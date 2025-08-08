@@ -1,0 +1,43 @@
+[tool.poetry]
+name        = "mockexchange"
+version     = "0.1.0"
+description = "Headless exchange emulator backed by Valkey (Redis fork)"
+authors     = ["Didac Cristobal-Canals"]
+homepage    = "https://github.com/didac-crst/mockexchange-api"
+
+# Correct shape: an array of tables
+packages = [
+  { include = "mockexchange",      from = "src" },     # library
+  { include = "mockexchange_api",  from = "src" }      # app layer
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"        # already enforces the interpreter version
+redis    = "^5.0"
+fastapi  = "^0.111"
+uvicorn  = { extras = ["standard"], version = "^0.30" }
+pydantic = "^2.6"
+python-multipart = "^0.0.20"
+pykka = "^3.1"
+pandas = "^2.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest          = "^8.2"
+pytest-asyncio  = "^0.23"
+ruff            = "*"
+black           = "*"
+mypy            = "^1.10"
+pytest-dotenv = "^0.5.2"
+hypothesis = "^6.100"
+
+[tool.poetry.scripts]
+# short, easy to type
+mockx             = "mockexchange_api.cli:main"
+# keep the old alias if someone already relies on it
+mockexchange-cli  = "mockexchange_api.cli:main"
+# ASGI app for uvicorn/gunicorn
+mockexchange-api  = "mockexchange_api.server:app"
+
+[build-system]
+requires      = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

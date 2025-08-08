@@ -1,0 +1,12 @@
+services:
+  mockexchange-api:
+    build: .
+    container_name: mockexchange-api
+    network_mode: host            # ← shares host’s net namespace
+    env_file: .env                # REDIS_URL=redis://127.0.0.1:6379/0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/balance || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
