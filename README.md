@@ -119,18 +119,19 @@ that trades smarter than I did.
 ## 🗺 Architecture & Ecosystem
 
 ```mermaid
+
 flowchart TB
     subgraph Clients
-        deck[Deck UI (Streamlit)]
-        bot[Trading Bot / Script]
+        deck["Deck UI (Streamlit)"]
+        bot["Trading Bot / Script"]
     end
 
-    bot -->|ccxt-like API| gateway[MockExchange Gateway 🛡]
-    deck -->|HTTP/REST| backend[Backend API 📈]
+    bot -->|ccxt-like API| gateway["MockExchange Gateway 🛡"]
+    deck -->|HTTP/REST| backend["Backend API 📈"]
     gateway -->|HTTP/REST| backend
 
-    backend --> redis[(Valkey / Redis)]
-    feeder[Price Feeder 🧩\n(ccxt → Redis)] --> redis
+    backend --> redis[("Valkey / Redis")]
+    feeder["Price Feeder 🧩<br/>(ccxt → Redis)"] --> redis
 ```  
 
 ```text
