@@ -1,7 +1,10 @@
 services:
-  mockexchange-deck:
-    build: .
-    container_name: mockexchange-deck
-    network_mode: host
-    env_file: .env
+  deck:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8501:8501"
     restart: unless-stopped
