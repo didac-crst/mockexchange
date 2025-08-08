@@ -1,30 +1,34 @@
-# MockExchange API 📈
+# MockExchange Engine <!-- omit in toc -->
 
 **_Trade without fear, greed, or actual money — because sometimes the best way to lose less is to not play at all._**
 
 ---
 
-## Table of Contents
+## Table of Contents <!-- omit in toc -->
 
 - [TL;DR](#tldr)
-- [The Story](#the-story)
-- [Core Features](#core-features)
-- [Quick Start (Docker)](#quick-start-docker)
-- [Environment Variables](#environment-variables-complete)
+- [✨ Core Features](#-core-features)
+- [Quick start (Docker)](#quick-start-docker)
+  - [Using docker-compose for Valkey Docker](#using-docker-compose-for-valkey-docker)
+- [Environment variables (complete)](#environment-variables-complete)
+  - [`.env` template](#env-template)
 - [Authentication](#authentication)
 - [REST Endpoints](#rest-endpoints)
-- [Example Workflow](#example-workflow)
-- [Tick-loop Internals](#tick-loop-internals)
+- [Example workflow](#example-workflow)
+- [Tick-loop internals](#tick-loop-internals)
+  - [Feeding live prices](#feeding-live-prices)
 - [Installation (from source)](#installation-from-source)
 - [Using the CLI (`mockx`)](#using-the-cli-mockx)
-- [Running the Test-suite](#running-the-test-suite-)
-- [Dry Run Example](#dry-run-example-)
-- [Repo Layout](#repo-layout-updated-2025-07)
-- [Development Notes](#development-notes)
-- [Front-end Dashboard](#front-end-dashboard)
+  - [Command reference](#command-reference)
+  - [Quick demo inside the running container](#quick-demo-inside-the-running-container)
+- [Running the test-suite 🧪](#running-the-test-suite-)
+- [Dry Run Example 🚀](#dry-run-example-)
+- [Repo layout (updated 2025-07)](#repo-layout-updated-2025-07)
+- [Development notes](#development-notes)
+- [Front‑end dashboard](#frontend-dashboard)
 - [Gateway](#gateway)
 - [Contributing](#contributing)
-- [License](#license-)
+- [License 🪪](#license-)
 
 ---
 
@@ -38,106 +42,14 @@
 
 ---
 
-## The Story
+## ✨ Core Features
 
-> It was **2013**, and Bitcoin had just hit a jaw-dropping **$300**.  
-> Someone in our old engineering WhatsApp group brought it up.  
-> I asked innocently, *“What’s that?”*  
->  
-> The response came instantly, dripping with confidence:  
-> *“You’re too late — this bubble is about to burst…”*  
->  
-> Which, in hindsight, was probably the most confidently
-> wrong (and overly cautious) financial advice I’ve ever received.
-
-But something about it intrigued me. I didn’t fully understand it.  
-I didn’t even think it would work — and yet, I bought in.  
-Just **2/3 of a BTC**, about **180 €**, which, at the time, I mentally wrote off as *“money I’ll never see again.”*  
-Spoiler: it was the **best terrible financial decision** I’ve ever made.
-
-I held.  
-And held.  
-And held some more.
-
-Then came **2017** — the year of Lambos, moon memes, and FOMO-induced insomnia.  
-I began checking prices at night before bed, and again first thing in the morning —
-not for fun, but to confirm whether I was now rich… or still stuck working 9 to 5.
-
-This, of course, led me to the **classic rookie move**: diversification.  
-I dove into altcoins with names like **LTC**, **TROY**, and others I’ve repressed like a bad haircut from high school.  
-Let’s just say: they didn’t go to the moon — they dug a tunnel.
-
-Decision after decision, I watched my gains **evaporate in slow motion**.  
-Eventually, I realized I needed support — not from a financial advisor (they’d only
-remind me of my poor decisions), but from something more aligned with my goals — not theirs.
-
-**Something logical**.  
-Emotionless.  
-Free from fear and greed.  
-Unimpressed by sudden price spikes or Twitter hype.  
-A system that won’t panic sell or chase pumps.
-
-I wanted an intelligent system that could make decisions based on **data**, not **dopamine**.  
-Something that would just execute the plan, no matter how boring or unsexy that plan was.  
-Something more disciplined than I’d ever been — able to stay locked on a single task for hours, without fatigue, distraction, or the urge to check the news.
-
-In short, I wanted to build a **trader with no feelings** —
-like a **psychopath**, but helpful.
-
-So in **2020**, full of optimism and free time, I enrolled in an **AI-for-trading** program.  
-I was ready to automate the pain away.
-
-Then… I became a dad.
-
-Suddenly, my trading ambitions were replaced with diapers, sleep deprivation,
-and learning the fine art of **negotiating with toddlers**.  
-Needless to say, the bot went on standby — alongside my hobbies, ambitions, and most adult-level reasoning.
-
-Fast forward to **2024**. The kids sleep (sometimes), and my curiosity roared back to life.  
-I decided it was time to build — **for real**.  
-Not to get rich — but because this is what I do for fun:
-connect dots, explore computer science, study markets, and challenge my past self
-with fewer emotional trades and more intelligent systems.
-
-But ideas need hardware.  
-So I bought my first Raspberry Pi.  
-Because if I was going to burn time, I wasn’t about to burn kilowatts.  
-I needed something that could run 24/7 without turning my electricity bill into a second mortgage.  
-Resilient, quiet, efficient — like a monk with a TPU, ready to meditate on market patterns in silence for as long as it takes.  
-It wasn’t much, but it was enough to get started.
-
-From there, the system began to grow — and spiral.  
-Scraping prices in real time, keeping databases efficient, aggregating data, archiving old data,
-writing little scripts that somehow become immortal zombie processes needing to be killed by hand...  
-I genuinely didn’t expect it to be so much.
-
-And yet — I like it.  
-This is how I relax: designing systems no one asked for, solving problems I created myself,  
-and picking up strange new skills in the process — the kind you never set out to learn, but somehow end up mastering.
-
-Which brings us to **2025**, and **MockExchange**:  
-a stateless, deterministic, no-risk spot-exchange emulator that speaks fluent **ccxt**,
-pretends it’s real, and stores the last price-tick, balance and order in **Valkey** (aka Redis) —
-instead of touching live markets — so you can test, dry-run, and debug your bot
-without risking a single satoshi.
-
-No more fear.  
-No more “should I have bought?” or “why did I sell?”  
-Just logic, fake orders, and enough tooling to safely build the thing
-that trades smarter than I did.
-
----
-
-## Core Features
-
-* **One binary, three faces**  
-    * 🐍 Import as a normal Python package in your back-tests.  
-    * 🐳 Run as a Docker container exposing a FastAPI server.  
-    * 💻 Fire quick commands via the bundled CLI.  
-* **Deterministic & Stateless** — wipe everything with one `POST /admin/reset`.  
-* **Pluggable data-feed** — point the engine to any key-value store that writes `sym_<SYMBOL>` → *last price* and the tick-loop does the rest.  
-* **Consistent commission model** — flat `COMMISSION` rate applied on every fill.  
-
+- 🐍 Import as a Python package for back-tests.
+- 🐳 Run as a Docker container with a FastAPI server.
+- 💻 Use quick commands via the `mockx` CLI.
+- Commission model & order-matching engine configurable via env vars.
+- Works with any key-value feed providing latest price per symbol.
+- 
 ---  
 
 ## Quick start (Docker)  
@@ -185,22 +97,22 @@ then start **MockExchange** as shown above.
 
 ## Environment variables (complete)  
 
-| Var | Default (dev) | Purpose / Notes |
-|-----|---------------|-----------------|
-| `API_URL`	| `http://localhost:8000` |	Base‑URL the CLI (and integration tests) call. |
-| `API_TIMEOUT_SEC` |	`10` | Per‑request timeout used by the CLI’s httpx client. |
-| `API_KEY` | `invalid-key` | Required header value for **every** request (`x-api-key`). |
-| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Where Valkey lives. |
-| `CASH_ASSET` | `USDT` | The “cash” currency used by the engine when computing PnL / fees. |
-| `COMMISSION` | `0.00075` | Fee rate (0.075 %). |
-| `TEST_ENV` | `false` | `true` disables auth **and** re-enables `/docs`; tests set this to `True`. |
-| `TICK_LOOP_SEC` | `30` | Scan interval for the background price-tick loop (seconds). |
-| `PRUNE_EVERY_MIN` | `60` | How often the prune job runs (minutes). `0` disables automatic pruning. |
-| `STALE_AFTER_H` | `24` | Age threshold for permanent deletion of *filled* / *canceled* / *partially_canceled* / *expired* / *rejected* orders (hours). |
-| `EXPIRE_AFTER_H` | `24` | Age threshold for non-traded "OPEN" orders  *new* / *partially_filled* orders (hours). |
-| `MIN_TIME_ANSWER_ORDER_MARKET` | `3` | Lower bound for artificial latency (seconds) before a market order is filled. |
-| `MAX_TIME_ANSWER_ORDER_MARKET` | `5` | Upper bound for the artificial latency. |
-| `SIGMA_FILL_MARKET_ORDER` | `0.1` | Standard‑deviation parameter that controls the random partial‑fill ratio for simulated market orders – higher values mean more variability and a greater chance of partial fills. |
+| Var                            | Default (dev)              | Purpose / Notes                                                                                                                                                                   |
+| ------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `API_URL`                      | `http://localhost:8000`    | Base‑URL the CLI (and integration tests) call.                                                                                                                                    |
+| `API_TIMEOUT_SEC`              | `10`                       | Per‑request timeout used by the CLI’s httpx client.                                                                                                                               |
+| `API_KEY`                      | `invalid-key`              | Required header value for **every** request (`x-api-key`).                                                                                                                        |
+| `REDIS_URL`                    | `redis://127.0.0.1:6379/0` | Where Valkey lives.                                                                                                                                                               |
+| `CASH_ASSET`                   | `USDT`                     | The “cash” currency used by the engine when computing PnL / fees.                                                                                                                 |
+| `COMMISSION`                   | `0.00075`                  | Fee rate (0.075 %).                                                                                                                                                               |
+| `TEST_ENV`                     | `false`                    | `true` disables auth **and** re-enables `/docs`; tests set this to `True`.                                                                                                        |
+| `TICK_LOOP_SEC`                | `30`                       | Scan interval for the background price-tick loop (seconds).                                                                                                                       |
+| `PRUNE_EVERY_MIN`              | `60`                       | How often the prune job runs (minutes). `0` disables automatic pruning.                                                                                                           |
+| `STALE_AFTER_H`                | `24`                       | Age threshold for permanent deletion of *filled* / *canceled* / *partially_canceled* / *expired* / *rejected* orders (hours).                                                     |
+| `EXPIRE_AFTER_H`               | `24`                       | Age threshold for non-traded "OPEN" orders  *new* / *partially_filled* orders (hours).                                                                                            |
+| `MIN_TIME_ANSWER_ORDER_MARKET` | `3`                        | Lower bound for artificial latency (seconds) before a market order is filled.                                                                                                     |
+| `MAX_TIME_ANSWER_ORDER_MARKET` | `5`                        | Upper bound for the artificial latency.                                                                                                                                           |
+| `SIGMA_FILL_MARKET_ORDER`      | `0.1`                      | Standard‑deviation parameter that controls the random partial‑fill ratio for simulated market orders – higher values mean more variability and a greater chance of partial fills. |
 
 ### `.env` template  
 
@@ -250,25 +162,25 @@ Feel free to drop-in replace the old table in the README.
 
 ## REST Endpoints
 
-| Method | Path                                           | Description                                                                            |
-| ------ | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **GET** | `/tickers`                                    | List all symbols currently cached.                                                     |
-| **GET** | `/tickers/{symbol}`                           | Latest ticker for one symbol (`BTC/USDT`).                                             |
-| **GET** | `/balance`                                    | Full portfolio snapshot.                                                               |
-| **GET** | `/balance/list`                               | Number of assets and list of them.                                                     |
-| **GET** | `/balance/{asset}`                            | Balance row for `BTC`, `USDT`, …                                                       |
-| **GET** | `/orders`                                     | List orders — filters: `status`, `symbol`, `side`, `tail`.                             |
-| **GET** | `/orders/list`                                | Number of orders and oid- filters: `status`, `symbol`, `side`, `tail`.                 |
-| **GET** | `/orders/{oid}`                               | Inspect a single order.                                                                |
-| **POST** | `/orders`                                    | Create *market* or *limit* order.                                                      |
-| **POST** | `/orders/can_execute`                        | Dry-run: check if there’s enough balance for the order.                                |
-| **POST** | `/orders/{oid}/cancel`                       | Cancel an *OPEN* order (`new` / `partially_filled`)                                    |
-| **GET** | `/overview/assets`                            | Overview on total balances, frozen assets on open orders and mismatches between them.  |
-| **PATCH** | `/admin/tickers/{symbol}/price`             | Manually patch a ticker’s last-price (plus optional volumes).                          |
-| **PATCH** | `/admin/balance/{asset}`                    | Overwrite or create a balance row (`free`, `used`).                                    |
-| **POST** | `/admin/fund`                                | Credit an asset’s `free` column (quick top-up).                                        |
-| **DELETE** | `/admin/data`                              | Wipe **all** balances *and* orders (clean slate).                                      |
-| **GET** | `/admin/healthz` *(not in schema)*            | Simple health probe (`{"status":"ok"}`).                                               |
+| Method     | Path                               | Description                                                                           |
+| ---------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
+| **GET**    | `/tickers`                         | List all symbols currently cached.                                                    |
+| **GET**    | `/tickers/{symbol}`                | Latest ticker for one symbol (`BTC/USDT`).                                            |
+| **GET**    | `/balance`                         | Full portfolio snapshot.                                                              |
+| **GET**    | `/balance/list`                    | Number of assets and list of them.                                                    |
+| **GET**    | `/balance/{asset}`                 | Balance row for `BTC`, `USDT`, …                                                      |
+| **GET**    | `/orders`                          | List orders — filters: `status`, `symbol`, `side`, `tail`.                            |
+| **GET**    | `/orders/list`                     | Number of orders and oid- filters: `status`, `symbol`, `side`, `tail`.                |
+| **GET**    | `/orders/{oid}`                    | Inspect a single order.                                                               |
+| **POST**   | `/orders`                          | Create *market* or *limit* order.                                                     |
+| **POST**   | `/orders/can_execute`              | Dry-run: check if there’s enough balance for the order.                               |
+| **POST**   | `/orders/{oid}/cancel`             | Cancel an *OPEN* order (`new` / `partially_filled`)                                   |
+| **GET**    | `/overview/assets`                 | Overview on total balances, frozen assets on open orders and mismatches between them. |
+| **PATCH**  | `/admin/tickers/{symbol}/price`    | Manually patch a ticker’s last-price (plus optional volumes).                         |
+| **PATCH**  | `/admin/balance/{asset}`           | Overwrite or create a balance row (`free`, `used`).                                   |
+| **POST**   | `/admin/fund`                      | Credit an asset’s `free` column (quick top-up).                                       |
+| **DELETE** | `/admin/data`                      | Wipe **all** balances *and* orders (clean slate).                                     |
+| **GET**    | `/admin/healthz` *(not in schema)* | Simple health probe (`{"status":"ok"}`).                                              |
 
 
 ---  
@@ -305,15 +217,15 @@ A background coroutine scans Valkey for keys matching `sym_*`, feeds the latest 
 
 MockExchange is agnostic about **where** prices come from; it simply expects a hash per symbol with these fields:
 
-  | field       | example value |
-  |-------------|---------------|
-  | `price`     | `117800.01`   |
+  | field       | example value    |
+  | ----------- | ---------------- |
+  | `price`     | `117800.01`      |
   | `timestamp` | `1752853159.996` |
-  | `bid`       | `117800.00`   |
-  | `ask`       | `117800.01`   |
-  | `bidVolume` | `0.05537`     |
-  | `askVolume` | `8.91369`     |
-  | `symbol`    | `BTC/USDT`    |
+  | `bid`       | `117800.00`      |
+  | `ask`       | `117800.01`      |
+  | `bidVolume` | `0.05537`        |
+  | `askVolume` | `8.91369`        |
+  | `symbol`    | `BTC/USDT`       |
 
 `HSET sym_BTC/USDT price 117800.01 timestamp 752853159.996 bid ...`
 
@@ -366,21 +278,21 @@ mockx ticker BTC/USDT         # latest price snapshot
 
 ### Command reference
 
-| CLI | Maps to REST | What it does |
-|-----|--------------|--------------|
-| `mockx balance` | `GET /balance` | Dump every asset row. |
-| `mockx ticker <SYM>` | `GET /tickers/<SYM>` | Latest ticker (comma list allowed). |
-| `mockx order <SYM> <buy\|sell> <qty> [--type limit] [--price P]` | `POST /orders` | Create market/limit order. |
-| `mockx cancel <OID>` | `POST /orders/{oid}/cancel` | Cancel an **OPEN** order. |
-| `mockx orders [...]` | `GET /orders` | List orders (`--status`, `--symbol`, …). |
-| `mockx order-get <OID>` | `GET /orders/{oid}` | Inspect one order. |
-| `mockx orders-simple` | `GET /orders/list` | Count + OID list. |
-| `mockx can-exec <SYM> <buy\|sell> <qty> [--price P]` | `POST /orders/can_execute` | Dry‑run balance check. |
-| `mockx fund <ASSET> <AMOUNT>` | `POST /admin/fund` | Quick top‑up (admin). |
-| `mockx set-balance <ASSET> --free F --used U` | `PATCH /admin/balance/{asset}` | Overwrite a balance row. |
-| `mockx set-price <SYM> <P> [--bid-volume V] [--ask-volume V]` | `PATCH /admin/tickers/{sym}/price` | Force last‑price & volumes. |
-| `mockx reset-data` | `DELETE /admin/data` | Wipe **all** balances + orders. |
-| `mockx health` | `GET /admin/health` | Simple health probe. |
+| CLI                                                              | Maps to REST                       | What it does                             |
+| ---------------------------------------------------------------- | ---------------------------------- | ---------------------------------------- |
+| `mockx balance`                                                  | `GET /balance`                     | Dump every asset row.                    |
+| `mockx ticker <SYM>`                                             | `GET /tickers/<SYM>`               | Latest ticker (comma list allowed).      |
+| `mockx order <SYM> <buy\|sell> <qty> [--type limit] [--price P]` | `POST /orders`                     | Create market/limit order.               |
+| `mockx cancel <OID>`                                             | `POST /orders/{oid}/cancel`        | Cancel an **OPEN** order.                |
+| `mockx orders [...]`                                             | `GET /orders`                      | List orders (`--status`, `--symbol`, …). |
+| `mockx order-get <OID>`                                          | `GET /orders/{oid}`                | Inspect one order.                       |
+| `mockx orders-simple`                                            | `GET /orders/list`                 | Count + OID list.                        |
+| `mockx can-exec <SYM> <buy\|sell> <qty> [--price P]`             | `POST /orders/can_execute`         | Dry‑run balance check.                   |
+| `mockx fund <ASSET> <AMOUNT>`                                    | `POST /admin/fund`                 | Quick top‑up (admin).                    |
+| `mockx set-balance <ASSET> --free F --used U`                    | `PATCH /admin/balance/{asset}`     | Overwrite a balance row.                 |
+| `mockx set-price <SYM> <P> [--bid-volume V] [--ask-volume V]`    | `PATCH /admin/tickers/{sym}/price` | Force last‑price & volumes.              |
+| `mockx reset-data`                                               | `DELETE /admin/data`               | Wipe **all** balances + orders.          |
+| `mockx health`                                                   | `GET /admin/health`                | Simple health probe.                     |
 
 > `mockx -h` and `mockx <sub‑command> -h` print the same information on the CLI.
 

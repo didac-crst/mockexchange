@@ -129,11 +129,12 @@ that trades smarter than I did.
 
 ## ✨ Core Features
 
-- 🐍 Import as a Python package for back-tests.
-- 🐳 Run as a Docker container with a FastAPI server.
-- 💻 Use quick commands via the `mockx` CLI.
-- Commission model & order-matching engine configurable via env vars.
-- Works with any key-value feed providing latest price per symbol.
+- 🧩 **Modular architecture** — Engine, Periscope, Oracle, and Gateway can run independently or together.
+- 🔌 **Pluggable components** — swap price feeds, dashboards, or clients without touching the core.
+- 🌐 **ccxt-inspired interface** — follows familiar trading API patterns to simplify bot integration.
+- 📊 **Full visibility** — Periscope dashboard for live monitoring of balances, orders, and performance metrics.
+- 🔮 **Realistic market simulation** — Oracle injects live exchange prices into a safe, risk-free trading environment.
+- 🚀 **Ready for production** — Dockerized services, path-filtered CI, and clear interface boundaries.
 
 ---
 
