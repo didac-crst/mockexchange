@@ -1,6 +1,7 @@
 services:
-  deck:
+  mockx-periscope:
     build:
+      container_name: mockx-periscope
       context: .
       dockerfile: Dockerfile
     env_file:

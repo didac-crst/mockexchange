@@ -1,6 +1,7 @@
 services:
-  backend:
+  mockx-engine:
     build:
+      container_name: mockx-engine
       context: .
       dockerfile: Dockerfile
     env_file:
