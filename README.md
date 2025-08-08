@@ -1,4 +1,4 @@
-# MockExchange Suite
+# MockExchange Suite <!-- omit in toc -->
 
 **_Trade without fear, greed, or actual money — because sometimes the best way to lose less is to not play at all._**
 
@@ -6,28 +6,24 @@ This repository contains the full **MockExchange** paper-trading platform:
 - **MockX Engine** – Matching engine, portfolio tracking, and API layer.
 - **MockX Periscope** – Streamlit-based dashboard for visualizing portfolio and orders.
 - **MockX Oracle** – Price feed service (e.g., Binance via CCXT → Valkey).
-- **MockX Gateway** (external repo) – Lightweight Python wrapper for the MockX Engine API, providing a ccxt-style interface for bots and scripts.
+- [*MockX Gateway** (external repo)](https://github.com/didac-crst/mockexchange-gateway) – Lightweight Python wrapper for the MockX Engine API, providing a ccxt-style interface for bots and scripts.
 
 ---
 
-## 📑 Table of Contents
-
-- [MockExchange Suite](#mockexchange-suite)
-  - [📑 Table of Contents](#-table-of-contents)
-  - [TL;DR](#tldr)
-  - [📜 Story](#-story)
-  - [Core Features](#core-features)
-  - [🗺 Architecture \& Ecosystem](#-architecture--ecosystem)
-    - [Related Repositories](#related-repositories)
-  - [📦 Packages in this Monorepo](#-packages-in-this-monorepo)
-  - [🚀 Quick Start](#-quick-start)
-    - [0. Prepare Valkey (Redis)](#0-prepare-valkey-redis)
-    - [1. Start MockX Oracle 🔮](#1-start-mockx-oracle-)
-    - [2. Start MockX Engine](#2-start-mockx-engine)
-    - [3. Start MockX Periscope](#3-start-mockx-periscope)
-  - [🗂 Monorepo Structure](#-monorepo-structure)
-  - [📚 Documentation](#-documentation)
-  - [🪪 License](#-license)
+## 📑 Table of Contents <!-- omit in toc -->
+- [TL;DR](#tldr)
+- [📜 Story](#-story)
+- [Core Features](#core-features)
+- [🗺 Architecture \& Ecosystem](#-architecture--ecosystem)
+- [📦 Packages in this Monorepo](#-packages-in-this-monorepo)
+- [🚀 Quick Start](#-quick-start)
+  - [0. Prepare Valkey (Redis)](#0-prepare-valkey-redis)
+  - [1. Start MockX Oracle](#1-start-mockx-oracle)
+  - [2. Start MockX Engine](#2-start-mockx-engine)
+  - [3. Start MockX Periscope](#3-start-mockx-periscope)
+- [🗂 Monorepo Structure](#-monorepo-structure)
+- [📚 Documentation](#-documentation)
+- [🪪 License](#-license)
 
 ---
 
@@ -169,11 +165,6 @@ flowchart TB
     binance -->|ccxt| oracle
 ```
 
-### Related Repositories
-
-- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  
-    Minimal ccxt-style Python client to interact with the Engine API (install via `pip`).
-
 ---
 
 ## 📦 Packages in this Monorepo
@@ -185,7 +176,8 @@ flowchart TB
 | **MockX Oracle**    | `packages/oracle/`    | Market data feeder (ccxt → Valkey/Redis).                    | [Oracle README](packages/oracle/README.md)       |
 
 Related (external):
-- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway
+- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  
+    Minimal ccxt-style Python client to interact with the Engine API (install via `pip` or `poetry`).
 
 ---
 
@@ -201,7 +193,7 @@ docker run -d --name valkey -p 6379:6379 valkey/valkey
 
 ---
 
-### 1. Start MockX Oracle 🔮
+### 1. Start MockX Oracle
 This service writes latest market prices into Valkey.
 
 Example Docker Compose:
