@@ -119,6 +119,32 @@ that trades smarter than I did.
 ## 🗺 Architecture & Ecosystem
 
 ```mermaid
+flowchart TB
+    subgraph Clients
+        deck["Deck UI (Streamlit)"]
+        bot["Trading Bot / Script"]
+    end
+
+    subgraph Infra
+        redis[("Valkey / Redis")]
+        backend["Backend API 📈"]
+    end
+
+    subgraph External
+        binance["Binance (Live Market Data)"]
+    end
+
+    bot -->|ccxt-like API| gateway["MockExchange Gateway 🛡"]
+    deck -->|HTTP/REST| backend
+    gateway -->|HTTP/REST| backend
+
+    backend --> redis
+
+    feeder["Price Feeder 🧩<br/>(ccxt → Redis)"] --> redis
+    binance -->|ccxt| feeder
+```
+
+```mermaid
 
 flowchart TB
     subgraph Clients
