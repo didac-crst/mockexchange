@@ -13,7 +13,7 @@ This repository contains the full **MockExchange** paper-trading platform:
 ## 📑 Table of Contents <!-- omit in toc -->
 - [TL;DR](#tldr)
 - [📜 Story](#-story)
-- [Core Features](#core-features)
+- [✨ Core Features](#-core-features)
 - [🗺 Architecture \& Ecosystem](#-architecture--ecosystem)
 - [📦 Packages in this Monorepo](#-packages-in-this-monorepo)
 - [🚀 Quick Start](#-quick-start)
@@ -127,7 +127,7 @@ that trades smarter than I did.
 
 ---
 
-## Core Features
+## ✨ Core Features
 
 - 🐍 Import as a Python package for back-tests.
 - 🐳 Run as a Docker container with a FastAPI server.
@@ -188,7 +188,10 @@ Related (external):
 ### 0. Prepare Valkey (Redis)
 Install or run via Docker:
 ```bash
-docker run -d --name valkey -p 6379:6379 valkey/valkey
+docker run -d --name mockx-valkey \
+            -p 6379:6379 \
+            valkey/valkey \
+            --requirepass "SuperSecretPass"
 ```
 
 ---
