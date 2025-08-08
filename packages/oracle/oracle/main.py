@@ -59,7 +59,10 @@ LEGACY_QUOTE = os.getenv("QUOTE", "USDT")
 DISCOVER_QUOTES = os.getenv("DISCOVER_QUOTES", "false").lower() == "true"
 DISCOVER_LIMIT = int(os.getenv("DISCOVER_LIMIT", "0"))
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
+REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_DB = os.getenv("REDIS_DB", "0")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
 INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "10"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -199,6 +202,12 @@ def main() -> int:
 
     # Initialize exchange + Redis
     ex = getattr(ccxt, EXCHANGE)({"enableRateLimit": True})
+
+    if REDIS_PASSWORD:
+        REDIS_URL = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+    else:
+        REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+
     r = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
     # Determine symbols
