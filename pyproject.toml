@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "mockexchange-deck"
+version = "0.1.0"
+description = "Streamlit dashboard for mockexchange_api (paper-trading PoC)"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+streamlit = "^1.37.0"
+streamlit-autorefresh = "^1.0.0"
+pandas = "^2.2"
+numpy = "~2.2"
+requests = "^2.32"
+python-dotenv = "^1.0"
+plotly = "^5.22"
+pydantic = "^2.7"
+streamlit-aggrid = "0.3.*"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.3"
+ruff = "^0.4"
+pytest = "^8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,7 @@
+services:
+  mockexchange-deck:
+    build: .
+    container_name: mockexchange-deck
+    network_mode: host
+    env_file: .env
+    restart: unless-stopped
