@@ -1,17 +1,42 @@
-# MockExchange Monorepo
+# MockExchange Suite
 
 **_Trade without fear, greed, or actual money — because sometimes the best way to lose less is to not play at all._**
 
 This repository contains the full **MockExchange** paper-trading platform:
-- **Backend** – Full matching engine, portfolio tracking, and API layer.
-- **Deck** – Streamlit-based dashboard for visualizing portfolio and orders.
+- **MockX Engine** – Matching engine, portfolio tracking, and API layer.
+- **MockX Periscope** – Streamlit-based dashboard for visualizing portfolio and orders.
+- **MockX Oracle** – Price feed service (e.g., Binance via CCXT → Valkey).
+- **MockX Gateway** (external repo) – Lightweight Python wrapper for the MockX Engine API, providing a ccxt-style interface for bots and scripts.
+
+---
+
+## 📑 Table of Contents
+
+- [MockExchange Suite](#mockexchange-suite)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [TL;DR](#tldr)
+  - [📜 Story](#-story)
+  - [Core Features](#core-features)
+  - [🗺 Architecture \& Ecosystem](#-architecture--ecosystem)
+    - [Related Repositories](#related-repositories)
+  - [📦 Packages in this Monorepo](#-packages-in-this-monorepo)
+  - [🚀 Quick Start](#-quick-start)
+    - [0. Prepare Valkey (Redis)](#0-prepare-valkey-redis)
+    - [1. Start MockX Oracle 🔮](#1-start-mockx-oracle-)
+    - [2. Start MockX Engine](#2-start-mockx-engine)
+    - [3. Start MockX Periscope](#3-start-mockx-periscope)
+  - [🗂 Monorepo Structure](#-monorepo-structure)
+  - [📚 Documentation](#-documentation)
+  - [🪪 License](#-license)
+
+---
 
 ## TL;DR
 
 - Stateless, deterministic, no-risk spot-exchange emulator.
 - ccxt-compatible API — test bots without touching live markets.
-- Pluggable market data feed (e.g., Binance via CCXT).
-- Companion Streamlit dashboard for monitoring balances & orders.
+- Externalized price feed (MockX Oracle) so you can swap sources.
+- Companion Streamlit dashboard (MockX Periscope) for monitoring.
 - Full CLI + REST API + Docker support.
 
 ---
@@ -121,92 +146,52 @@ that trades smarter than I did.
 ```mermaid
 flowchart TB
     subgraph Clients
-        deck["Deck UI (Streamlit)"]
+        periscope["MockX Periscope<br/>(Streamlit UI)"]
         bot["Trading Bot / Script"]
     end
 
     subgraph Infra
         redis[("Valkey / Redis")]
-        backend["Backend API 📈"]
+        engine["MockX Engine 📈"]
     end
 
     subgraph External
         binance["Binance (Live Market Data)"]
     end
 
-    bot -->|ccxt-like API| gateway["MockExchange Gateway 🛡"]
-    deck -->|HTTP/REST| backend
-    gateway -->|HTTP/REST| backend
+    bot -->|ccxt-like API| gateway["MockX Gateway 🛡"]
+    periscope -->|HTTP/REST| engine
+    gateway -->|HTTP/REST| engine
 
-    backend --> redis
+    engine --> redis
 
-    feeder["Price Feeder 🧩<br/>(ccxt → Redis)"] --> redis
-    binance -->|ccxt| feeder
-```
-
-```mermaid
-
-flowchart TB
-    subgraph Clients
-        deck["Deck UI (Streamlit)"]
-        bot["Trading Bot / Script"]
-    end
-
-    bot -->|ccxt-like API| gateway["MockExchange Gateway 🛡"]
-    deck -->|HTTP/REST| backend["Backend API 📈"]
-    gateway -->|HTTP/REST| backend
-
-    backend --> redis[("Valkey / Redis")]
-    feeder["Price Feeder 🧩<br/>(ccxt → Redis)"] --> redis
-```  
-
-```text
-            Clients
-┌──────────────────────────┐       ┌──────────────────────────┐
-│   Deck UI (Streamlit)    │       │  Trading Bot / Script    │
-└─────────────┬────────────┘       └─────────────┬────────────┘
-                │ (HTTP/REST)                      │ (ccxt-like API)
-                │                                   ▼
-                │                     ┌──────────────────────────┐
-                │                     │  MockExchange Gateway 🛡  │
-                │                     └─────────────┬────────────┘
-                └─────────────────────┬─────────────┘
-                                        │ (HTTP/REST)
-                                        ▼
-                            ┌──────────────────────────┐
-                            │      Backend API 📈      │
-                            └─────────────┬────────────┘
-                                            │
-                                            ▼
-                                    [Valkey / Redis]
-                                            ▲
-                                            │  (writes price ticks)
-                                ┌──────────────────────────┐
-                                │   Price Feeder 🧩         │
-                                │  (ccxt → Redis)           │
-                                └──────────────────────────┘
+    oracle["MockX Oracle 🔮<br/>(ccxt → Redis)"] --> redis
+    binance -->|ccxt| oracle
 ```
 
 ### Related Repositories
 
-- **MockExchange Gateway** – https://github.com/didac-crst/mockexchange-gateway  
-    Minimal ccxt-style Python client to interact with the backend API.  
-    Use it in bots, scripts, or integrations without writing HTTP calls manually.
+- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  
+    Minimal ccxt-style Python client to interact with the Engine API (install via `pip`).
 
 ---
 
 ## 📦 Packages in this Monorepo
 
-| Package     | Path                | Description                                                  | README                                       |
-| ----------- | ------------------- | ------------------------------------------------------------ | -------------------------------------------- |
-| **Backend** | `packages/backend/` | Core engine, order-matching, balances, API layer, CLI tools. | [Backend README](packages/backend/README.md) |
-| **Deck**    | `packages/deck/`    | Streamlit dashboard for portfolio and orders.                | [Deck README](packages/deck/README.md)       |
+| Package             | Path                  | Description                                                  | README                                           |
+| ------------------- | --------------------- | ------------------------------------------------------------ | ------------------------------------------------ |
+| **MockX Engine**    | `packages/engine/`    | Core engine, order-matching, balances, API layer, CLI tools. | [Engine README](packages/engine/README.md)       |
+| **MockX Periscope** | `packages/periscope/` | Streamlit dashboard for portfolio and orders.                | [Periscope README](packages/periscope/README.md) |
+| **MockX Oracle**    | `packages/oracle/`    | Market data feeder (ccxt → Valkey/Redis).                    | [Oracle README](packages/oracle/README.md)       |
+
+Related (external):
+- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway
 
 ---
 
 ## 🚀 Quick Start
 
-**Order of setup matters** — without Valkey + Price Feeder, the backend has no prices to match orders.
+**Order matters** — without Valkey + Oracle, the Engine has no prices.
 
 ### 0. Prepare Valkey (Redis)
 Install or run via Docker:
@@ -216,26 +201,26 @@ docker run -d --name valkey -p 6379:6379 valkey/valkey
 
 ---
 
-### 1. Start the Price Feeder 🧩
-This service writes latest market prices into Valkey every few seconds.
+### 1. Start MockX Oracle 🔮
+This service writes latest market prices into Valkey.
 
-Example Docker Compose file:
+Example Docker Compose:
 ```yaml
 services:
-    feeder:
+    oracle:
     image: python:3.11-slim
     environment:
         EXCHANGE: "binance"
-        SYMBOLS: "BTC/USDT,ETH/USDT,SOL/USDT"
+        SYMBOLS: "BTC/USDT,ETH/USDT"
         REDIS_URL: "redis://host.docker.internal:6379/0"
         INTERVAL_SEC: "10"
     volumes:
-        - ./feeder.py:/app/feeder.py:ro
+        - ./oracle.py:/app/oracle.py:ro
     working_dir: /app
-    command: ["python", "-u", "feeder.py"]
+    command: ["python", "-u", "oracle.py"]
 ```
 
-Minimal `feeder.py` using ccxt + redis:
+Minimal `oracle.py`:
 ```python
 import os, time
 import ccxt, redis
@@ -258,30 +243,30 @@ while True:
                 "symbol": sym
             })
     except Exception as e:
-        print("feeder error:", e)
+        print("oracle error:", e)
     time.sleep(INTERVAL_SEC)
 ```
 
 ---
 
-### 2. Start the Backend
+### 2. Start MockX Engine
 ```bash
-cd packages/backend
+cd packages/engine
 cp .env.example .env
-docker compose -p mockx-backend up --build
+docker compose -p mockx-engine up --build
 ```
-API: [http://localhost:8000](http://localhost:8000)
+API: http://localhost:8000
 
 ---
 
-### 3. Start the Deck UI
+### 3. Start MockX Periscope
 ```bash
-cd packages/deck
+cd packages/periscope
 cp .env.example .env
-# Ensure API_URL in .env points to backend (default: http://localhost:8000)
-docker compose -p mockx-deck up --build
+# Ensure API_URL in .env points to engine (default: http://localhost:8000)
+docker compose -p mockx-periscope up --build
 ```
-UI: [http://localhost:8501](http://localhost:8501)
+UI: http://localhost:8501
 
 ---
 
@@ -289,25 +274,27 @@ UI: [http://localhost:8501](http://localhost:8501)
 ```text
 mockexchange/
 ├── packages/
-│   ├── backend/        # Core engine + API
-│   └── deck/           # Streamlit UI
-├── .github/workflows/  # CI for backend and deck
-└── README.md           # This file
+│   ├── engine/        # MockX Engine
+│   ├── periscope/     # MockX Periscope
+│   └── oracle/        # MockX Oracle
+├── .github/workflows/ # CI
+└── README.md          # This file
 ```
 
 ---
 
 ## 📚 Documentation
 
-- [Backend README](packages/backend/README.md) – full backend usage.
-- [Deck README](packages/deck/README.md) – dashboard usage.
-- [MockExchange Gateway](https://github.com/didac-crst/mockexchange-gateway) – Python client library.
+- [Engine README](packages/engine/README.md)
+- [Periscope README](packages/periscope/README.md)
+- [Oracle README](packages/oracle/README.md)
+- [MockX Gateway](https://github.com/didac-crst/mockexchange-gateway)
 
 ---
 
 ## 🪪 License
 
-MIT License – see [`LICENSE`](packages/backend/LICENSE) and [`LICENSE`](packages/deck/LICENSE) for details.
+MIT License – see the licenses inside each package.
 
 > **Don’t risk real money.**  
-> Spin up MockExchange, hammer it with tests, then hit the real markets only when your algos are solid.
+> Spin up MockExchange, hammer it with tests, then hit live markets only when your algos are solid.
