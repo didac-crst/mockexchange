@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "mockx-oracle"
+version = "0.1.0"
+description = "MockX Oracle - Price feed service for MockExchange"
+authors = ["Didac <didac.crst@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+ccxt = "^4.2.91"
+redis = "^5.0.1"
+pydantic = "^2.7.0"
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

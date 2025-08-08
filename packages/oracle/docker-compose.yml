@@ -1,0 +1,9 @@
+services:
+  mockx-oracle:
+    build:
+      container_name: mockx-oracle
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
