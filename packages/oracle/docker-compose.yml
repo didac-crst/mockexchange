@@ -6,4 +6,6 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    ports:
+      - "6379:6379"
     restart: unless-stopped
