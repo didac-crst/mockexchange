@@ -155,7 +155,7 @@ flowchart TB
         binance["Binance (Live Market Data)"]
     end
 
-    bot -->|ccxt-like API| gateway["MockX Gateway 🛡"]
+    bot -->|ccxt-like wrapper| gateway["MockX Gateway 🛡 (external)"]
     periscope -->|HTTP/REST| engine
     gateway -->|HTTP/REST| engine
 
