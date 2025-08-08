@@ -1,0 +1,18 @@
+services:
+  order-generator:
+    build: .
+    container_name: dryrun-order-gen
+    restart: unless-stopped
+    # Pass the .env file automatically
+    env_file:
+      - .env
+    # Network: host mode simplifies talking to a localhost API on Linux
+    # On macOS / Windows you may prefer the default bridge network and use
+    #   URL_API=http://host.docker.internal:8000
+    network_mode: "host"
+    # Optional: limit resources so the generator doesn’t hog your machine
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M

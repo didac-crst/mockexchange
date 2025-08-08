@@ -1,0 +1,59 @@
+# ────────────────────────── Python artefacts ──────────────────────────
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.egg-info/
+.eggs/
+.build/
+dist/
+pip-wheel-metadata/
+.hypothesis/
+
+# Poetry / PDM / Hatch caches
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local virtual-envs (venv, pipenv, conda envs created inside project)
+venv/
+.env/
+.env.bak/
+.venv/
+.ipynb_checkpoints/
+
+# ────────────────────────── IDE / Editor files ────────────────────────
+# VSCode
+.vscode/
+# JetBrains (PyCharm, IDEA, etc.)
+.idea/
+# others
+.DS_Store
+Thumbs.db
+
+# ────────────────────────── secrets / config ──────────────────────────
+# Environment variables & user-specific settings
+*.env
+.env.*
+# (keep .env.sample checked-in instead)
+
+# ────────────────────────── Docker build cache ────────────────────────
+# If you copy files into the image that shouldn’t reach git
+docker-cache/
+*/*/target/
+
+# ────────────────────────── Miscellaneous ─────────────────────────────
+# Logs & runtime files
+*.log
+*.pid
+*.sqlite3
+# pytest junitxml output
+junit-*.xml
+# Profiling data
+*.prof
+# mypy & task runner caches
+.mypy_cache/
+.pyre/
+# Mac resource forks
+._*

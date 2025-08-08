@@ -1,0 +1,3 @@
+# runtime deps
+httpx>=0.26
+python-dotenv>=1.0  # if helpers.py relies on load_dotenv – harmless otherwise
