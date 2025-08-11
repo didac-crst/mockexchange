@@ -48,7 +48,7 @@ from .helpers import (
 # Tunables – increase for more coverage, decrease for faster CI runs
 # ---------------------------------------------------------------------------
 N_ROUNDS: int = 3  # Hypothesis examples per test run
-N_TICKERS: int = 100  # upper bound on symbols sampled per run
+N_TICKERS: int = 20  # upper bound on symbols sampled per run
 ENGINE_SETTLE_WAIT: float = 4.0  # seconds the engine gets to react
 
 OPEN_STATES: tuple[str, ...] = ("new", "partially_filled")

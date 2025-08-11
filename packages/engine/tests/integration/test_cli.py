@@ -50,7 +50,7 @@ def run_cli(monkeypatch, capsys, fake_client, argv):
     import importlib
     import sys as _sys
 
-    cli = importlib.import_module("mockexchange_api.cli")
+    cli = importlib.import_module("api.cli")
     monkeypatch.setattr(cli, "client", fake_client, raising=True)
     monkeypatch.setattr(_sys, "argv", ["mockx", *argv])
 
