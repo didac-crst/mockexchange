@@ -6,6 +6,9 @@ services:
     # Pass the .env file automatically
     env_file:
       - .env
+    # Environment variables for reset control
+    environment:
+      - RESET_PORTFOLIO=${RESET_PORTFOLIO:-false}
     # Network: host mode simplifies talking to a localhost API on Linux
     # On macOS / Windows you may prefer the default bridge network and use
     #   URL_API=http://host.docker.internal:8000

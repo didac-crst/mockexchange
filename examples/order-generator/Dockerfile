@@ -24,4 +24,4 @@ ENV URL_API="http://localhost:8000" \
     API_KEY="changeme"
 
 # Run the generator
-CMD ["python", "dryrun_continuous_order_generator.py"]
+CMD ["python", "order_generator.py"]

@@ -61,12 +61,15 @@ HEADERS = {"x-api-key": API_KEY} if TEST_ENV else None
 # Reset function
 # ────────────────────────────────────────────────────
 
-RESET_FLAG = Path("/app/reset.flag")  # directory inside the Docker container
+# Use environment variable instead of file flag to avoid persistence issues
+RESET_ENV_VAR = "RESET_PORTFOLIO"
 
 
 def maybe_reset_api(client) -> list[str]:
-    if RESET_FLAG.exists():
-        print("🔄 Reset flag detected. Resetting API...")
+    reset_requested = os.getenv(RESET_ENV_VAR, "false").lower() in ("true", "1", "yes")
+
+    if reset_requested:
+        print("🔄 Reset requested via environment variable. Resetting API...")
         try:
             # Seed the wallet once per container start
             tickers = _get_tickers_to_trade(client)
@@ -74,8 +77,6 @@ def maybe_reset_api(client) -> list[str]:
             print("✅ Reenitialized wallet with funding amount:", FUNDING_AMOUNT)
         except Exception as e:
             print(f"❌ Reset failed: {e}")
-        finally:
-            RESET_FLAG.unlink()  # remove flag regardless of outcome
     else:
         print("🚀 No reset requested. Continuing as normal.")
         tickers = _get_existing_tickers(client)

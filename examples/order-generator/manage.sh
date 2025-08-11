@@ -104,18 +104,17 @@ start_generator() {
     check_env
     check_engine
     
+    # Build and start
+    docker-compose build --no-cache
+    
     if [ "$reset_flag" = "true" ]; then
         print_warning "Reset flag detected. This will clear backend state!"
-        # Create reset flag
-        touch ./scripts/reset.flag
+        # Start with reset environment variable
+        RESET_PORTFOLIO=true docker-compose up -d
+    else
+        # Start without reset
+        RESET_PORTFOLIO=false docker-compose up -d
     fi
-    
-    # Build and start
-    docker compose build --no-cache
-    docker compose up -d
-    
-    # Remove reset flag after starting
-    rm -f ./scripts/reset.flag
     
     print_status "Order generator started"
     print_status "Container name: $CONTAINER_NAME"
@@ -126,7 +125,7 @@ start_generator() {
 # Function to stop
 stop_generator() {
     print_status "Stopping order generator..."
-    docker compose down
+    docker-compose down
     print_status "Order generator stopped"
 }
 
@@ -139,18 +138,17 @@ restart_generator() {
     check_env
     check_engine
     
+    # Stop first
+    docker-compose down
+    
     if [ "$reset_flag" = "true" ]; then
         print_warning "Reset flag detected. This will clear backend state!"
-        # Create reset flag
-        touch ./scripts/reset.flag
+        # Start with reset environment variable
+        RESET_PORTFOLIO=true docker-compose up -d
+    else
+        # Start without reset
+        RESET_PORTFOLIO=false docker-compose up -d
     fi
-    
-    # Stop and start without rebuild
-    docker compose down
-    docker compose up -d
-    
-    # Remove reset flag after starting
-    rm -f ./scripts/reset.flag
     
     print_status "Order generator restarted"
     print_status "View logs with: $0 logs"
@@ -166,7 +164,7 @@ show_logs() {
 # Function to show status
 show_status() {
     print_status "Order generator status:"
-    docker compose ps
+    docker-compose ps
     echo ""
     print_status "Container logs (last 10 lines):"
     docker logs --tail=10 $CONTAINER_NAME 2>/dev/null || print_warning "Container not running"
