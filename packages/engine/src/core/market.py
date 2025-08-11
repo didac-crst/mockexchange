@@ -1,5 +1,5 @@
 """
-Read-only ticker feed (Valkey hashes `sym_<SYMBOL>`).
+Read-only ticker feed (Valkey hashes `tickers:<SYMBOL>`).
 """
 
 from __future__ import annotations
@@ -11,10 +11,11 @@ import time
 from ._types import TradingPair
 from .logging_config import logger
 
+
 @dataclass
 class Market:
     """
-    Minimal reader for price hashes named ``sym_<PAIR>``.
+    Minimal reader for price hashes named ``tickers:<PAIR>``.
 
     The hash *must* contain at least:
 
@@ -25,7 +26,7 @@ class Market:
     """
 
     conn: redis.Redis
-    root_key: str = "sym_"
+    root_key: str = "tickers:"
 
     # Public API ---------------------------------------------------------
     @property
@@ -35,8 +36,12 @@ class Market:
 
         This is a list of strings, e.g. ``["BTC/USDT", "ETH/USDT"]``.
         """
-        fmt_ticker = lambda k: k[len(self.root_key):] # strip the root key
-        return [fmt_ticker(k) for k in self.conn.scan_iter(f"{self.root_key}*") if k.startswith(self.root_key)]
+        fmt_ticker = lambda k: k[len(self.root_key) :]  # strip the root key
+        return [
+            fmt_ticker(k)
+            for k in self.conn.scan_iter(f"{self.root_key}*")
+            if k.startswith(self.root_key)
+        ]
 
     def fetch_ticker(self, ticker: str) -> TradingPair | None:
         """
@@ -58,15 +63,15 @@ class Market:
         """
         h = self.conn.hgetall(f"{self.root_key}{ticker}")
         if not h:
-            return None                            # ticker vanished – treat as absent
+            return None  # ticker vanished – treat as absent
         try:
             price = float(h["price"])
-            ts    = float(h["timestamp"])
+            ts = float(h["timestamp"])
         except (KeyError, ValueError):
             # Just log once and skip this ticker
             logger.warning("Malformed ticker blob for %s: %s", ticker, h)
             return None
-        
+
         return TradingPair(
             symbol=ticker,
             price=price,
@@ -79,7 +84,7 @@ class Market:
             ask_volume=float(h.get("askVolume", 0.0)),
             info=h,
         )
-    
+
     def last_price(self, symbol: str) -> float:
         """
         Return the last price of the ticker.
@@ -100,7 +105,7 @@ class Market:
         """
         if not TradingPair.symbol:
             raise RuntimeError("TradingPair must have a symbol")
-        
+
         fields = {
             "symbol": TradingPair.symbol,
             "price": TradingPair.price,

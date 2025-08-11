@@ -7,8 +7,8 @@ homepage    = "https://github.com/didac-crst/mockexchange-api"
 
 # Correct shape: an array of tables
 packages = [
-  { include = "mockexchange",      from = "src" },     # library
-  { include = "mockexchange_api",  from = "src" }      # app layer
+  { include = "core",      from = "src" },     # library
+  { include = "api",       from = "src" }      # app layer
 ]
 
 [tool.poetry.dependencies]
@@ -32,11 +32,11 @@ hypothesis = "^6.100"
 
 [tool.poetry.scripts]
 # short, easy to type
-mockx             = "mockexchange_api.cli:main"
+mockx             = "api.cli:main"
 # keep the old alias if someone already relies on it
-mockexchange-cli  = "mockexchange_api.cli:main"
+mockexchange-cli  = "api.cli:main"
 # ASGI app for uvicorn/gunicorn
-mockexchange-api  = "mockexchange_api.server:app"
+mockexchange-api  = "api.server:app"
 
 [build-system]
 requires      = ["poetry-core"]

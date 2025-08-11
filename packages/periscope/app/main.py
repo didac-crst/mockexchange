@@ -23,7 +23,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from datetime import datetime, timezone   #  ← add datetime import
+from datetime import datetime, timezone  #  ← add datetime import
 
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
@@ -31,9 +31,9 @@ from streamlit_autorefresh import st_autorefresh
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-load_dotenv(Path(__file__).parent.parent / ".env")
+load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 APP_TITLE = os.getenv("APP_TITLE", "")
-LOGO_FILE= os.getenv("LOGO_FILE", "")
+LOGO_FILE = os.getenv("LOGO_FILE", "")
 LOCAL_TZ_str = os.getenv("LOCAL_TZ", "UTC")  # e.g. "Europe/Berlin"
 
 # -----------------------------------------------------------------------------
@@ -64,11 +64,11 @@ if APP_TITLE != "":
     st.sidebar.title(APP_TITLE)
 
 # Pull current URL parameters as early as possible
-params = st.query_params                     # returns a QueryParamsProxy
-oid    = params.get("order_id")              # already a single value (or None)
+params = st.query_params  # returns a QueryParamsProxy
+oid = params.get("order_id")  # already a single value (or None)
 
 # Default to portfolio if param missing
-initial_page = params.get("page", "Performance")    # default to "Performance"
+initial_page = params.get("page", "Performance")  # default to "Performance"
 
 # Two-page app: Portfolio ↔ Order Book
 page = st.sidebar.radio(
@@ -76,7 +76,7 @@ page = st.sidebar.radio(
     ("Performance", "Portfolio", "Order Book"),
     index=["Performance", "Portfolio", "Order Book"].index(initial_page),
     key="sidebar_page",
-    on_change=update_page # Update URL query-params when page changes
+    on_change=update_page,  # Update URL query-params when page changes
 )
 
 # -----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ else:
         portfolio.render()
     else:  # page == "Order Book"
         orders.render()
-        
+
 st.sidebar.markdown("---")
 # ────────────────────────────────────────────────────────────────
 # UTC clock (updates on every autorefresh)

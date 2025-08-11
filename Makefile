@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format clean start stop logs start-engine start-oracle start-periscope stop-engine stop-oracle stop-periscope logs-engine logs-oracle logs-periscope
+.PHONY: help install dev test lint format clean start stop logs start-valkey start-engine start-oracle start-periscope stop-valkey stop-engine stop-oracle stop-periscope logs-valkey logs-engine logs-oracle logs-periscope
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -41,6 +41,9 @@ clean: ## Clean up build artifacts
 start: ## Start all services with Docker Compose
 	docker-compose up -d
 
+start-valkey: ## Start only the valkey service
+	docker-compose up -d valkey
+
 start-engine: ## Start only the engine service
 	docker-compose up -d engine
 
@@ -52,6 +55,9 @@ start-periscope: ## Start only the periscope service
 
 stop: ## Stop all services
 	docker-compose down
+
+stop-valkey: ## Stop only the valkey service
+	docker-compose stop valkey
 
 stop-engine: ## Stop only the engine service
 	docker-compose stop engine
@@ -65,6 +71,9 @@ stop-periscope: ## Stop only the periscope service
 logs: ## Show logs from all services
 	docker-compose logs -f
 
+logs-valkey: ## Show valkey logs
+	docker-compose logs -f valkey
+
 logs-engine: ## Show engine logs
 	docker-compose logs -f engine
 
@@ -75,6 +84,8 @@ logs-periscope: ## Show periscope logs
 	docker-compose logs -f periscope
 
 restart: stop start ## Restart all services
+
+restart-valkey: stop-valkey start-valkey ## Restart only the valkey service
 
 restart-engine: stop-engine start-engine ## Restart only the engine service
 

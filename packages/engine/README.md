@@ -211,7 +211,7 @@ curl -X POST $auth -H "Content-Type: application/json" \
 
 ## Tick-loop internals  
 
-A background coroutine scans Valkey for keys matching `sym_*`, feeds the latest price into `ExchangeEngine.process_price_tick(symbol)` and settles any limit orders that crossed. Interval is `TICK_LOOP_SEC` seconds (default **10 s**).  
+A background coroutine scans Valkey for keys matching `tickers:*`, feeds the latest price into `ExchangeEngine.process_price_tick(symbol)` and settles any limit orders that crossed. Interval is `TICK_LOOP_SEC` seconds (default **10 s**).  
 
 ### Feeding live prices  
 
@@ -227,12 +227,12 @@ MockExchange is agnostic about **where** prices come from; it simply expects a h
   | `askVolume` | `8.91369`        |
   | `symbol`    | `BTC/USDT`       |
 
-`HSET sym_BTC/USDT price 117800.01 timestamp 752853159.996 bid ...`
+`HSET tickers:BTC/USDT price 117800.01 timestamp 752853159.996 bid ...`
 
 The reference feeder we use in production is a 40-line script that:  
 
 1. Pulls fresh tickers from **Binance** via **CCXT** every 10 s.  
-2. For each symbol it writes a Valkey hash at the key `sym_<SYMBOL>`.
+2. For each symbol it writes a Valkey hash at the key `tickers:<SYMBOL>`.
 
 Any mechanism that follows the same convention works (Kafka consumer, WebSocket stream, another exchange, etc.).
 
@@ -352,17 +352,17 @@ mockexchange-api/
 ├── Dockerfile                   ← Uvicorn + Poetry export
 ├── docker-compose.yml           ← Convenience wrapper (host-network)
 ├── src/
-│   ├── mockexchange/            ← Core engine (stateless library)
+│   ├── core/                    ← Core engine (stateless library)
 │   │   ├── __init__.py          ← Re-exports Engine, version, …
-│   │   ├── engine.py            ← Order flow & matching
+│   │   ├── engine_actors.py     ← Order flow & matching
 │   │   ├── market.py            ← Ticker facade
 │   │   ├── portfolio.py         ← Balances
 │   │   ├── orderbook.py         ← Orders & fills
 │   │   ├── _types.py            ← Enums & dataclasses
 │   │   └── logging_config.py    ← Centralised logging setup
-│   ├── mockexchange_api/        ← API layer & CLI
+│   ├── api/                     ← API layer & CLI
 │   │   ├── __init__.py
-│   │   ├── server.py            ← FastAPI app (`mockexchange_api.server:app`)
+│   │   ├── server.py            ← FastAPI app (`api.server:app`)
 │   │   └── cli.py               ← Thin command-line helper
 │   └── tests/                   ← Pytest suite (unit + integration)
 │       ├── conftest.py
@@ -378,7 +378,7 @@ mockexchange-api/
 * Unit-tests boot a throw-away Valkey with  
   `valkey-server --save '' --appendonly no --port 0` (**random port**).  
 * Market data is whatever you drop into hashes:  
-  `HSET sym_BTC/USDT price 56000 timestamp $(date +%s)`.  
+  `HSET tickers:BTC/USDT price 56000 timestamp $(date +%s)`.  
 * Commission is read from `COMMISSION` env (default `0.00075` = 0.075 %).  
 * Code style: **Black** & **Ruff** (`poetry run ruff check .`) — run `ruff format .` to auto-fix.  
 * Static typing: **MyPy** (`poetry run mypy src/mockexchange`).  

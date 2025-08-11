@@ -19,13 +19,22 @@ This repository contains the full **MockExchange** paper-trading platform:
 - [🚀 Quick Start](#-quick-start)
   - [Option 1: One-Command Setup (Recommended)](#option-1-one-command-setup-recommended)
   - [Option 2: Manual Setup](#option-2-manual-setup)
-    - [0. Prepare Valkey (Redis)](#0-prepare-valkey-redis)
-    - [1. Start MockX Oracle](#1-start-mockx-oracle)
-    - [2. Start MockX Engine](#2-start-mockx-engine)
-    - [3. Start MockX Periscope](#3-start-mockx-periscope)
+    - [0. Setup environment](#0-setup-environment)
+    - [1. Start MockX Valkey](#1-start-mockx-valkey)
+    - [2. Start MockX Oracle](#2-start-mockx-oracle)
+    - [3. Start MockX Engine](#3-start-mockx-engine)
+    - [4. Start MockX Periscope](#4-start-mockx-periscope)
   - [Development Setup](#development-setup)
   - [Individual Service Management](#individual-service-management)
   - [Common Use Cases](#common-use-cases)
+- [🔧 Environment Configuration](#-environment-configuration)
+  - [Quick Setup](#quick-setup)
+  - [Key Configuration Sections](#key-configuration-sections)
+    - [**Valkey (Database)**](#valkey-database)
+    - [**Oracle (Price Feeds)**](#oracle-price-feeds)
+    - [**Engine (API)**](#engine-api)
+    - [**Periscope (Dashboard)**](#periscope-dashboard)
+  - [Benefits of Centralized Configuration](#benefits-of-centralized-configuration)
 - [🗂 Monorepo Structure](#-monorepo-structure)
 - [📚 Documentation](#-documentation)
 - [🪪 License](#-license)
@@ -176,11 +185,12 @@ flowchart TB
 
 ## 📦 Packages in this Monorepo
 
-| Package             | Path                  | Description                                                  | README                                           |
-| ------------------- | --------------------- | ------------------------------------------------------------ | ------------------------------------------------ |
-| **MockX Engine**    | `packages/engine/`    | Core engine, order-matching, balances, API layer, CLI tools. | [Engine README](packages/engine/README.md)       |
-| **MockX Periscope** | `packages/periscope/` | Streamlit dashboard for portfolio and orders.                | [Periscope README](packages/periscope/README.md) |
-| **MockX Oracle**    | `packages/oracle/`    | Market data feeder (ccxt → Valkey/Redis).                    | [Oracle README](packages/oracle/README.md)       |
+| Package             | Path                  | Description                                       | README                                           |
+| ------------------- | --------------------- | ------------------------------------------------- | ------------------------------------------------ |
+| **MockX Valkey**    | `packages/valkey/`    | Redis-compatible database for data persistence.   | [Valkey README](packages/valkey/README.md)       |
+| **MockX Engine**    | `packages/engine/`    | Core engine (core/), API layer (api/), CLI tools. | [Engine README](packages/engine/README.md)       |
+| **MockX Periscope** | `packages/periscope/` | Streamlit dashboard for portfolio and orders.     | [Periscope README](packages/periscope/README.md) |
+| **MockX Oracle**    | `packages/oracle/`    | Market data feeder (ccxt → Valkey/Redis).         | [Oracle README](packages/oracle/README.md)       |
 
 Related (external):
 - **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  
@@ -191,13 +201,19 @@ Related (external):
 ## 🚀 Quick Start
 
 ### Option 1: One-Command Setup (Recommended)
-Start everything with a single command:
+1. **Setup environment** (first time only):
+```bash
+cp .env.example .env
+# Edit .env if needed (defaults work for most cases)
+```
+
+2. **Start everything**:
 ```bash
 make start
 ```
 
 This launches:
-- **Valkey** (Redis fork) on port 6379
+- **MockX Valkey** (Redis fork) on port 6379
 - **MockX Oracle** (price feed) 
 - **MockX Engine** (API) on port 8000
 - **MockX Periscope** (dashboard) on port 8501
@@ -210,30 +226,29 @@ Access your services:
 ### Option 2: Manual Setup
 If you prefer to run services individually:
 
-#### 0. Prepare Valkey (Redis)
+#### 0. Setup environment
 ```bash
-docker run -d --name mockx-valkey \
-            -p 6379:6379 \
-            valkey/valkey \
-            --requirepass "SuperSecretPass"
+cp .env.example .env
 ```
 
-#### 1. Start MockX Oracle
+#### 1. Start MockX Valkey
 ```bash
-cd packages/oracle
-docker compose up --build
+make start-valkey
 ```
 
-#### 2. Start MockX Engine
+#### 2. Start MockX Oracle
 ```bash
-cd packages/engine
-docker compose up --build
+make start-oracle
 ```
 
-#### 3. Start MockX Periscope
+#### 3. Start MockX Engine
 ```bash
-cd packages/periscope
-docker compose up --build
+make start-engine
+```
+
+#### 4. Start MockX Periscope
+```bash
+make start-periscope
 ```
 
 ### Development Setup
@@ -258,21 +273,25 @@ You can also manage services individually:
 
 ```bash
 # Start specific services
+make start-valkey      # Start only the database
 make start-engine      # Start only the engine
 make start-oracle      # Start only the oracle  
 make start-periscope   # Start only the dashboard
 
 # Stop specific services
+make stop-valkey       # Stop only the database
 make stop-engine       # Stop only the engine
 make stop-oracle       # Stop only the oracle
 make stop-periscope    # Stop only the dashboard
 
 # Restart specific services
+make restart-valkey    # Restart only the database
 make restart-engine    # Restart only the engine
 make restart-oracle    # Restart only the oracle
 make restart-periscope # Restart only the dashboard
 
 # View logs for specific services
+make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
 make logs-oracle       # Oracle logs only
 make logs-periscope    # Dashboard logs only
@@ -285,19 +304,61 @@ make status            # Show all service statuses
 
 ```bash
 # Development workflow
-make start-oracle      # Start price feed first
+make start-valkey      # Start database first
+make start-oracle      # Start price feed
 make start-engine      # Then start the API
 make logs-engine       # Monitor engine logs
 make restart-engine    # Restart after code changes
 
 # Debugging specific services
+make logs-valkey       # Check database connectivity
 make logs-oracle       # Check if price feed is working
 make restart-periscope # Restart dashboard if UI is stuck
 make status            # See which services are running
 
 # Selective deployment
-make start-engine make start-periscope  # Skip oracle if using external data
+make start-valkey make start-engine make start-periscope  # Skip oracle if using external data
 ```
+
+---
+
+## 🔧 Environment Configuration
+
+All environment variables are centralized in the root `.env` file. This eliminates duplication and makes configuration management much easier.
+
+### Quick Setup
+```bash
+# Copy the template and customize if needed
+cp .env.example .env
+```
+
+### Key Configuration Sections
+
+#### **Valkey (Database)**
+- `VALKEY_PASSWORD` - Database authentication
+- `VALKEY_PORT` - Database port (default: 6379)
+
+#### **Oracle (Price Feeds)**
+- `EXCHANGE` - Source exchange (binance, coinbase, etc.)
+- `SYMBOLS` - Trading pairs to monitor
+- `INTERVAL_SEC` - Price update frequency
+
+#### **Engine (API)**
+- `ENGINE_PORT` - API server port (default: 8000)
+- `COMMISSION` - Trading commission rate
+- `API_KEY` - Authentication key
+
+#### **Periscope (Dashboard)**
+- `PERISCOPE_PORT` - Dashboard port (default: 8501)
+- `APP_TITLE` - Dashboard title
+- `REFRESH_SECONDS` - Auto-refresh interval
+
+### Benefits of Centralized Configuration
+- ✅ **Single source of truth** - All config in one place
+- ✅ **No duplication** - Eliminates scattered `.env` files
+- ✅ **Easy customization** - Change once, applies everywhere
+- ✅ **Better security** - Centralized password management
+- ✅ **Simplified deployment** - One config file to manage
 
 ---
 
@@ -305,11 +366,13 @@ make start-engine make start-periscope  # Skip oracle if using external data
 ```text
 mockexchange/
 ├── packages/
-│   ├── engine/        # MockX Engine (core API & matching)
+│   ├── valkey/        # MockX Valkey (Redis database)
+│   ├── engine/        # MockX Engine (core/ + api/)
 │   ├── periscope/     # MockX Periscope (dashboard)
 │   └── oracle/        # MockX Oracle (price feeds)
 ├── .github/workflows/ # CI/CD pipelines
 ├── docker-compose.yml # Full stack orchestration
+├── .env.example       # Environment configuration template
 ├── Makefile          # Development commands
 ├── pyproject.toml    # Root workspace config
 ├── .pre-commit-config.yaml # Code quality hooks
@@ -320,6 +383,7 @@ mockexchange/
 
 ## 📚 Documentation
 
+- [Valkey README](packages/valkey/README.md)
 - [Engine README](packages/engine/README.md)
 - [Periscope README](packages/periscope/README.md)
 - [Oracle README](packages/oracle/README.md)

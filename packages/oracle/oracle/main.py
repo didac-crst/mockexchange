@@ -68,7 +68,7 @@ INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "10"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 # Constants
-VALKEY_TICKERS_ROOT = "ticker:"
+VALKEY_TICKERS_ROOT = "tickers:"
 
 # --- Logging ------------------------------------------------------------------
 

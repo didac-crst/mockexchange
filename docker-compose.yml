@@ -6,11 +6,13 @@ services:
     image: valkey/valkey:7-alpine
     container_name: mockx-valkey
     ports:
-      - "6379:6379"
-    command: --requirepass "SuperSecretPass"
+      - "${VALKEY_PORT}:6379"
+    command: --requirepass "${VALKEY_PASSWORD}"
     volumes:
       - valkey_data:/data
     restart: unless-stopped
+    env_file:
+      - .env
 
   # MockX Oracle - price feed service
   oracle:
@@ -19,13 +21,15 @@ services:
       dockerfile: Dockerfile
     container_name: mockx-oracle
     environment:
-      - EXCHANGE=binance
-      - SYMBOLS=BTC/USDT,ETH/USDT,ADA/USDT
-      - REDIS_URL=redis://:SuperSecretPass@valkey:6379/0
-      - INTERVAL_SEC=10
+      - EXCHANGE=${EXCHANGE}
+      - SYMBOLS=${SYMBOLS}
+      - REDIS_URL=${REDIS_URL}
+      - INTERVAL_SEC=${INTERVAL_SEC}
     depends_on:
       - valkey
     restart: unless-stopped
+    env_file:
+      - .env
 
   # MockX Engine - core trading engine
   engine:
@@ -34,14 +38,18 @@ services:
       dockerfile: Dockerfile
     container_name: mockx-engine
     ports:
-      - "8000:8000"
+      - "${ENGINE_PORT}:8000"
     environment:
-      - REDIS_URL=redis://:SuperSecretPass@valkey:6379/0
-      - LOG_LEVEL=INFO
+      - REDIS_URL=${REDIS_URL}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - COMMISSION=${COMMISSION}
+      - API_KEY=${API_KEY}
     depends_on:
       - valkey
       - oracle
     restart: unless-stopped
+    env_file:
+      - .env
 
   # MockX Periscope - dashboard
   periscope:
@@ -50,12 +58,27 @@ services:
       dockerfile: Dockerfile
     container_name: mockx-periscope
     ports:
-      - "8501:8501"
+      - "${PERISCOPE_PORT}:8501"
     environment:
-      - API_URL=http://engine:8000
+      - API_URL=${API_URL}
+      - UI_URL=${UI_URL}
+      - APP_TITLE=${APP_TITLE}
+      - LOGO_FILE=${LOGO_FILE}
+      - API_KEY=${API_KEY}
+      - REFRESH_SECONDS=${REFRESH_SECONDS}
+      - QUOTE_ASSET=${QUOTE_ASSET}
+      - FRESH_WINDOW_S=${FRESH_WINDOW_S}
+      - N_VISUAL_DEGRADATIONS=${N_VISUAL_DEGRADATIONS}
+      - SLIDER_MIN=${SLIDER_MIN}
+      - SLIDER_MAX=${SLIDER_MAX}
+      - SLIDER_STEP=${SLIDER_STEP}
+      - SLIDER_DEFAULT=${SLIDER_DEFAULT}
+      - LOCAL_TZ=${LOCAL_TZ}
     depends_on:
       - engine
     restart: unless-stopped
+    env_file:
+      - .env
 
 volumes:
   valkey_data:

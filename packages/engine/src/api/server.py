@@ -2,7 +2,7 @@
 server.py
 ~~~~~~~~~
 
-FastAPI façade over :class:`mockexchange.engine.ExchangeEngine`.
+FastAPI façade over :class:`core.engine_actors.ExchangeEngineActor`.
 
 * **No business logic** lives here – we only translate *HTTP ⇄ Python*.
 * Designed to run **inside a Docker container** (host-network is fine).
@@ -59,7 +59,7 @@ GET **/admin/health**                   → check service health
 
 Implementation notes
 --------------------
-* The background *tick-loop* scans keys ``sym_*`` in Redis every
+* The background *tick-loop* scans keys ``tickers:*`` in Redis every
   ``TICK_LOOP_SEC`` seconds and settles limit orders whose prices have
   crossed.
 * API docs (`/docs`) and the raw OpenAPI JSON are **disabled in
@@ -86,15 +86,16 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 from pykka import Future
 from fastapi import FastAPI, HTTPException, Query, Depends, Header
 from pydantic import BaseModel, Field
-from mockexchange.engine_actors import start_engine  # NEW import
-from mockexchange.logging_config import logger
-from mockexchange.constants import ALL_STATUS_STR, ALL_SIDES_STR, ALL_TYPES_STR
+from core.engine_actors import start_engine  # NEW import
+from core.logging_config import logger
+from core.constants import ALL_STATUS_STR, ALL_SIDES_STR, ALL_TYPES_STR
 
 _ALL_STATUS = Literal[*ALL_STATUS_STR]  # type alias for all order statuses
 _TRADING_SIDES = Literal[*ALL_SIDES_STR]  # type alias for all trading sides
 _ORDER_TYPES = Literal[*ALL_TYPES_STR]  # type alias for all order types
 
 CASH_ASSET = os.getenv("CASH_ASSET", "USDT")  # default cash asset
+
 
 # ─────────────────────────── Pydantic models ────────────────────────── #
 class OrderReq(BaseModel):
@@ -112,6 +113,7 @@ class BalanceReq(BaseModel):
 
 class FundReq(BaseModel):
     amount: float = Field(100000.0, gt=0)
+
 
 class ModifyTickerReq(BaseModel):
     price: float = Field(..., gt=0)
@@ -228,6 +230,7 @@ def balance_list():
 def asset_balance(asset: str):
     return _g(ENGINE.fetch_balance(asset))
 
+
 @app.post("/balance/{asset}/deposit", tags=["Portfolio"], dependencies=prod_depends)
 def deposit_asset(req: FundReq, asset: str = CASH_ASSET):
     try:
@@ -236,6 +239,7 @@ def deposit_asset(req: FundReq, asset: str = CASH_ASSET):
         # Turn any ValueError into a 400 Bad Request
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @app.post("/balance/{asset}/withdrawal", tags=["Portfolio"], dependencies=prod_depends)
 def withdraw_asset(req: FundReq, asset: str = CASH_ASSET):
     try:
@@ -243,6 +247,7 @@ def withdraw_asset(req: FundReq, asset: str = CASH_ASSET):
     except ValueError as e:
         # Turn any ValueError into a 400 Bad Request
         raise HTTPException(status_code=400, detail=str(e))
+
 
 # orders ----------------------------------------------------------------- #
 @app.get("/orders", tags=["Orders"])
@@ -287,7 +292,7 @@ def get_order(
     include_history: bool = Query(
         False, description="Include order history in response"
     ),
-):  
+):
     try:
         o = _g(ENGINE.order_book.get().get(oid, include_history=include_history))
         return o.to_dict(include_history=include_history)
@@ -331,9 +336,7 @@ def cancel(oid: str):
 # overview --------------------------------------------------------------- #
 @app.get("/overview/capital", tags=["Overview"])
 def get_summary_capital(
-    aggregation: bool = Query(
-        True, description="Portfolio aggregated capital"
-    )
+    aggregation: bool = Query(True, description="Portfolio aggregated capital")
 ):
     """
     Get a summary of all capital related amounts in the portfolio.
@@ -347,10 +350,12 @@ def get_summary_capital(
     # If aggregation is False, we return a dict with each asset's capital separately
     return sum_capital
 
+
 @app.get("/overview/assets", tags=["Overview"])
 def get_summary_assets():
     sum_assets_bal = _g(ENGINE.get_summary_assets())
     return sum_assets_bal
+
 
 @app.get("/overview/trades", tags=["Overview"])
 def get_summary_trades(
@@ -359,7 +364,9 @@ def get_summary_trades(
     side: _TRADING_SIDES | None = Query(None),
 ):
     # turn "BTC,ETH" → ["BTC", "ETH"]; keep None if nothing supplied
-    assets_list = [s.strip() for s in assets.split(",") if s.strip()] if assets else None
+    assets_list = (
+        [s.strip() for s in assets.split(",") if s.strip()] if assets else None
+    )
     sum_trades = _g(ENGINE.get_trade_stats(assets=assets_list, side=side))
     return sum_trades
 
@@ -374,11 +381,12 @@ def patch_ticker_price(ticker: str, body: ModifyTickerReq):
             symbol=ticker,
             price=body.price,
             bid_volume=body.bid_volume,
-            ask_volume=body.ask_volume
+            ask_volume=body.ask_volume,
         )
     )
     _g(ENGINE.process_price_tick(ticker))
     return data
+
 
 @app.patch("/admin/balance/{asset}", tags=["Admin"], dependencies=prod_depends)
 def set_balance(asset: str, req: BalanceReq):
@@ -392,6 +400,7 @@ def set_balance(asset: str, req: BalanceReq):
 # @app.post("/admin/withdraw", tags=["Admin"], dependencies=prod_depends)
 # def withdraw(req: WithdrawReq):
 #     return _g(ENGINE.withdraw_asset(req.asset, req.amount))
+
 
 @app.delete("/admin/data", tags=["Admin"], dependencies=prod_depends)
 def purge_all():
@@ -443,7 +452,9 @@ async def prune_and_expire_loop():
     prune_age = timedelta(seconds=STALE_AFTER_SEC)
     expire_age = timedelta(seconds=EXPIRE_AFTER_SEC)
     while True:
-        logger.debug(f"Prune and expire loop started - PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC} seconds")
+        logger.debug(
+            f"Prune and expire loop started - PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC} seconds"
+        )
         try:
             if i_am_leader():
                 ENGINE.prune_orders_older_than(age=prune_age).get()
@@ -455,9 +466,12 @@ async def prune_and_expire_loop():
             # If an error occurs, we will miss one prune cycle.
             await asyncio.sleep(PRUNE_EVERY_SEC)
 
+
 async def sanity_loop():
     while True:
-        logger.debug(f"Sanity loop started - SANITY_CHECK_EVERY_SEC: {SANITY_CHECK_EVERY_SEC} seconds")
+        logger.debug(
+            f"Sanity loop started - SANITY_CHECK_EVERY_SEC: {SANITY_CHECK_EVERY_SEC} seconds"
+        )
         try:
             if i_am_leader():
                 ENGINE.check_consistency().get()
