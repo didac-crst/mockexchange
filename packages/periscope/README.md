@@ -54,10 +54,9 @@ The UI will be available at <http://localhost:8501>.
 ## 🐳 Quick start (Docker / docker-compose)
 
 ```bash
-git clone https://github.com/didac-crst/mockexchange-deck.git
-cd mockexchange-deck
-cp .env.example .env                # set correct API_URL, API_KEY …
-sh start_mockexchange.sh            # or: docker compose up -d
+git clone https://github.com/didac-crst/mockexchange.git
+cd mockexchange
+make start                        # starts all services including periscope
 ```
 
 > The container uses **host network mode** so it can reach the back-end on  
@@ -67,22 +66,22 @@ sh start_mockexchange.sh            # or: docker compose up -d
 
 ## 🛠️ Configuration
 
-| Variable                 | Default                       | Purpose                                                     |
-|--------------------------|-------------------------------|-------------------------------------------------------------|
-| `API_URL`                | `http://localhost:8000`       | Base URL of the MockExchange API server                     |
-| `UI_URL`                 | `http://mockexchange.your-domain.com` | Base URL used to generate links in the frontend     |
-| `APP_TITLE`              | `MockExchange`                  | Title shown in the Streamlit browser tab and header       |
-| `LOGO_FILE`              | `logo.png`                      | Name of the logo image to display in the sidebar          |
-| `API_KEY`                | `dev-key`                     | Bearer key sent as `x-api-key` header                       |
-| `REFRESH_SECONDS`        | `60`                          | UI auto-refresh interval (seconds)                          |
-| `QUOTE_ASSET`            | `USDT`                        | Fiat or stablecoin used to value the portfolio              |
-| `FRESH_WINDOW_S`         | `60`                          | Time-window (seconds) for “fresh” row highlighting          |
-| `N_VISUAL_DEGRADATIONS`  | `60`                          | Number of fade-out levels for row highlighting              |
-| `SLIDER_MIN`             | `25`                          | Minimum “tail” slider value (earliest orders to fetch)      |
-| `SLIDER_MAX`             | `1000`                        | Maximum “tail” slider value                                 |
-| `SLIDER_STEP`            | `25`                          | Step size for the “tail” slider                             |
-| `SLIDER_DEFAULT`         | `100`                         | Default “tail” slider value                                 |
-| `LOCAL_TZ`               | `Europe/Berlin`            | Timezone used to localize and display timestamps in local time |
+| Variable                | Default                               | Purpose                                                        |
+| ----------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| `API_URL`               | `http://localhost:8000`               | Base URL of the MockExchange API server                        |
+| `UI_URL`                | `http://mockexchange.your-domain.com` | Base URL used to generate links in the frontend                |
+| `APP_TITLE`             | `MockExchange`                        | Title shown in the Streamlit browser tab and header            |
+| `LOGO_FILE`             | `logo.png`                            | Name of the logo image to display in the sidebar               |
+| `API_KEY`               | `dev-key`                             | Bearer key sent as `x-api-key` header                          |
+| `REFRESH_SECONDS`       | `60`                                  | UI auto-refresh interval (seconds)                             |
+| `QUOTE_ASSET`           | `USDT`                                | Fiat or stablecoin used to value the portfolio                 |
+| `FRESH_WINDOW_S`        | `60`                                  | Time-window (seconds) for “fresh” row highlighting             |
+| `N_VISUAL_DEGRADATIONS` | `60`                                  | Number of fade-out levels for row highlighting                 |
+| `SLIDER_MIN`            | `25`                                  | Minimum “tail” slider value (earliest orders to fetch)         |
+| `SLIDER_MAX`            | `1000`                                | Maximum “tail” slider value                                    |
+| `SLIDER_STEP`           | `25`                                  | Step size for the “tail” slider                                |
+| `SLIDER_DEFAULT`        | `100`                                 | Default “tail” slider value                                    |
+| `LOCAL_TZ`              | `Europe/Berlin`                       | Timezone used to localize and display timestamps in local time |
 
 All variables live in **`.env`** (see `.env.example`).  
 They are loaded via *python-dotenv* inside `app/config.py`.
@@ -91,10 +90,10 @@ They are loaded via *python-dotenv* inside `app/config.py`.
 
 You can customize the sidebar’s appearance using two environment variables:
 
-| Variable     | Behavior                                                                 |
-|--------------|--------------------------------------------------------------------------|
-| `APP_TITLE`  | Optional title shown at the **top of the sidebar**. If unset or empty, no title is shown. |
-| `LOGO_FILE`  | Filename of a logo image (e.g. `logo.png`) shown **above the sidebar title**. If unset, no image is shown. If set, the file **must exist** in the `misc/` folder at the **repo root**. |
+| Variable    | Behavior                                                                                                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `APP_TITLE` | Optional title shown at the **top of the sidebar**. If unset or empty, no title is shown.                                                                                              |
+| `LOGO_FILE` | Filename of a logo image (e.g. `logo.png`) shown **above the sidebar title**. If unset, no image is shown. If set, the file **must exist** in the `misc/` folder at the **repo root**. |
 
 #### ⚠️ Important:
 - Create a `misc/` directory at the top level of the repo if it doesn’t exist:
@@ -118,8 +117,6 @@ mockexchange_deck/
 ├── docker-compose.yml           ← Convenience wrapper (host‑network)
 ├── README.md                    ← You’re here
 ├── pyproject.toml               ← Poetry deps & build meta
-├── start_mockexchange.sh        ← Quick dev helper
-├── stop_mockexchange.sh
 ├── app/                         # Streamlit source code
 │   ├── __init__.py              
 │   ├── main.py                  # Entry‑point with sidebar navigation

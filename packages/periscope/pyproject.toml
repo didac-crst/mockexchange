@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "mockexchange-deck"
+name = "mockexchange-periscope"
 version = "0.1.0"
 description = "Streamlit dashboard for mockexchange_api (paper-trading PoC)"
-authors = ["Your Name <you@example.com>"]
+authors = ["Didac <didac.crst@gmail.com>"]
 readme = "README.md"
 packages = [{ include = "app" }]
 

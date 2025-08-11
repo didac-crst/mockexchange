@@ -349,9 +349,8 @@ mockexchange-api/
 ├── docker-compose.yml           ← Convenience wrapper (host-network)
 ├── README.md                    ← You’re here
 ├── pyproject.toml               ← Poetry deps & build meta
-├── start_mockexchange.sh        ← Quick dev helpers
-├── stop_mockexchange.sh
-├── logs_mockexchange.sh
+├── Dockerfile                   ← Uvicorn + Poetry export
+├── docker-compose.yml           ← Convenience wrapper (host-network)
 ├── src/
 │   ├── mockexchange/            ← Core engine (stateless library)
 │   │   ├── __init__.py          ← Re-exports Engine, version, …

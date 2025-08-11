@@ -17,10 +17,15 @@ This repository contains the full **MockExchange** paper-trading platform:
 - [🗺 Architecture \& Ecosystem](#-architecture--ecosystem)
 - [📦 Packages in this Monorepo](#-packages-in-this-monorepo)
 - [🚀 Quick Start](#-quick-start)
-  - [0. Prepare Valkey (Redis)](#0-prepare-valkey-redis)
-  - [1. Start MockX Oracle](#1-start-mockx-oracle)
-  - [2. Start MockX Engine](#2-start-mockx-engine)
-  - [3. Start MockX Periscope](#3-start-mockx-periscope)
+  - [Option 1: One-Command Setup (Recommended)](#option-1-one-command-setup-recommended)
+  - [Option 2: Manual Setup](#option-2-manual-setup)
+    - [0. Prepare Valkey (Redis)](#0-prepare-valkey-redis)
+    - [1. Start MockX Oracle](#1-start-mockx-oracle)
+    - [2. Start MockX Engine](#2-start-mockx-engine)
+    - [3. Start MockX Periscope](#3-start-mockx-periscope)
+  - [Development Setup](#development-setup)
+  - [Individual Service Management](#individual-service-management)
+  - [Common Use Cases](#common-use-cases)
 - [🗂 Monorepo Structure](#-monorepo-structure)
 - [📚 Documentation](#-documentation)
 - [🪪 License](#-license)
@@ -135,6 +140,7 @@ that trades smarter than I did.
 - 📊 **Full visibility** — Periscope dashboard for live monitoring of balances, orders, and performance metrics.
 - 🔮 **Realistic market simulation** — Oracle injects live exchange prices into a safe, risk-free trading environment.
 - 🚀 **Ready for production** — Dockerized services, path-filtered CI, and clear interface boundaries.
+- 🛠 **Developer-friendly** — One-command setup, pre-commit hooks, comprehensive testing, and linting.
 
 ---
 
@@ -184,10 +190,27 @@ Related (external):
 
 ## 🚀 Quick Start
 
-**Order matters** — without Valkey + Oracle, the Engine has no prices.
+### Option 1: One-Command Setup (Recommended)
+Start everything with a single command:
+```bash
+make start
+```
 
-### 0. Prepare Valkey (Redis)
-Install or run via Docker:
+This launches:
+- **Valkey** (Redis fork) on port 6379
+- **MockX Oracle** (price feed) 
+- **MockX Engine** (API) on port 8000
+- **MockX Periscope** (dashboard) on port 8501
+
+Access your services:
+- **API**: http://localhost:8000
+- **Dashboard**: http://localhost:8501
+- **Logs**: `make logs`
+
+### Option 2: Manual Setup
+If you prefer to run services individually:
+
+#### 0. Prepare Valkey (Redis)
 ```bash
 docker run -d --name mockx-valkey \
             -p 6379:6379 \
@@ -195,74 +218,86 @@ docker run -d --name mockx-valkey \
             --requirepass "SuperSecretPass"
 ```
 
----
-
-### 1. Start MockX Oracle
-This service writes latest market prices into Valkey.
-
-Example Docker Compose:
-```yaml
-services:
-    oracle:
-    image: python:3.11-slim
-    environment:
-        EXCHANGE: "binance"
-        SYMBOLS: "BTC/USDT,ETH/USDT"
-        REDIS_URL: "redis://host.docker.internal:6379/0"
-        INTERVAL_SEC: "10"
-    volumes:
-        - ./oracle.py:/app/oracle.py:ro
-    working_dir: /app
-    command: ["python", "-u", "oracle.py"]
+#### 1. Start MockX Oracle
+```bash
+cd packages/oracle
+docker compose up --build
 ```
 
-Minimal `oracle.py`:
-```python
-import os, time
-import ccxt, redis
-
-ex = getattr(ccxt, os.getenv("EXCHANGE", "binance"))({"enableRateLimit": True})
-r = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0"), decode_responses=True)
-SYMBOLS = os.getenv("SYMBOLS", "BTC/USDT").split(",")
-INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "10"))
-
-while True:
-    try:
-        tickers = ex.fetch_tickers(SYMBOLS)
-        for sym, t in tickers.items():
-            r.hset(f"sym_{sym}", mapping={
-                "price": t["last"],
-                "timestamp": time.time(),
-                "bid": t.get("bid"), "ask": t.get("ask"),
-                "bidVolume": t.get("bidVolume") or 0.0,
-                "askVolume": t.get("askVolume") or 0.0,
-                "symbol": sym
-            })
-    except Exception as e:
-        print("oracle error:", e)
-    time.sleep(INTERVAL_SEC)
-```
-
----
-
-### 2. Start MockX Engine
+#### 2. Start MockX Engine
 ```bash
 cd packages/engine
-cp .env.example .env
-docker compose -p mockx-engine up --build
+docker compose up --build
 ```
-API: http://localhost:8000
 
----
-
-### 3. Start MockX Periscope
+#### 3. Start MockX Periscope
 ```bash
 cd packages/periscope
-cp .env.example .env
-# Ensure API_URL in .env points to engine (default: http://localhost:8000)
-docker compose -p mockx-periscope up --build
+docker compose up --build
 ```
-UI: http://localhost:8501
+
+### Development Setup
+For contributors and developers:
+
+```bash
+# Install dependencies and dev tools
+make dev
+
+# Run tests
+make test
+
+# Format code
+make format
+
+# Check code quality
+make lint
+```
+
+### Individual Service Management
+You can also manage services individually:
+
+```bash
+# Start specific services
+make start-engine      # Start only the engine
+make start-oracle      # Start only the oracle  
+make start-periscope   # Start only the dashboard
+
+# Stop specific services
+make stop-engine       # Stop only the engine
+make stop-oracle       # Stop only the oracle
+make stop-periscope    # Stop only the dashboard
+
+# Restart specific services
+make restart-engine    # Restart only the engine
+make restart-oracle    # Restart only the oracle
+make restart-periscope # Restart only the dashboard
+
+# View logs for specific services
+make logs-engine       # Engine logs only
+make logs-oracle       # Oracle logs only
+make logs-periscope    # Dashboard logs only
+
+# Check service status
+make status            # Show all service statuses
+```
+
+### Common Use Cases
+
+```bash
+# Development workflow
+make start-oracle      # Start price feed first
+make start-engine      # Then start the API
+make logs-engine       # Monitor engine logs
+make restart-engine    # Restart after code changes
+
+# Debugging specific services
+make logs-oracle       # Check if price feed is working
+make restart-periscope # Restart dashboard if UI is stuck
+make status            # See which services are running
+
+# Selective deployment
+make start-engine make start-periscope  # Skip oracle if using external data
+```
 
 ---
 
@@ -270,11 +305,15 @@ UI: http://localhost:8501
 ```text
 mockexchange/
 ├── packages/
-│   ├── engine/        # MockX Engine
-│   ├── periscope/     # MockX Periscope
-│   └── oracle/        # MockX Oracle
-├── .github/workflows/ # CI
-└── README.md          # This file
+│   ├── engine/        # MockX Engine (core API & matching)
+│   ├── periscope/     # MockX Periscope (dashboard)
+│   └── oracle/        # MockX Oracle (price feeds)
+├── .github/workflows/ # CI/CD pipelines
+├── docker-compose.yml # Full stack orchestration
+├── Makefile          # Development commands
+├── pyproject.toml    # Root workspace config
+├── .pre-commit-config.yaml # Code quality hooks
+└── README.md         # This file
 ```
 
 ---

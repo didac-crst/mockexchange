@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Valkey (Redis fork) - required by all services
+  valkey:
+    image: valkey/valkey:7-alpine
+    container_name: mockx-valkey
+    ports:
+      - "6379:6379"
+    command: --requirepass "SuperSecretPass"
+    volumes:
+      - valkey_data:/data
+    restart: unless-stopped
+
+  # MockX Oracle - price feed service
+  oracle:
+    build:
+      context: ./packages/oracle
+      dockerfile: Dockerfile
+    container_name: mockx-oracle
+    environment:
+      - EXCHANGE=binance
+      - SYMBOLS=BTC/USDT,ETH/USDT,ADA/USDT
+      - REDIS_URL=redis://:SuperSecretPass@valkey:6379/0
+      - INTERVAL_SEC=10
+    depends_on:
+      - valkey
+    restart: unless-stopped
+
+  # MockX Engine - core trading engine
+  engine:
+    build:
+      context: ./packages/engine
+      dockerfile: Dockerfile
+    container_name: mockx-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://:SuperSecretPass@valkey:6379/0
+      - LOG_LEVEL=INFO
+    depends_on:
+      - valkey
+      - oracle
+    restart: unless-stopped
+
+  # MockX Periscope - dashboard
+  periscope:
+    build:
+      context: ./packages/periscope
+      dockerfile: Dockerfile
+    container_name: mockx-periscope
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://engine:8000
+    depends_on:
+      - engine
+    restart: unless-stopped
+
+volumes:
+  valkey_data:

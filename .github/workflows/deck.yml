@@ -1,13 +1,13 @@
-name: deck
+name: periscope
 on:
   push:
-    paths: ['packages/deck/**']
+    paths: ['packages/periscope/**']
   pull_request:
-    paths: ['packages/deck/**']
+    paths: ['packages/periscope/**']
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v1
-      - run: cd packages/deck && uv pip install -e . || pip install -e . && pytest -q || true
+      - run: cd packages/periscope && uv pip install -e . || pip install -e . && pytest -q || true

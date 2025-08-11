@@ -1,13 +1,13 @@
-name: backend
+name: engine
 on:
   push:
-    paths: ['packages/backend/**']
+    paths: ['packages/engine/**']
   pull_request:
-    paths: ['packages/backend/**']
+    paths: ['packages/engine/**']
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v1
-      - run: cd packages/backend && uv pip install -e . || pip install -e . && pytest -q || true
+      - run: cd packages/engine && uv pip install -e . || pip install -e . && pytest -q || true
