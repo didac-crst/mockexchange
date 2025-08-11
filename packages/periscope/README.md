@@ -1,161 +1,118 @@
-# MockExchange Deck  
-*Streamlit front-end for the MockExchange paper-trading platform*
+# MockX Periscope
 
-> **Heads-up:** this repository only contains the **front-end**.  
-> The app requires a matching back-end — [**mockexchange-api**](https://github.com/didac-crst/mockexchange-api) — running locally or remotely.
+**MockX Periscope** is the web dashboard for the MockExchange suite, providing a real-time interface to monitor portfolios, orders, and trading activity.
 
----
+## Overview
 
-## ✨ Features  
+MockX Periscope provides:
 
-*   Real-time **portfolio dashboard** with equity value and asset allocation pie.  
-*   **Orders** table with status, execution price, fees and latency.  
-*   Automatic refresh every *REFRESH_SECONDS* (default 60 s).  
-*   Clean Streamlit UI that works on desktop and mobile.  
-*   One-click Docker deployment.
+- **Portfolio Dashboard** - Real-time balance overview and asset allocation
+- **Order Management** - View and track order status and execution
+- **Trade History** - Complete trading activity and performance metrics
+- **Real-time Updates** - Auto-refresh with configurable intervals
+- **Responsive Design** - Works on desktop and mobile devices
+- **Streamlit UI** - Modern, clean interface built with Streamlit
 
----
+## Quick Start
 
-## 🖼️ UI Screenshots 
+The Periscope dashboard is part of the full MockExchange stack. See the [main README](../../README.md) for complete setup instructions.
 
-![Portfolio dashboard](./docs/img/portfolio_page.png)
-
-![Orders page](./docs/img/orders_page.png)
-
----
-
-## 🚀 Quick start (local)
-
+### **Individual Service Management**
 ```bash
-# 1 · clone & enter
-git clone https://github.com/didac-crst/mockexchange-deck.git
-cd mockexchange-deck
+# Start just the dashboard (requires Engine)
+make start-periscope
 
-# 2 · create a Python 3.12 env  (skip if you use Docker)
-python -m venv .venv && source .venv/bin/activate
+# View dashboard logs
+make logs-periscope
 
-# 3 · install deps
-pip install --upgrade pip
-pip install poetry
-poetry install --no-root
+# Check dashboard status
+make status
+```
 
-# 4 · copy & edit environment
-cp .env.example .env
-#   └─ adjust API_URL, API_KEY, … to point to your running back-end
+### **Access the Dashboard**
+Once running, the dashboard is available at:
+- **Local**: http://localhost:8501
+- **Docker**: http://localhost:8501
 
-# 5 · run
+## Configuration
+
+The dashboard uses environment variables from the root `.env` file. Key variables include:
+
+| Variable          | Default                 | Description                  |
+| ----------------- | ----------------------- | ---------------------------- |
+| `PERISCOPE_PORT`  | `8501`                  | Dashboard port               |
+| `API_URL`         | `http://localhost:8000` | Engine API URL               |
+| `API_KEY`         | `dev-key`               | Authentication key           |
+| `REFRESH_SECONDS` | `60`                    | Auto-refresh interval        |
+| `QUOTE_ASSET`     | `USDT`                  | Portfolio valuation currency |
+| `APP_TITLE`       | `MockExchange`          | Dashboard title              |
+
+See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
+
+## Features
+
+### **Portfolio Page**
+- **Asset Balances** - Free, used, and total balances for each asset
+- **Portfolio Value** - Total value in quote currency (USDT)
+- **Asset Allocation** - Pie chart showing portfolio distribution
+- **Performance Metrics** - PnL and percentage changes
+
+### **Orders Page**
+- **Order List** - All orders with status, price, and execution details
+- **Filtering** - Filter by status, symbol, side, and time range
+- **Real-time Updates** - Live order status changes
+- **Order Details** - Click to view complete order information
+
+### **Performance Page**
+- **Trade Statistics** - Aggregated trading metrics
+- **Performance Charts** - Visual representation of trading activity
+- **Asset Performance** - Individual asset performance tracking
+
+## Architecture
+
+### **Frontend**
+- **Streamlit** - Web framework for data apps
+- **Plotly** - Interactive charts and visualizations
+- **Responsive Design** - Mobile-friendly interface
+
+### **Backend Integration**
+- **REST API** - Communicates with MockX Engine
+- **Real-time Updates** - Polling-based data refresh
+- **Authentication** - API key-based security
+
+## Development
+
+### **Local Development**
+```bash
+# Install dependencies
+poetry install
+
+# Run locally
 streamlit run app/main.py
 ```
 
-The UI will be available at <http://localhost:8501>.
+### **Adding New Pages**
+1. Create new module in `app/_pages/`
+2. Add navigation in `app/main.py`
+3. Implement API calls in `app/services/api.py`
 
----
+### **Customization**
+- **Styling** - Modify `app/_pages/_colors.py`
+- **Configuration** - Update `app/config.py`
+- **API Integration** - Extend `app/services/api.py`
 
-## 🐳 Quick start (Docker / docker-compose)
+## Screenshots
 
-```bash
-git clone https://github.com/didac-crst/mockexchange.git
-cd mockexchange
-make start                        # starts all services including periscope
-```
+![Portfolio Dashboard](./docs/img/portfolio_page.png)
+![Orders Page](./docs/img/orders_page.png)
 
-> The container uses **host network mode** so it can reach the back-end on  
-> `localhost:8000` by default. Adjust `.env` if your API runs elsewhere.
+## Dependencies
 
----
+- **Streamlit** - Web application framework
+- **Plotly** - Interactive visualizations
+- **Requests** - HTTP client for API calls
+- **Python-dotenv** - Environment variable management
 
-## 🛠️ Configuration
+## License
 
-| Variable                | Default                               | Purpose                                                        |
-| ----------------------- | ------------------------------------- | -------------------------------------------------------------- |
-| `API_URL`               | `http://localhost:8000`               | Base URL of the MockExchange API server                        |
-| `UI_URL`                | `http://mockexchange.your-domain.com` | Base URL used to generate links in the frontend                |
-| `APP_TITLE`             | `MockExchange`                        | Title shown in the Streamlit browser tab and header            |
-| `LOGO_FILE`             | `logo.png`                            | Name of the logo image to display in the sidebar               |
-| `API_KEY`               | `dev-key`                             | Bearer key sent as `x-api-key` header                          |
-| `REFRESH_SECONDS`       | `60`                                  | UI auto-refresh interval (seconds)                             |
-| `QUOTE_ASSET`           | `USDT`                                | Fiat or stablecoin used to value the portfolio                 |
-| `FRESH_WINDOW_S`        | `60`                                  | Time-window (seconds) for “fresh” row highlighting             |
-| `N_VISUAL_DEGRADATIONS` | `60`                                  | Number of fade-out levels for row highlighting                 |
-| `SLIDER_MIN`            | `25`                                  | Minimum “tail” slider value (earliest orders to fetch)         |
-| `SLIDER_MAX`            | `1000`                                | Maximum “tail” slider value                                    |
-| `SLIDER_STEP`           | `25`                                  | Step size for the “tail” slider                                |
-| `SLIDER_DEFAULT`        | `100`                                 | Default “tail” slider value                                    |
-| `LOCAL_TZ`              | `Europe/Berlin`                       | Timezone used to localize and display timestamps in local time |
-
-All variables live in **`.env`** (see `.env.example`).  
-They are loaded via *python-dotenv* inside `app/config.py`.
-
-### 🎨 Sidebar customization
-
-You can customize the sidebar’s appearance using two environment variables:
-
-| Variable    | Behavior                                                                                                                                                                               |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `APP_TITLE` | Optional title shown at the **top of the sidebar**. If unset or empty, no title is shown.                                                                                              |
-| `LOGO_FILE` | Filename of a logo image (e.g. `logo.png`) shown **above the sidebar title**. If unset, no image is shown. If set, the file **must exist** in the `misc/` folder at the **repo root**. |
-
-#### ⚠️ Important:
-- Create a `misc/` directory at the top level of the repo if it doesn’t exist:
-    ```bash
-    mkdir misc
-    ```
-- Save your logo image there, e.g. `misc/logo.png`.
-- Reference it in `.env` like so:
-    ```
-    LOGO_FILE=logo.png
-    ```
-- If `LOGO_FILE` is set but the file is missing or unreadable, an error will occur at runtime.
-
----
-
-## Repo layout (updated 2025-07)  
-
-```text
-mockexchange_deck/
-├── Dockerfile                   ← Streamlit + Poetry export 
-├── docker-compose.yml           ← Convenience wrapper (host‑network)
-├── README.md                    ← You’re here
-├── pyproject.toml               ← Poetry deps & build meta
-├── app/                         # Streamlit source code
-│   ├── __init__.py              
-│   ├── main.py                  # Entry‑point with sidebar navigation
-│   ├── config.py                # dotenv config accessor
-│   ├── services/                # API adapter layer
-│   │   ├── __init__.py
-│   │   ├── api.py
-│   │   └── model.py
-│   └── _pages/                  # Individual Streamlit pages
-│       ├── __init__.py
-│       ├── _helpers.py
-│       ├── orders.py
-│       └── portfolio.py
-├── docs/                        # Screenshots, diagrams, extra docs
-├── misc/                        ← !!! Folder to be created !!!
-└── LICENSE
-```
-
----
-
-## 🧑‍💻 Development tips  
-
-*   Hot-reload is handled by Streamlit; just save your code.  
-*   **Add pages** by creating new modules under `app/_pages/` and a radio  
-    button in the sidebar (`app/main.py`).  
-*   Keep *all* network requests inside `app/services/api.py` so pages stay  
-    UI-only.
-
----
-
-## 🙏 Acknowledgements  
-
-*   Built with **Streamlit**, **Plotly Express** and **Poetry**.  
-*   Inspired by Binance’s web dashboard, but 100 % mock / paper-trading.
-
----  
-
-## License 🪪  
-
-This project is released under the MIT License — see [`LICENSE`](LICENSE) for details.  
-
-> **Don’t risk real money.**  Spin up MockExchange, hammer it with tests, then hit the real markets only when your algos are solid.
+MIT License - see [LICENSE](LICENSE) for details.

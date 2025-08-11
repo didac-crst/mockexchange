@@ -1,85 +1,108 @@
-# MockX Oracle 🔮 <!-- omit in toc -->
+# MockX Oracle
 
-Price feed service for **MockExchange**.
-
-Fetches live market data from a configured exchange via [`ccxt`](https://github.com/ccxt/ccxt) and writes it into Valkey/Redis in the schema expected by the **MockX Engine**.
+**MockX Oracle** is the price feed service for the MockExchange suite, fetching live market data from exchanges and providing it to the trading engine.
 
 ---
 
-## 📑 Table of Contents <!-- omit in toc -->
-- [Usage](#usage)
-  - [1. Configure Environment](#1-configure-environment)
-  - [2. Run with Docker Compose](#2-run-with-docker-compose)
-- [Environment Variables](#environment-variables)
-- [Interface with MockExchange](#interface-with-mockexchange)
-- [🔗 See Also](#-see-also)
+## Overview
 
----
+The Oracle service:
 
-## Usage
+- **Fetches live prices** from exchanges via CCXT
+- **Writes to Valkey** in the format expected by the engine
+- **Supports multiple exchanges** (Binance, Coinbase, etc.)
+- **Configurable symbols** and update intervals
+- **Auto-discovery mode** for finding available markets
 
-### 1. Configure Environment
-Copy `.env.example` to `.env` and edit values to match your setup.
+## Quick Start
 
-### 2. Run with Docker Compose
+The Oracle is part of the full MockExchange stack. See the [main README](../../README.md) for complete setup instructions.
+
+### **Individual Service Management**
 ```bash
-docker compose up --build
-```
+# Start just the Oracle (requires Valkey)
+make start-oracle
 
-Or run Valkey separately with authentication:
-```bash
-docker run -d --name mockx-valkey \
-    -p 6379:6379 \
-    valkey/valkey \
-    --requirepass "SuperSecretPass"
+# View Oracle logs
+make logs-oracle
+
+# Check Oracle status
+make status
 ```
 
 ---
 
-## Environment Variables
+## Configuration
 
-| Variable          | Description                                                                   |
-| ----------------- | ----------------------------------------------------------------------------- |
-| `EXCHANGE`        | Exchange id for ccxt (e.g. `binance`)                                         |
-| `SYMBOLS`         | Comma-separated list of symbols (e.g. `BTC/USDT,ETH/USDT`)                    |
-| `DISCOVER_QUOTES` | Comma-separated list of quote assets for auto-discovery (e.g. `USDT,EUR,BTC`) |
-| `DISCOVER_LIMIT`  | Limit for discovered markets per quote asset (0 = unlimited)                  |
-| `DISCOVER_ENABLE` | Enable discovery mode (`true` / `false`)                                      |
-| `INTERVAL_SEC`    | Fetch interval in seconds                                                     |
-| `REDIS_HOST`      | Redis host (default: `127.0.0.1`)                                             |
-| `REDIS_PORT`      | Redis port (default: `6379`)                                                  |
-| `REDIS_DB`        | Redis database index (default: `0`)                                           |
-| `REDIS_PASSWORD`  | Redis password (leave empty if no password is set)                            |
-| `LOG_LEVEL`       | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`)                           |
+The Oracle uses environment variables from the root `.env` file. Key variables include:
 
-**Security tip:**  
-If Valkey is exposed outside localhost, set a strong password via `--requirepass` and provide it through `REDIS_PASSWORD`.
+| Variable          | Default             | Description                 |
+| ----------------- | ------------------- | --------------------------- |
+| `EXCHANGE`        | `binance`           | Exchange to fetch data from |
+| `SYMBOLS`         | `BTC/USDT,ETH/USDT` | Trading pairs to monitor    |
+| `INTERVAL_SEC`    | `10`                | Price update frequency      |
+| `DISCOVER_ENABLE` | `false`             | Enable auto-discovery mode  |
+| `DISCOVER_QUOTES` | `USDT,EUR`          | Quote assets for discovery  |
+| `DISCOVER_LIMIT`  | `10`                | Max markets per quote asset |
+
+See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
 
 ---
 
-## Interface with MockExchange
+## Data Format
 
-The **MockX Oracle** is a standalone service that:
+The Oracle writes ticker data to Valkey in the following format:
 
-1. Uses `ccxt` to fetch real-time price data from a configured exchange.
-2. Stores this data in Valkey under the key pattern:
-   ```
-   tickers:<symbol>
-   ```
-   with fields:
-   - `price` — last trade price  
-   - `timestamp` — exchange timestamp or local time if unavailable  
-   - `bid` — highest bid  
-   - `ask` — lowest ask  
-   - `bidVolume` — volume at best bid  
-   - `askVolume` — volume at best ask  
-   - `symbol` — symbol name (e.g. `BTC/USDT`)
-3. The **MockX Engine** reads from these keys when matching orders.
+### **Redis Key Structure**
+```
+tickers:{SYMBOL}
+```
 
-Without the Oracle (or another price feed writing in the same schema), the Engine cannot execute trades.
+### **Data Fields**
+| Field       | Type   | Description        | Example          |
+| ----------- | ------ | ------------------ | ---------------- |
+| `price`     | float  | Last traded price  | `50000.00`       |
+| `timestamp` | float  | Unix timestamp     | `1703123456.789` |
+| `bid`       | float  | Best bid price     | `49999.50`       |
+| `ask`       | float  | Best ask price     | `50000.50`       |
+| `bidVolume` | float  | Volume at best bid | `1.234`          |
+| `askVolume` | float  | Volume at best ask | `0.567`          |
+| `symbol`    | string | Trading pair       | `BTC/USDT`       |
+
+### **Example Redis Command**
+```bash
+HSET tickers:BTC/USDT price 50000.00 timestamp 1703123456.789 bid 49999.50 ask 50000.50
+```
 
 ---
 
-## 🔗 See Also
-- [Main MockExchange README](../README.md) — full architecture, story, and usage.
-- [CCXT Documentation](https://docs.ccxt.com/) — list of supported exchanges and methods.
+## Supported Exchanges
+
+The Oracle supports all exchanges available in [CCXT](https://docs.ccxt.com/), including:
+
+- **Binance** - Most popular crypto exchange
+- **Coinbase** - US-based exchange
+- **Kraken** - European exchange
+- **Bitfinex** - Professional trading
+- **And many more** - See [CCXT documentation](https://docs.ccxt.com/)
+
+## Integration
+
+The Oracle integrates with the MockExchange stack:
+
+1. **Fetches prices** from configured exchange
+2. **Writes to Valkey** using `tickers:{SYMBOL}` keys
+3. **Engine reads** prices for order matching
+4. **Dashboard displays** real-time data
+
+## Development
+
+### **Adding New Exchanges**
+Simply change the `EXCHANGE` environment variable to any CCXT-supported exchange.
+
+### **Custom Price Feeds**
+You can replace the Oracle with any service that writes to Valkey using the same `tickers:{SYMBOL}` format.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
