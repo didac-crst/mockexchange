@@ -1,5 +1,15 @@
 # MockExchange Suite <!-- omit in toc -->
 
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
+[![Poetry](https://img.shields.io/badge/poetry-managed-orange.svg)](https://python-poetry.org/)
+[![Tests](https://img.shields.io/badge/tests-passing-green.svg)](https://github.com/didac-crst/mockexchange)
+[![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/didac-crst/mockexchange)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-ef8336.svg)](https://pycqa.github.io/isort/)
+[![Linting: ruff](https://img.shields.io/badge/linting-ruff-red.svg)](https://github.com/astral-sh/ruff)
+
 **_Trade without fear, greed, or actual money — because every fake loss is a real step up._**
 
 This repository contains the full **MockExchange** paper-trading platform:
@@ -447,7 +457,7 @@ mockexchange/
 
 ## 🪪 License
 
-MIT License – see the licenses inside each package.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 > **Don’t risk real money.**  
 > Spin up MockExchange, hammer it with tests, then hit live markets only when your algos are solid.

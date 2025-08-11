@@ -185,6 +185,3 @@ Simply change the `EXCHANGE` environment variable to any CCXT-supported exchange
 ### **Custom Price Feeds**
 You can replace the Oracle with any service that writes to Valkey using the same `tickers:{SYMBOL}` format.
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.

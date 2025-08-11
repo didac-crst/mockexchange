@@ -168,6 +168,3 @@ poetry run mypy src/
 
 See the [order generator example](../../examples/order-generator/) for a complete trading simulation.
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.

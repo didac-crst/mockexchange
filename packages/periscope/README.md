@@ -114,6 +114,3 @@ streamlit run app/main.py
 - **Requests** - HTTP client for API calls
 - **Python-dotenv** - Environment variable management
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
