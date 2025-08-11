@@ -1,6 +1,6 @@
 """Unit tests for ticker processing functionality."""
 
-from oracle.main import normalize_ticker, normalize_timestamp
+from oracle.main import normalize_ticker, normalize_timestamp, is_valid_price
 
 
 class TestTickerProcessing:
@@ -111,3 +111,67 @@ class TestTickerProcessing:
 
         assert isinstance(result["timestamp"], float)
         assert result["timestamp"] > 0
+
+    def test_is_valid_price_positive(self):
+        """Test price validation with positive prices."""
+        assert is_valid_price(1.0) is True
+        assert is_valid_price(0.000001) is True
+        assert is_valid_price(1000000.0) is True
+
+    def test_is_valid_price_non_positive(self):
+        """Test price validation with non-positive prices."""
+        assert is_valid_price(0.0) is False
+        assert is_valid_price(-1.0) is False
+        assert is_valid_price(-0.000001) is False
+
+    def test_normalize_ticker_with_none_prices(self):
+        """Test normalizing ticker with None price values."""
+        ticker = {
+            "last": None,
+            "close": None,
+            "bid": None,
+            "ask": None,
+            "bidVolume": 10.0,
+            "askVolume": 5.0,
+            "timestamp": 1234567890.0,
+        }
+
+        result = normalize_ticker("BTC/USDT", ticker)
+
+        assert result["price"] == 0.0  # Should fallback to 0.0 when all prices are None
+        assert result["bid"] == 0.0
+        assert result["ask"] == 0.0
+
+    def test_normalize_ticker_mixed_none_prices(self):
+        """Test normalizing ticker with some None and some valid prices."""
+        ticker = {
+            "last": None,
+            "close": 50000.0,  # This should be used
+            "bid": 49900.0,
+            "ask": 50100.0,
+            "bidVolume": 10.0,
+            "askVolume": 5.0,
+            "timestamp": 1234567890.0,
+        }
+
+        result = normalize_ticker("BTC/USDT", ticker)
+
+        assert result["price"] == 50000.0  # Should use close price since last is None
+
+    def test_normalize_ticker_none_bid_ask(self):
+        """Test normalizing ticker with None bid/ask values."""
+        ticker = {
+            "last": None,
+            "close": None,
+            "bid": None,
+            "ask": None,
+            "bidVolume": 10.0,
+            "askVolume": 5.0,
+            "timestamp": 1234567890.0,
+        }
+
+        result = normalize_ticker("BTC/USDT", ticker)
+
+        assert result["price"] == 0.0  # Should fallback to 0.0 when no valid prices
+        assert result["bid"] == 0.0
+        assert result["ask"] == 0.0

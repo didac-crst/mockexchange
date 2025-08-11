@@ -10,6 +10,7 @@ The Oracle service:
 
 - **Fetches live prices** from exchanges via CCXT
 - **Writes to Valkey** in the format expected by the engine
+- **Validates prices** to ensure only positive prices are stored
 - **Supports multiple exchanges** (Binance, Coinbase, etc.)
 - **Configurable symbols** and update intervals
 - **Auto-discovery mode** for finding available markets
@@ -71,9 +72,38 @@ tickers:{SYMBOL}
 | `askVolume` | float  | Volume at best ask | `0.567`          |
 | `symbol`    | string | Trading pair       | `BTC/USDT`       |
 
+> **Note**: Only tickers with positive prices (`price > 0`) are written to Valkey. Tickers with zero or negative prices are skipped to maintain data quality.
+
 ### **Example Redis Command**
 ```bash
 HSET tickers:BTC/USDT price 50000.00 timestamp 1703123456.789 bid 49999.50 ask 50000.50
+```
+
+---
+
+## Price Validation
+
+The Oracle includes built-in price validation to ensure data quality:
+
+### **Validation Rules**
+- **Positive Prices Only**: Only tickers with `price > 0` are written to Valkey
+- **Skip Invalid Data**: Tickers with zero, negative, `None`, or missing prices are skipped
+- **Preserve Existing Data**: Skipped tickers don't affect existing data in Valkey
+- **Logging**: Skipped tickers are logged at DEBUG level for monitoring
+
+### **Price Fallback Logic**
+The Oracle uses the following fallback order for determining the price:
+1. `last` price (most recent trade)
+2. `close` price (previous close)
+3. Mid price: `(bid + ask) / 2` (if both bid and ask are available)
+4. `0.0` (if no price information is available)
+
+If the final price is `0.0`, negative, or `None`, the ticker is skipped.
+
+### **Example Log Output**
+```
+[INFO] Processed 100 tickers: 95 written, 5 skipped (non-positive prices)
+[DEBUG] Skipping INVALID/USDT: price is not positive (0.000000)
 ```
 
 ---

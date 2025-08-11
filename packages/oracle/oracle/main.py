@@ -174,13 +174,34 @@ def discover_symbols_for_quotes(
     return results
 
 
+def is_valid_price(price: float) -> bool:
+    """Check if the price is valid (positive)."""
+    return price > 0.0
+
+
 def write_tickers(
     r: "redis.Redis", root: str, items: Iterable[tuple[str, dict]]
 ) -> None:
     """Write a batch of (symbol, ticker_dict) pairs into Valkey under f'{root}{symbol}'."""
+    skipped_count = 0
+    written_count = 0
+    
     for sym, t in items:
         payload = normalize_ticker(sym, t)
-        r.hset(f"{root}{sym}", mapping=payload)
+        
+        # Check if price is positive before writing to valkey
+        if is_valid_price(payload["price"]):
+            r.hset(f"{root}{sym}", mapping=payload)
+            written_count += 1
+        else:
+            log.debug("Skipping %s: price is not positive (%.6f)", sym, payload["price"])
+            skipped_count += 1
+    
+    if skipped_count > 0:
+        log.info("Processed %d tickers: %d written, %d skipped (non-positive prices)", 
+                written_count + skipped_count, written_count, skipped_count)
+    else:
+        log.debug("Updated %d symbols", written_count)
 
 
 # --- Main loop ----------------------------------------------------------------
