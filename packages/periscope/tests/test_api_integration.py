@@ -2,107 +2,101 @@
 
 from unittest.mock import Mock, patch
 
-import httpx
 import pytest
-from app.services.api import get_balances, get_orders, get_tickers
+from app.services.api import get_balance, get_orders, get_prices
 
 
 class TestAPIIntegration:
     """Test API integration functionality."""
 
-    @patch("httpx.get")
-    def test_get_balances_success(self, mock_get):
+    @patch("app.services.api._get")
+    def test_get_balance_success(self, mock_get):
         """Test successful balance retrieval."""
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "BTC": {"free": 1.0, "used": 0.1, "total": 1.1},
-            "USDT": {"free": 50000.0, "used": 0.0, "total": 50000.0},
-        }
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
+        mock_get.return_value = [
+            {"asset": "BTC", "free": 1.0, "used": 0.1, "total": 1.1},
+            {"asset": "USDT", "free": 50000.0, "used": 0.0, "total": 50000.0},
+        ]
 
-        result = get_balances("http://localhost:8000")
+        result = get_balance()
 
-        assert "BTC" in result
-        assert "USDT" in result
-        assert result["BTC"]["free"] == 1.0
-        assert result["USDT"]["total"] == 50000.0
+        assert "equity" in result
+        assert "quote_asset" in result
+        assert "assets_df" in result
+        assert len(result["assets_df"]) == 2
 
-    @patch("httpx.get")
-    def test_get_balances_api_error(self, mock_get):
+    @patch("app.services.api._get")
+    def test_get_balance_api_error(self, mock_get):
         """Test balance retrieval with API error."""
-        mock_response = Mock()
-        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "404 Not Found", request=Mock(), response=Mock()
-        )
-        mock_get.return_value = mock_response
+        import requests
 
-        with pytest.raises(httpx.HTTPStatusError):
-            get_balances("http://localhost:8000")
+        mock_get.side_effect = requests.exceptions.HTTPError("404 Not Found")
 
-    @patch("httpx.get")
+        with pytest.raises(requests.exceptions.HTTPError):
+            get_balance()
+
+    @patch("app.services.api._get")
     def test_get_orders_success(self, mock_get):
         """Test successful orders retrieval."""
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "order_123": {
+        mock_get.return_value = [
+            {
                 "id": "order_123",
                 "symbol": "BTC/USDT",
-                "side": "BUY",
+                "side": "buy",
                 "amount": 1.0,
                 "price": 50000.0,
                 "status": "filled",
             }
-        }
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
+        ]
 
-        result = get_orders("http://localhost:8000")
+        result = get_orders()
 
-        assert "order_123" in result
-        assert result["order_123"]["symbol"] == "BTC/USDT"
-        assert result["order_123"]["side"] == "BUY"
+        assert len(result) == 1
+        assert result.iloc[0]["symbol"] == "BTC/USDT"
+        assert result.iloc[0]["side"] == "buy"
 
-    @patch("httpx.get")
-    def test_get_tickers_success(self, mock_get):
-        """Test successful tickers retrieval."""
-        mock_response = Mock()
-        mock_response.json.return_value = {
+    @patch("app.services.api._get")
+    def test_get_prices_success(self, mock_get):
+        """Test successful prices retrieval."""
+        mock_get.return_value = {
             "BTC/USDT": {
-                "price": 50000.0,
+                "symbol": "BTC/USDT",
+                "last": 50000.0,
                 "bid": 49900.0,
                 "ask": 50100.0,
                 "timestamp": 1234567890.0,
             },
             "ETH/USDT": {
-                "price": 3000.0,
+                "symbol": "ETH/USDT",
+                "last": 3000.0,
                 "bid": 2990.0,
                 "ask": 3010.0,
                 "timestamp": 1234567890.0,
             },
         }
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
 
-        result = get_tickers("http://localhost:8000")
+        result = get_prices(["BTC/USDT", "ETH/USDT"])
 
         assert "BTC/USDT" in result
         assert "ETH/USDT" in result
-        assert result["BTC/USDT"]["price"] == 50000.0
-        assert result["ETH/USDT"]["price"] == 3000.0
+        assert result["BTC/USDT"] == 50000.0
+        assert result["ETH/USDT"] == 3000.0
 
-    @patch("httpx.get")
+    @patch("app.services.api._get")
     def test_api_timeout(self, mock_get):
         """Test API timeout handling."""
-        mock_get.side_effect = httpx.TimeoutException("Request timed out")
+        import requests
 
-        with pytest.raises(httpx.TimeoutException):
-            get_balances("http://localhost:8000")
+        mock_get.side_effect = requests.exceptions.Timeout("Request timed out")
 
-    @patch("httpx.get")
+        with pytest.raises(requests.exceptions.Timeout):
+            get_balance()
+
+    @patch("app.services.api._get")
     def test_api_connection_error(self, mock_get):
         """Test API connection error handling."""
-        mock_get.side_effect = httpx.ConnectError("Connection failed")
+        import requests
 
-        with pytest.raises(httpx.ConnectError):
-            get_balances("http://localhost:8000")
+        mock_get.side_effect = requests.exceptions.ConnectionError("Connection failed")
+
+        with pytest.raises(requests.exceptions.ConnectionError):
+            get_balance()

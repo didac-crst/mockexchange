@@ -201,9 +201,9 @@ flowchart TB
 | Package             | Path                  | Description                                       | README                                           |
 | ------------------- | --------------------- | ------------------------------------------------- | ------------------------------------------------ |
 | **MockX Valkey**    | `packages/valkey/`    | Redis-compatible database for data persistence.   | [Valkey README](packages/valkey/README.md)       |
+| **MockX Oracle**    | `packages/oracle/`    | Market data feeder (ccxt → Valkey/Redis).         | [Oracle README](packages/oracle/README.md)       |
 | **MockX Engine**    | `packages/engine/`    | Core engine (core/), API layer (api/), CLI tools. | [Engine README](packages/engine/README.md)       |
 | **MockX Periscope** | `packages/periscope/` | Streamlit dashboard for portfolio and orders.     | [Periscope README](packages/periscope/README.md) |
-| **MockX Oracle**    | `packages/oracle/`    | Market data feeder (ccxt → Valkey/Redis).         | [Oracle README](packages/oracle/README.md)       |
 
 Related (external):
 - **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  

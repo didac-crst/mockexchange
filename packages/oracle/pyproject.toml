@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "MockX Oracle - Price feed service for MockExchange"
 authors = ["Didac <didac.crst@gmail.com>"]
 readme = "README.md"
+packages = [
+    {include = "oracle"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -26,10 +29,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
-    "--strict-config",
-    "--cov=oracle",
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov"
+    "--strict-config"
 ]
 
 [tool.black]

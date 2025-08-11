@@ -33,10 +33,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
-    "--strict-config",
-    "--cov=app",
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov"
+    "--strict-config"
 ]
 
 [build-system]

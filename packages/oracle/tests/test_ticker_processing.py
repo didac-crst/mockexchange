@@ -80,9 +80,9 @@ class TestTickerProcessing:
 
         result = normalize_ticker("BTC/USDT", ticker)
 
-        assert result["price"] is None
-        assert result["bid"] is None
-        assert result["ask"] is None
+        assert result["price"] == 0.0  # Changed from None to 0.0 to avoid Redis issues
+        assert result["bid"] == 0.0  # Changed from None to 0.0 to avoid Redis issues
+        assert result["ask"] == 0.0  # Changed from None to 0.0 to avoid Redis issues
 
     def test_normalize_ticker_missing_volumes(self):
         """Test normalizing ticker with missing volume data."""
