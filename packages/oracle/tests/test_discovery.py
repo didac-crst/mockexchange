@@ -1,7 +1,7 @@
 """Unit tests for Oracle discovery functionality."""
 
-import pytest
 from unittest.mock import Mock, patch
+
 from oracle.main import discover_symbols_for_quotes, parse_csv
 
 

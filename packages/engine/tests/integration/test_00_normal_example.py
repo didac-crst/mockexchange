@@ -25,10 +25,10 @@ import random
 from typing import Final
 
 from .helpers import (
-    reset_and_deposit,
-    place_order,
-    get_tickers,
     get_ticker_price,
+    get_tickers,
+    place_order,
+    reset_and_deposit,
 )
 
 # --------------------------------------------------------------------------- #

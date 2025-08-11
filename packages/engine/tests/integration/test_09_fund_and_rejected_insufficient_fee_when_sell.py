@@ -31,13 +31,13 @@ broken.
 # --------------------------------------------------------------------------- #
 # Imports & helpers
 # --------------------------------------------------------------------------- #
-from xmlrpc import client
+from math import isclose
+
 from .helpers import (
-    reset_and_deposit,
     deposit,
     get_ticker_price,
+    reset_and_deposit,
 )
-from math import isclose
 
 # --------------------------------------------------------------------------- #
 # Constants for the scenario

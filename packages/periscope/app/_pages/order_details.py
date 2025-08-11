@@ -16,20 +16,26 @@ Only comments & docstrings were added – runtime logic is unchanged.
 
 from __future__ import annotations
 
-# Standard library -------------------------------------------------------------
-from datetime import datetime, timezone
 import os
+
+# Standard library -------------------------------------------------------------
 from pathlib import Path
-import requests
 
 # Third‑party ------------------------------------------------------------------
 import pandas as pd
+import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-# First‑party ------------------------------------------------------------------
-from ._helpers import _format_significant_float, fmt_side_marker, update_page, convert_to_local_time
 from ._colors import _STATUS_LIGHT
+
+# First‑party ------------------------------------------------------------------
+from ._helpers import (
+    _format_significant_float,
+    convert_to_local_time,
+    fmt_side_marker,
+    update_page,
+)
 
 # -----------------------------------------------------------------------------
 # Configuration
@@ -40,6 +46,7 @@ API_BASE = os.getenv("API_BASE", "http://localhost:8000")  # REST back‑end
 # -----------------------------------------------------------------------------
 # Page renderer
 # -----------------------------------------------------------------------------
+
 
 def render(order_id: str) -> None:  # noqa: D401
     """Render the *Order Details* page for a given ``order_id``.
@@ -54,8 +61,12 @@ def render(order_id: str) -> None:  # noqa: D401
     # Formatting lambdas (local closures keep code below concise)
     # ------------------------------------------------------------------
     fmt = lambda v: _format_significant_float(v)  # noqa: E731
-    fmt_notion = lambda v: _format_significant_float(v, data.get('notion_currency'))  # noqa: E731
-    fmt_fee = lambda v: _format_significant_float(v, data.get('fee_currency'))  # noqa: E731
+    fmt_notion = lambda v: _format_significant_float(
+        v, data.get("notion_currency")
+    )  # noqa: E731
+    fmt_fee = lambda v: _format_significant_float(
+        v, data.get("fee_currency")
+    )  # noqa: E731
 
     # ------------------------------------------------------------------
     # Back navigation – remove "order_id" query param and rerun main page
@@ -81,7 +92,8 @@ def render(order_id: str) -> None:  # noqa: D401
     # In MockExchange errors come back as {"error": "..."} dict.
     if "error" in data:
         st.info(
-            "No history found for order ID " f"{order_id} – Probably it has been pruned."
+            "No history found for order ID "
+            f"{order_id} – Probably it has been pruned."
         )
         return
 
@@ -91,7 +103,7 @@ def render(order_id: str) -> None:  # noqa: D401
     ticker = data.get("symbol")
     asset = ticker.split("/")[0]
     side = data.get("side")
-    is_buy = (side == "buy")
+    is_buy = side == "buy"
     arrow_side = fmt_side_marker(side)  # format side with arrow
 
     _status = data.get("status")
@@ -108,14 +120,14 @@ def render(order_id: str) -> None:  # noqa: D401
 
     # Average execution price (None or 0 ⇢ blank)
     _price = data.get("price", 0)
-    price = (
-        fmt_notion(_price) if _price not in (None, 0) else None
-    )
+    price = fmt_notion(_price) if _price not in (None, 0) else None
 
     # Time‑stamps -------------------------------------------------------
     placed_ts = convert_to_local_time(data.get("ts_create"))
     updated_ts = convert_to_local_time(data.get("ts_update"))
-    executed_ts = convert_to_local_time(data.get("ts_finish")) if data.get("ts_finish") else None
+    executed_ts = (
+        convert_to_local_time(data.get("ts_finish")) if data.get("ts_finish") else None
+    )
 
     is_new = _status == "new"
     is_partial = "partially" in _status
@@ -193,7 +205,9 @@ def render(order_id: str) -> None:  # noqa: D401
             st.metric("Asset ▶ Remaining", fmt(remaining_amount))
 
     with col2:
-        actual_str = "Notional ▶ Actual paid" if is_buy else "Notional ▶ Actual received"
+        actual_str = (
+            "Notional ▶ Actual paid" if is_buy else "Notional ▶ Actual received"
+        )
         st.metric(actual_str, fmt_notion(actual_notion))
         if is_buy:
             st.metric("Notional ▶ Initial booked", fmt_notion(initial_notion))
@@ -244,6 +258,4 @@ def render(order_id: str) -> None:  # noqa: D401
 
     st.subheader("Order history")
     st.dataframe(df_hist, hide_index=True, use_container_width=True)
-    st.markdown(
-        "This table shows the step‑by‑step history of the order."
-    )
+    st.markdown("This table shows the step‑by‑step history of the order.")

@@ -1,4 +1,5 @@
 """Package init: sets global Streamlit config and shares constants."""
+
 from __future__ import annotations
 
 import streamlit as st

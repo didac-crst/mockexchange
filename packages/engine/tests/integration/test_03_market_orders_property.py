@@ -37,13 +37,15 @@ import random
 import time
 from math import isclose
 
+from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import strategies as st
+
 from .helpers import (
     assert_no_locked_funds,
     get_ticker_price,
     get_tickers,
     place_order,
 )
-from hypothesis import HealthCheck, assume, given, settings, strategies as st
 
 # ---------------------------------------------------------------------------
 # Test-tuning constants – tweak to trade-off coverage vs. runtime

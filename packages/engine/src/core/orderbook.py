@@ -5,21 +5,26 @@ Redis-backed order book with secondary indexes:
 * Set   : open:set        (ids)                        – every open order
 * Set   : open:{symbol}   (ids)                        – open orders per symbol
 """
+
 # orderbook.py
 from __future__ import annotations
 
-import redis
-from typing import Iterable, Union, Optional, TypeAlias
-from .constants import OPEN_STATUS, OrderState, OrderSide, OPEN_STATUS_STR
-from ._types import Order
+from collections.abc import Iterable
+from typing import TypeAlias
 
-StatusArg: TypeAlias = Union[str, OrderState]        # one element
-SideArg: TypeAlias = Union[str, OrderSide]        # one element
+import redis
+
+from ._types import Order
+from .constants import OPEN_STATUS, OPEN_STATUS_STR, OrderSide, OrderState
+
+StatusArg: TypeAlias = str | OrderState  # one element
+SideArg: TypeAlias = str | OrderSide  # one element
+
 
 class OrderBook:
-    HASH_KEY      = "orders"
-    OPEN_ALL_KEY  = "open:set"
-    OPEN_SYM_KEY  = "open:{sym}"        # .format(sym=symbol)
+    HASH_KEY = "orders"
+    OPEN_ALL_KEY = "open:set"
+    OPEN_SYM_KEY = "open:{sym}"  # .format(sym=symbol)
 
     def __init__(self, conn: redis.Redis) -> None:
         self.r = conn
@@ -27,9 +32,8 @@ class OrderBook:
     # ------------ internal helpers ------------------------------------ #
     def _index_add(self, order: Order) -> None:
         """Add id to the open indexes (only if order is OPEN)."""
-        is_open = (
-            order.status in OPEN_STATUS or
-            (isinstance(order.status, str) and order.status in OPEN_STATUS_STR)
+        is_open = order.status in OPEN_STATUS or (
+            isinstance(order.status, str) and order.status in OPEN_STATUS_STR
         )
         if not is_open:
             # If the order is not open, we don't need to index it.
@@ -53,7 +57,7 @@ class OrderBook:
     def update(self, order: Order) -> None:
         """Update an existing order."""
         self.r.hset(self.HASH_KEY, order.id, order.to_json(include_history=True))
-        
+
     def get(self, oid: str, *, include_history: bool = False) -> Order:
         blob = self.r.hget(self.HASH_KEY, oid)
         if blob is None:
@@ -64,11 +68,11 @@ class OrderBook:
     def list(
         self,
         *,
-        status: Optional[Union[StatusArg, Iterable[StatusArg]]] = None,
+        status: StatusArg | Iterable[StatusArg] | None = None,
         symbol: str | None = None,
-        side: Optional[SideArg] = None,
+        side: SideArg | None = None,
         tail: int | None = None,
-        include_history: bool = False
+        include_history: bool = False,
     ) -> list[Order]:
         """
         List orders by status, symbol, side, and limit the tail size.
@@ -82,23 +86,17 @@ class OrderBook:
             status = {status.value}
         elif isinstance(status, str):
             status = {status}
-        else:                     # iterable of str | OrderState
-            status = {
-                s.value if isinstance(s, OrderState) else s
-                for s in status
-            }
+        else:  # iterable of str | OrderState
+            status = {s.value if isinstance(s, OrderState) else s for s in status}
         # ── normalise `side` to a *set of raw-string values* ────────────────
         if side is None:
-            side_set = None                      # means “no filtering”
+            side_set = None  # means “no filtering”
         elif isinstance(side, OrderSide):
             side_set = {side.value}
         elif isinstance(side, str):
             side_set = {side}
-        else:                                    # iterable of str | OrderSide
-            side_set = {
-                s.value if isinstance(s, OrderSide) else s
-                for s in side
-            }
+        else:  # iterable of str | OrderSide
+            side_set = {s.value if isinstance(s, OrderSide) else s for s in side}
         # Only if all statuses are OPEN_STATUS, we can use the indexes
         if all(s in OPEN_STATUS_STR for s in status):
             # Use secondary indexes
@@ -108,28 +106,38 @@ class OrderBook:
                 ids = self.r.smembers(self.OPEN_ALL_KEY)
             if not ids:
                 return []
-            blobs = self.r.hmget(self.HASH_KEY, *ids)          # 1 round-trip
-            orders = [Order.from_json(b, include_history=include_history) for b in blobs if b]
+            blobs = self.r.hmget(self.HASH_KEY, *ids)  # 1 round-trip
+            orders = [
+                Order.from_json(b, include_history=include_history) for b in blobs if b
+            ]
         else:
             # Legacy full scan
             orders = [
                 Order.from_json(blob, include_history=include_history)
                 for _, blob in self.r.hscan_iter(self.HASH_KEY)
             ]
-            if symbol: # Already fulfilled by if status in OPEN_STATUS if symbol is not None
-                orders = [o for o in orders if o.symbol == symbol] # Symbol is a plain text
+            if (
+                symbol
+            ):  # Already fulfilled by if status in OPEN_STATUS if symbol is not None
+                orders = [
+                    o for o in orders if o.symbol == symbol
+                ]  # Symbol is a plain text
         # Filter for both cases
         # 1) side-filter
         if side_set is not None:
             orders = [
-                o for o in orders
-                if (o.side.value if isinstance(o.side, OrderSide) else o.side) in side_set
+                o
+                for o in orders
+                if (o.side.value if isinstance(o.side, OrderSide) else o.side)
+                in side_set
             ]
 
         # 2) status-filter
         orders = [
-            o for o in orders
-            if (o.status.value if isinstance(o.status, OrderState) else o.status) in status
+            o
+            for o in orders
+            if (o.status.value if isinstance(o.status, OrderState) else o.status)
+            in status
         ]
 
         # chronological order on update timestamp
@@ -142,12 +150,11 @@ class OrderBook:
     def remove(self, oid: str) -> None:
         """Erase an order from storage and all indexes. Idempotent."""
         blob = self.r.hget(self.HASH_KEY, oid)
-        if not blob:                       # already gone
+        if not blob:  # already gone
             return
         o = Order.from_json(blob)
-        is_open = (
-            o.status in OPEN_STATUS or
-            (isinstance(o.status, str) and o.status in OPEN_STATUS_STR)
+        is_open = o.status in OPEN_STATUS or (
+            isinstance(o.status, str) and o.status in OPEN_STATUS_STR
         )
         if is_open:
             self._index_rem(o)

@@ -1,7 +1,8 @@
 """Shared fixtures for engine tests."""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 
 @pytest.fixture

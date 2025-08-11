@@ -32,16 +32,17 @@ from __future__ import annotations
 import random
 import time
 from math import isclose
-from typing import Dict
+
+from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import strategies as st
 
 from .helpers import (
     assert_no_locked_funds,
     engine_latency,
     get_tickers,
-    place_order,
     patch_ticker_price,
+    place_order,
 )
-from hypothesis import HealthCheck, assume, given, settings, strategies as st
 
 # ---------------------------------------------------------------------------
 # Tunables – increase for more coverage, decrease for faster CI runs
@@ -130,7 +131,7 @@ def test_limit_order_round_trip_property(
     fake_price = 1_000_000.0
     notion_per_trade = free_cash / max(len(tickers), 1)
 
-    record_tx: Dict[str, Dict] = {}
+    record_tx: dict[str, dict] = {}
 
     # ------------------------------------------------------------------ #
     # 2) Place orders and immediately patch the price to trigger a match

@@ -1,6 +1,4 @@
 # tests/test_cli.py – ensure CLI dispatches to correct HTTP endpoints
-import json
-import sys
 from types import SimpleNamespace
 
 import httpx
@@ -49,7 +47,8 @@ class DummyClient(SimpleNamespace):
 def run_cli(monkeypatch, capsys, fake_client, argv):
     """Import the *cli* module fresh, patch the client, run main()."""
 
-    import importlib, sys as _sys
+    import importlib
+    import sys as _sys
 
     cli = importlib.import_module("mockexchange_api.cli")
     monkeypatch.setattr(cli, "client", fake_client, raising=True)

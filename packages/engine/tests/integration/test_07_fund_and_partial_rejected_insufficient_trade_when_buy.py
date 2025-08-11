@@ -31,10 +31,7 @@ The test follows these steps:
 # --------------------------------------------------------------------- #
 # Imports & helpers
 # --------------------------------------------------------------------- #
-import random
 import time
-
-import pytest
 
 from .helpers import (
     reset_and_deposit,
@@ -128,7 +125,7 @@ def test_insufficient_funds_rejection(client):
 
     balances = client.get("/balance").json()
     # Only USDT should exist in the portfolio
-    assert sorted(list(balances.keys())) == sorted([QUOTE, ASSET])
+    assert sorted(balances.keys()) == sorted([QUOTE, ASSET])
 
     # Locked USDT is back in `free`; nothing remains in `used`
     assert balances[QUOTE]["free"] < tampered["used"]

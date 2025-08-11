@@ -21,17 +21,22 @@ untouched**.
 from __future__ import annotations
 
 # Third‑party ------------------------------------------------------------------
-import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 # First‑party / project --------------------------------------------------------
 from app.services.api import get_balance
-from ._helpers import _display_portfolio_details, _format_significant_float, advanced_filter_toggle
+
+from ._helpers import (
+    _display_portfolio_details,
+    _format_significant_float,
+    advanced_filter_toggle,
+)
 
 # -----------------------------------------------------------------------------
 # Page renderer
 # -----------------------------------------------------------------------------
+
 
 def render() -> None:  # noqa: D401 – imperative mood is fine
     """Entry‑point for Streamlit – draw the **Portfolio** page.
@@ -54,8 +59,8 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     # 0) Boilerplate – page title & pull data
     # ------------------------------------------------------------------
     st.set_page_config(page_title="Portfolio")  # browser tab + sidebar label
-    st.title("Portfolio")                       # big header inside the page
-    params = st.query_params                    # returns a QueryParamsProxy
+    st.title("Portfolio")  # big header inside the page
+    # params = st.query_params  # returns a QueryParamsProxy - unused variable
 
     data = get_balance()  # dict: ``equity``, ``quote_asset``, ``assets_df``
 
@@ -101,7 +106,7 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     fig.update_layout(
         autosize=True,  # fill container width
         height=600,
-        margin=dict(t=40, b=40, l=40, r=40),
+        margin={"t": 40, "b": 40, "l": 40, "r": 40},
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -110,9 +115,11 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     # ------------------------------------------------------------------
     # Helper lambdas to keep formatting one‑liners tidy
     fmt_amt = lambda x: _format_significant_float(x)  # noqa: E731
-    fmt_price = lambda x: _format_significant_float(x, data['quote_asset'])  # noqa: E731
-    fmt_val = lambda x: _format_significant_float(x, data['quote_asset'])  # noqa: E731
-    fmt_pct = lambda x: f"{x*100:,.2f}%"                          # noqa: E731
+    fmt_price = lambda x: _format_significant_float(
+        x, data["quote_asset"]
+    )  # noqa: E731
+    fmt_val = lambda x: _format_significant_float(x, data["quote_asset"])  # noqa: E731
+    fmt_pct = lambda x: f"{x*100:,.2f}%"  # noqa: E731
 
     df_disp = df.copy()
     df_disp["free"] = df["free"].map(fmt_amt)
@@ -147,9 +154,7 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
             "quote_price": st.column_config.TextColumn(
                 f"Price ({data['quote_asset']})"
             ),
-            "value": st.column_config.TextColumn(
-                f"Value ({data['quote_asset']})"
-            ),
+            "value": st.column_config.TextColumn(f"Value ({data['quote_asset']})"),
             "share": st.column_config.TextColumn("Share (%)"),
         },
     )

@@ -24,7 +24,9 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from app.services.api import get_orders, get_trades_overview, get_overview_capital
+from app.services.api import get_orders, get_overview_capital, get_trades_overview
+
+from ._colors import _row_style
 from ._helpers import (
     _add_details_column,
     _display_trades_details,
@@ -33,7 +35,6 @@ from ._helpers import (
     convert_to_local_time,
     fmt_side_marker,
 )
-from ._colors import _row_style
 
 # -----------------------------------------------------------------------------
 # Configuration & constants
@@ -57,6 +58,7 @@ SLIDER_DEFAULT = int(os.getenv("SLIDER_DEFAULT", 100))
 # -----------------------------------------------------------------------------
 # Main page renderer – Streamlit entry‑point
 # -----------------------------------------------------------------------------
+
 
 def render() -> None:  # noqa: D401 – imperative mood is clearer here
     """Render the **Order Book** page.
@@ -95,13 +97,17 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
             "Fetch the whole order book", value=False, key="limit_toggle"
         )
         # ``tail=None`` signals the API client to drop the limit.
-        tail = None if limit_toggle else st.slider(
-            "Max number of last orders to load",
-            min_value=SLIDER_MIN,
-            max_value=SLIDER_MAX,
-            value=SLIDER_DEFAULT,
-            step=SLIDER_STEP,
-            key="tail_slider",
+        tail = (
+            None
+            if limit_toggle
+            else st.slider(
+                "Max number of last orders to load",
+                min_value=SLIDER_MIN,
+                max_value=SLIDER_MAX,
+                value=SLIDER_DEFAULT,
+                step=SLIDER_STEP,
+                key="tail_slider",
+            )
         )
 
     # ------------------------------------------------------------------
@@ -127,7 +133,9 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # 3) Display trade metrics (simple vs advanced)
     # ------------------------------------------------------------------
 
-    _display_trades_details(summary_capital, trades_summary, cash_asset, df_raw, advanced_display)
+    _display_trades_details(
+        summary_capital, trades_summary, cash_asset, df_raw, advanced_display
+    )
 
     # `df_copy` will be mutated for visual purposes; keep df_raw pristine.
     df_copy = df_raw.copy()
@@ -257,12 +265,17 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     ts_finish_num = pd.to_numeric(df["ts_finish"], errors="coerce")
 
     df["Exec. latency"] = (
-        (ts_finish_num - ts_create_num).div(1000).round(2).where(ts_finish_num.notna(), "")
+        (ts_finish_num - ts_create_num)
+        .div(1000)
+        .round(2)
+        .where(ts_finish_num.notna(), "")
     )
 
     # Human‑friendly quantity formatting (strip tiny rounding remainders)
     df["Req. Qty"] = df["amount"].map(lambda v: _format_significant_float(value=v))
-    df["Filled Qty"] = df["actual_filled"].apply(lambda v: _format_significant_float(value=v))
+    df["Filled Qty"] = df["actual_filled"].apply(
+        lambda v: _format_significant_float(value=v)
+    )
 
     # Append currency codes where applicable
     df["Limit price"] = df.apply(
@@ -276,15 +289,21 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Notional & fee prettifiers ------------------------------------------------
     df["Reserved notional"] = df.apply(
-        lambda r: _format_significant_float(value=r.reserved_notion_left, unity=r.notion_currency),
+        lambda r: _format_significant_float(
+            value=r.reserved_notion_left, unity=r.notion_currency
+        ),
         axis=1,
     )
     df["Actual notional"] = df.apply(
-        lambda r: _format_significant_float(value=r.actual_notion, unity=r.notion_currency),
+        lambda r: _format_significant_float(
+            value=r.actual_notion, unity=r.notion_currency
+        ),
         axis=1,
     )
     df["Reserved fee"] = df.apply(
-        lambda r: _format_significant_float(value=r.reserved_fee_left, unity=r.fee_currency),
+        lambda r: _format_significant_float(
+            value=r.reserved_fee_left, unity=r.fee_currency
+        ),
         axis=1,
     )
     df["Actual fee"] = df.apply(
@@ -295,7 +314,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # Normalise naming for the final view --------------------------------------
     df["Order ID"] = df["id"].astype(str)
     df["Exec. latency"] = df["Exec. latency"].apply(
-        lambda v: f"{v:,.2f} s" if isinstance(v, (int, float)) else ""
+        lambda v: f"{v:,.2f} s" if isinstance(v, int | float) else ""
     )
     df["Side"] = df["side"].map(fmt_side_marker)
     df["Type"] = df["type"].str.capitalize()
@@ -331,15 +350,11 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # ------------------------------------------------------------------
     # 6½) Style – row fading for recently updated orders
     # ------------------------------------------------------------------
-    styler = (
-        df_view.style
-        .format({"Details": lambda html: html}, escape="html")
-        .apply(
-            _row_style,
-            axis=1,
-            levels=N_VISUAL_DEGRADATIONS,
-            fresh_window_s=FRESH_WINDOW_S,
-        )
+    styler = df_view.style.format({"Details": lambda html: html}, escape="html").apply(
+        _row_style,
+        axis=1,
+        levels=N_VISUAL_DEGRADATIONS,
+        fresh_window_s=FRESH_WINDOW_S,
     )
 
     # ------------------------------------------------------------------
@@ -357,8 +372,8 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
             # render the URL as a clickable link
             "Details": st.column_config.LinkColumn(
                 label=" ",
-                display_text="🔍",    # fixed magnifier emoji
-                max_chars=1,          # don’t truncate your emoji!
+                display_text="🔍",  # fixed magnifier emoji
+                max_chars=1,  # don’t truncate your emoji!
                 help="View order details",
             ),
         },

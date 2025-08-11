@@ -1,8 +1,5 @@
 """Unit tests for ticker processing functionality."""
 
-import pytest
-import time
-from unittest.mock import Mock
 from oracle.main import normalize_ticker, normalize_timestamp
 
 

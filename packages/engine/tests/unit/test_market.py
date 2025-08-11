@@ -1,7 +1,7 @@
 """Unit tests for market module."""
 
-import pytest
 from unittest.mock import Mock, patch
+
 from core.market import Market
 
 

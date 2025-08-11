@@ -4,11 +4,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
 [![Poetry](https://img.shields.io/badge/poetry-managed-orange.svg)](https://python-poetry.org/)
-[![Tests](https://img.shields.io/badge/tests-passing-green.svg)](https://github.com/didac-crst/mockexchange)
+[![Tests](https://img.shields.io/badge/tests-available-green.svg)](https://github.com/didac-crst/mockexchange)
 [![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/didac-crst/mockexchange)
+[![Code Quality](https://img.shields.io/badge/code%20quality-maintained-blue.svg)](https://github.com/didac-crst/mockexchange)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-ef8336.svg)](https://pycqa.github.io/isort/)
 [![Linting: ruff](https://img.shields.io/badge/linting-ruff-red.svg)](https://github.com/astral-sh/ruff)
+[![Type checking: mypy](https://img.shields.io/badge/type%20checking-mypy-blue.svg)](https://mypy-lang.org/)
 
 **_Trade without fear, greed, or actual money — because every fake loss is a real step up._**
 

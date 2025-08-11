@@ -31,10 +31,7 @@ The test follows these steps:
 # --------------------------------------------------------------------- #
 # Imports & helpers
 # --------------------------------------------------------------------- #
-import random
 import time
-
-import pytest
 
 from .helpers import (
     reset_and_deposit,

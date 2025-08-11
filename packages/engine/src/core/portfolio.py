@@ -1,18 +1,21 @@
 """
 Balances live in *one* Valkey hash:  HSET balances <ASSET> <json>.
 """
+
 from __future__ import annotations
-from dataclasses import dataclass
+
 import json
+
 import redis
-from typing import Dict, Any
+
 from ._types import AssetBalance
+
 
 class Portfolio:
     """
     Thin CRUD wrapper over *one* Redis hash called ``balances``.
 
-    Keys   : asset symbol (BTC, USDT…)  
+    Keys   : asset symbol (BTC, USDT…)
     Values : compact JSON produced by :class:`AssetBalance.to_dict`
     """
 
@@ -34,13 +37,13 @@ class Portfolio:
             blob = self.conn.hget(self.key, asset)
             return self._load(blob) if blob else AssetBalance(asset)
         except redis.RedisError as e:
-            raise RuntimeError(f"Failed to get balance for {asset}: {e}")
+            raise RuntimeError(f"Failed to get balance for {asset}: {e}") from e
 
     def set(self, bal: AssetBalance) -> None:
         """Insert / overwrite a balance atomically (`HSET`)."""
         self.conn.hset(self.key, bal.asset, self._dump(bal))
 
-    def all(self) -> Dict[str, AssetBalance]:
+    def all(self) -> dict[str, AssetBalance]:
         """Return *all* balances as a dict keyed by asset."""
         return {a: self._load(b) for a, b in self.conn.hgetall(self.key).items()}
 

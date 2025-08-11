@@ -20,7 +20,7 @@ The helper utilities (`reset`, `reset_and_fund`, `edit_balance`) live in
 # ---------------------------------------------------------------------- #
 # Imports & helpers
 # ---------------------------------------------------------------------- #
-from .helpers import reset, edit_balance
+from .helpers import edit_balance, reset
 
 
 # ---------------------------------------------------------------------- #

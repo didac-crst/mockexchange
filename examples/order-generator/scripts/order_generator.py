@@ -6,18 +6,21 @@ All tunables are taken from environment variables (see .env.example).
 
 from __future__ import annotations
 
-import os, time, random, httpx
+import os
+import random
+import time
 from math import floor, log10
-from typing import Final
 from pathlib import Path
+
+import httpx
 
 # ---------- helpers from your own codebase ----------
 from helpers import (
-    reset_and_fund,
+    get_overview_balances,
+    get_ticker_price,
     get_tickers,
     place_order,
-    get_ticker_price,
-    get_overview_balances,
+    reset_and_fund,
 )
 
 # ────────────────────────────────────────────────────

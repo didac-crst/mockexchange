@@ -1,7 +1,8 @@
 """Registry of Streamlit pages so main.py can route dynamically."""
-from typing import Callable
 
-from . import orders, portfolio, performance
+from collections.abc import Callable
+
+from . import orders, performance, portfolio
 
 Page = Callable[[], None]
 

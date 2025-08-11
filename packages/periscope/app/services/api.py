@@ -14,11 +14,12 @@ Only docstrings and comments have been added – runtime logic is intact.
 
 from __future__ import annotations
 
+import pandas as pd
+
 # -----------------------------------------------------------------------------
 # Standard library & 3rd-party imports
 # -----------------------------------------------------------------------------
 import requests
-import pandas as pd
 
 # Project settings helper – returns a dict of env-based config values
 from app.config import settings
@@ -32,6 +33,7 @@ QUOTE = settings()["QUOTE_ASSET"]  # e.g. "USDT"
 # -----------------------------------------------------------------------------
 # Internal convenience helpers (prefixed with underscore)
 # -----------------------------------------------------------------------------
+
 
 def _get(path: str):  # noqa: D401 – short desc fine
     """Perform a **GET** request to *BASE + path* with auth header.
@@ -60,7 +62,9 @@ def _prices_for_assets(assets: list[str]) -> dict[str, float]:  # noqa: D401
     # Quote asset always maps to 1.0 so downstream math is simpler
     price_map.setdefault(QUOTE, 1.0)
 
-    price_asset_map = {symbol.split("/")[0]: value for symbol, value in price_map.items()}
+    price_asset_map = {
+        symbol.split("/")[0]: value for symbol, value in price_map.items()
+    }
 
     return price_asset_map
 
@@ -87,9 +91,11 @@ def _extract_assets(raw):  # noqa: D401 – helper, not user-facing
 
     raise ValueError("Unrecognised `/balance` payload shape")
 
+
 # -----------------------------------------------------------------------------
 # Public API helpers (called by Streamlit pages)
 # -----------------------------------------------------------------------------
+
 
 def get_overview_capital() -> dict:
     """Return a dict with the current capital summary.
@@ -104,13 +110,16 @@ def get_overview_capital() -> dict:
     res = _get("/overview/capital")
     if not isinstance(res, dict):
         raise TypeError(f"Expected dict from /overview/capital, got {type(res)}")
-    
+
     # Ensure all expected keys are present
     expected_keys = {"equity", "deposits", "withdrawals", "profit_loss"}
     if not expected_keys.issubset(res.keys()):
-        raise KeyError(f"Missing keys in /overview/capital response: {expected_keys - res.keys()}")
+        raise KeyError(
+            f"Missing keys in /overview/capital response: {expected_keys - res.keys()}"
+        )
 
-    return res    
+    return res
+
 
 def get_prices(tickers: list[str]) -> dict[str, float]:
     """Return a mapping of ``{ticker: last_price_in_quote}``.
@@ -147,6 +156,7 @@ def get_prices(tickers: list[str]) -> dict[str, float]:
         raise TypeError(f"Unexpected ticker payload type: {type(res)}")
 
     return price_map
+
 
 def get_balance() -> dict:
     """Fetch `/balance` and return a structured dict
@@ -223,6 +233,7 @@ def get_orders(status: str | None = None, tail: int = 50) -> pd.DataFrame:
     rows = _get(path)  # returns list[dict]
     return pd.DataFrame(rows)
 
+
 def get_trades_overview() -> tuple[dict, str]:
     """Return the dict payload from `/overview/trades` with basic validation.
     raw  – JSON you pasted above (already loaded to a dict)
@@ -239,7 +250,7 @@ def get_trades_overview() -> tuple[dict, str]:
     raw = _get("/overview/trades")
     if not isinstance(raw, dict):
         raise TypeError(f"Expected dict from /overview/trades, got {type(raw)}")
-    
+
     # helper that finds out all the assets in the trades
     def _find_assets_in_trades(raw: dict) -> set[str]:
         assets = set()
@@ -252,7 +263,7 @@ def get_trades_overview() -> tuple[dict, str]:
     assets_in_trades = [base for base in _find_assets_in_trades(raw) if base != QUOTE]
     # Here we are passing only the asset name and not the full pair like "BTC/USDT"
     # In sum_metric we will only need the base asset name, not the quote.
-    last_prices = _prices_for_assets(assets_in_trades) # noqa: D401
+    last_prices = _prices_for_assets(assets_in_trades)  # noqa: D401
 
     # helper that digs into one metric (count/amount/notional/fee)
     def _sum_metric(side_block: dict, metric: str, last_prices: dict) -> float:
@@ -272,7 +283,7 @@ def get_trades_overview() -> tuple[dict, str]:
                         continue
                     total += float(val) * last_price
                 else:
-                   total += float(val)
+                    total += float(val)
         return total, is_missing_price
 
     sides = ("BUY", "SELL")
@@ -283,7 +294,9 @@ def get_trades_overview() -> tuple[dict, str]:
         if not block:
             continue
         out[s]["count"], _ = _sum_metric(block, "count", last_prices)
-        out[s]["amount_value"], out[s]["amount_value_incomplete"] = _sum_metric(block, "amount", last_prices)
+        out[s]["amount_value"], out[s]["amount_value_incomplete"] = _sum_metric(
+            block, "amount", last_prices
+        )
         out[s]["notional"], _ = _sum_metric(block, "notional", last_prices)
         out[s]["fee"], _ = _sum_metric(block, "fee", last_prices)
 
@@ -293,7 +306,6 @@ def get_trades_overview() -> tuple[dict, str]:
         for k in ("count", "amount_value", "notional", "fee")
     }
     out["TOTAL"]["amount_value_incomplete"] = bool(
-        out["BUY"]["amount_value_incomplete"] or
-        out["SELL"]["amount_value_incomplete"]
+        out["BUY"]["amount_value_incomplete"] or out["SELL"]["amount_value_incomplete"]
     )
     return out, QUOTE

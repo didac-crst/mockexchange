@@ -72,23 +72,28 @@ Implementation notes
 from __future__ import annotations
 
 # Standard library imports
-import asyncio, os, time, redis, socket
+import asyncio
 import contextlib
+import os
+import socket
+import time
 from contextlib import asynccontextmanager
 from datetime import timedelta
-from typing import List, Literal
 from pathlib import Path
+from typing import Literal
+
+import redis
+from core.constants import ALL_SIDES_STR, ALL_STATUS_STR, ALL_TYPES_STR
+from core.engine_actors import start_engine  # NEW import
+from core.logging_config import logger
 from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from pydantic import BaseModel, Field
+from pykka import Future
 
 # load environment from your project’s .env
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-from pykka import Future
-from fastapi import FastAPI, HTTPException, Query, Depends, Header
-from pydantic import BaseModel, Field
-from core.engine_actors import start_engine  # NEW import
-from core.logging_config import logger
-from core.constants import ALL_STATUS_STR, ALL_SIDES_STR, ALL_TYPES_STR
 
 _ALL_STATUS = Literal[*ALL_STATUS_STR]  # type alias for all order statuses
 _TRADING_SIDES = Literal[*ALL_SIDES_STR]  # type alias for all trading sides
@@ -237,7 +242,7 @@ def deposit_asset(req: FundReq, asset: str = CASH_ASSET):
         return _g(ENGINE.deposit_asset(asset, req.amount))
     except ValueError as e:
         # Turn any ValueError into a 400 Bad Request
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/balance/{asset}/withdrawal", tags=["Portfolio"], dependencies=prod_depends)
@@ -246,7 +251,7 @@ def withdraw_asset(req: FundReq, asset: str = CASH_ASSET):
         return _g(ENGINE.withdrawal_asset(asset, req.amount))
     except ValueError as e:
         # Turn any ValueError into a 400 Bad Request
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 # orders ----------------------------------------------------------------- #

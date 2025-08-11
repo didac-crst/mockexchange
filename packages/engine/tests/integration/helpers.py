@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import time
-from typing import Any, Dict, List
-from httpx import Client
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any
+
+from httpx import Client
 
 # ───────────────────────── helpers ───────────────────────── #
 
@@ -56,7 +58,7 @@ def patch_ticker_price(client: Client, symbol: str, price: float) -> None:
     ).raise_for_status()
 
 
-def place_order(client: Client, payload: Dict[str, Any]) -> Dict[str, Any]:
+def place_order(client: Client, payload: dict[str, Any]) -> dict[str, Any]:
     """Place a single order and return the response."""
     resp = client.post("/orders", json=payload)
     resp.raise_for_status()
@@ -83,19 +85,19 @@ def cancel_order(client: Client, order_id: str) -> None:
 
 
 def place_orders_parallel(
-    client: Client, payloads: List[Dict[str, Any]]
-) -> List[Dict[str, Any]]:
+    client: Client, payloads: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """
     Fire POST /orders for every payload concurrently (one thread each).
     Returns the list of order-JSONs in the *same order* as `payloads`.
     """
 
-    def _send(body: Dict[str, Any]) -> Dict[str, Any]:
+    def _send(body: dict[str, Any]) -> dict[str, Any]:
         r = client.post("/orders", json=body)
         r.raise_for_status()
         return r.json()
 
-    results: Dict[int, Dict[str, Any]] = {}
+    results: dict[int, dict[str, Any]] = {}
     with ThreadPoolExecutor(max_workers=len(payloads)) as pool:
         futures = {pool.submit(_send, body): idx for idx, body in enumerate(payloads)}
         for fut in as_completed(futures):

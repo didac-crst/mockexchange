@@ -3,10 +3,11 @@ Read-only ticker feed (Valkey hashes `tickers:<SYMBOL>`).
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import Any, Dict
-import redis
+
 import time
+from dataclasses import dataclass
+
+import redis
 
 from ._types import TradingPair
 from .logging_config import logger

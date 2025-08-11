@@ -1,9 +1,19 @@
 # __init__.py
-from importlib.metadata import version, PackageNotFoundError
-from .logging_config import logger
+from importlib.metadata import PackageNotFoundError, version
+
 from ._types import AssetBalance, Order
-from .engine_actors import start_engine, ExchangeEngineActor  # <-- required
-from .constants import OrderSide, OrderType, OrderState, OPEN_STATUS_STR, CLOSED_STATUS_STR, ALL_STATUS_STR, ALL_SIDES_STR, ALL_TYPES_STR
+from .constants import (
+    ALL_SIDES_STR,
+    ALL_STATUS_STR,
+    ALL_TYPES_STR,
+    CLOSED_STATUS_STR,
+    OPEN_STATUS_STR,
+    OrderSide,
+    OrderState,
+    OrderType,
+)
+from .engine_actors import ExchangeEngineActor, start_engine  # <-- required
+from .logging_config import logger
 
 try:
     __version__ = version("mockexchange")

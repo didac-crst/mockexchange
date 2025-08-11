@@ -1,9 +1,11 @@
 """Shared fixtures for all test modules."""
 
 from __future__ import annotations
-import os, httpx
+
+import os
+
+import httpx
 from dotenv import load_dotenv
-from helpers import reset_and_fund
 
 load_dotenv()  # load .env → os.environ
 

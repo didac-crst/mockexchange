@@ -23,15 +23,14 @@ from __future__ import annotations
 # Standard library
 # -----------------------------------------------------------------------------
 import time
-from typing import Tuple, Dict, List
-from datetime import datetime, timezone
+from datetime import datetime
 
 # Third-party
 import pandas as pd
 
 from ._helpers import (
-                TS_FMT,
-                LOCAL_TZ,
+    LOCAL_TZ,
+    TS_FMT,
 )
 
 # -----------------------------------------------------------------------------
@@ -68,6 +67,7 @@ _BG0: dict[str, str] = {
 # Helper functions (internal)
 # -----------------------------------------------------------------------------
 
+
 def _color_interp(c0: str, t: float) -> str:  # noqa: D401 – short desc ok
     """Return a **darkened** version of *c0* by blending with black.
 
@@ -103,7 +103,9 @@ def contrast_text_color(bg_hex: str) -> str:  # noqa: D401
     return "#000000" if yiq >= 128 else "#ffffff"
 
 
-def _create_color_rows_degradation(levels: int = 3) -> Tuple[Dict[int, dict], Dict[int, dict]]:
+def _create_color_rows_degradation(
+    levels: int = 3,
+) -> tuple[dict[int, dict], dict[int, dict]]:
     """Generate *levels* fade steps for background & foreground palettes.
 
     ``levels`` must be ≥ 2.
@@ -118,7 +120,7 @@ def _create_color_rows_degradation(levels: int = 3) -> Tuple[Dict[int, dict], Di
         raise ValueError("`N_VISUAL_DEGRADATIONS` must be at least 2")
 
     # Background palettes ------------------------------------------------
-    bg: Dict[int, dict[str, str]] = {0: _BG0}
+    bg: dict[int, dict[str, str]] = {0: _BG0}
     for j in range(1, levels):
         if j == levels - 1:
             # last bucket = solid black (fully faded)
@@ -128,14 +130,17 @@ def _create_color_rows_degradation(levels: int = 3) -> Tuple[Dict[int, dict], Di
             bg[j] = {k: _color_interp(c, fade) for k, c in _BG0.items()}
 
     # Foreground palettes -------------------------------------------------
-    fg: Dict[int, dict[str, str]] = {
-        lvl: {k: contrast_text_color(c) for k, c in pal.items()} for lvl, pal in bg.items()
+    fg: dict[int, dict[str, str]] = {
+        lvl: {k: contrast_text_color(c) for k, c in pal.items()}
+        for lvl, pal in bg.items()
     }
     return bg, fg
+
 
 # -----------------------------------------------------------------------------
 # Main styling hook used by dataframe.style.apply
 # -----------------------------------------------------------------------------
+
 
 def _row_style(
     row: pd.Series,
@@ -197,6 +202,7 @@ def _row_style(
     fg = fg_maps[bucket].get(status_key, contrast_text_color(bg))
     style = f"background-color:{bg};color:{fg}"
     return [style] * len(row)
+
 
 # def _row_style(
 #     row: pd.Series,

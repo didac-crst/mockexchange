@@ -1,8 +1,13 @@
 """Shared fixtures for all test modules."""
 
 from __future__ import annotations
-import os, pytest, httpx
+
+import os
+
+import httpx
+import pytest
 from dotenv import load_dotenv
+
 from .helpers import reset_and_deposit
 
 load_dotenv()  # load .env → os.environ

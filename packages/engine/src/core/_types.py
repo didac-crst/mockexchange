@@ -2,17 +2,18 @@
 Shared tiny enums / dataclasses used across the package.
 Keeps circular-import headaches away from the business logic.
 """
+
 # _types.py
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
-from dataclasses import fields as dataclass_fields
-from typing import Any, Dict, Optional
-import time
 import json
+import time
+from dataclasses import asdict, dataclass, field
+from dataclasses import fields as dataclass_fields
+from typing import Any
 
-from .constants import CLOSED_STATUS, OrderSide, OrderType, OrderState
-from .logging_config import logger
+from .constants import CLOSED_STATUS, OrderSide, OrderState, OrderType
+
 
 # ─── Data classes ────────────────────────────────────────────────────────
 @dataclass
@@ -20,7 +21,7 @@ class AssetBalance:
     """
     One row inside the portfolio hash.
 
-    *Why not store ``total``?*  
+    *Why not store ``total``?*
     It’s always `free + used`, so we compute it on the fly.
     """
 
@@ -34,7 +35,7 @@ class AssetBalance:
         return self.free + self.used
 
     # (De)serialise ------------------------------------------------------
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "asset": self.asset,
             "free": self.free,
@@ -43,12 +44,13 @@ class AssetBalance:
         }
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "AssetBalance":
+    def from_dict(cls, d: dict[str, Any]) -> AssetBalance:
         return cls(
             asset=d["asset"],
             free=float(d.get("free", 0.0)),
             used=float(d.get("used", 0.0)),
         )
+
 
 @dataclass
 class TradingPair:
@@ -57,12 +59,12 @@ class TradingPair:
 
     Fields
     ------
-    symbol: trading pair symbol (e.g., "BTC/USDT")  
-    price: current price of the trading pair  
-    timestamp: timestamp of the last update (in seconds since epoch)  
-    bid: current highest bid price  
-    ask: current lowest ask price  
-    bid_volume: volume at the current highest bid price  
+    symbol: trading pair symbol (e.g., "BTC/USDT")
+    price: current price of the trading pair
+    timestamp: timestamp of the last update (in seconds since epoch)
+    bid: current highest bid price
+    ask: current lowest ask price
+    bid_volume: volume at the current highest bid price
     ask_volume: volume at the current lowest ask price
     """
 
@@ -76,7 +78,7 @@ class TradingPair:
     info: str = None
 
     # (De)serialise ------------------------------------------------------
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "symbol": self.symbol,
             "price": self.price,
@@ -88,7 +90,7 @@ class TradingPair:
         }
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "TradingPair":
+    def from_dict(cls, d: dict[str, Any]) -> TradingPair:
         return cls(
             symbol=d["symbol"],
             price=float(d["price"]),
@@ -98,9 +100,10 @@ class TradingPair:
             bid_volume=float(d["bid_volume"]),
             ask_volume=float(d["ask_volume"]),
         )
-    
+
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), separators=(",", ":"))
+
 
 @dataclass
 class OrderHistory:
@@ -109,7 +112,7 @@ class OrderHistory:
 
     Fields
     ------
-    ts        millis when the history entry was created  
+    ts        millis when the history entry was created
     status    order status (e.g., filled, canceled, etc.)
     price     execution price (None for market orders)
     amount_remain    amount remaining to be filled
@@ -123,14 +126,15 @@ class OrderHistory:
 
     ts: int
     status: str
-    price: Optional[float] = None
-    amount_remain: Optional[float] = None
-    actual_filled: Optional[float] = None 
-    actual_notion: Optional[float] = None
-    actual_fee: Optional[float] = None
-    reserved_notion_left: Optional[float] = None
-    reserved_fee_left: Optional[float] = None
-    comment: Optional[str] = None
+    price: float | None = None
+    amount_remain: float | None = None
+    actual_filled: float | None = None
+    actual_notion: float | None = None
+    actual_fee: float | None = None
+    reserved_notion_left: float | None = None
+    reserved_fee_left: float | None = None
+    comment: str | None = None
+
 
 @dataclass
 class Order:
@@ -139,10 +143,10 @@ class Order:
 
     Fields
     ------
-    id            unique, URL-safe token  
+    id            unique, URL-safe token
     symbol        trading pair (e.g., "BTC/USDT")
-    side          ``buy`` / ``sell``  
-    type          ``market`` / ``limit``  
+    side          ``buy`` / ``sell``
+    type          ``market`` / ``limit``
     amount        order size in base currency
     status        ``new`` / ``filled`` / ``canceled`` / ``expired`` / ``rejected`` / ``partially_filled`` / ``partially_canceled`` / ``partially_expired`` / ``partially_rejected``
     price         actual execution price (set at fill time)
@@ -157,7 +161,7 @@ class Order:
     fee_rate      fee rate (e.g. 0.001 for 0.1%)
     notion_currency  quote currency used for value (e.g. USDT)
     fee_currency     currency in which the fee is charged
-    ts_create       millis when the order was *created*  
+    ts_create       millis when the order was *created*
     ts_update       millis when the order was last *updated*
     ts_finish       millis when it can't be further updated (e.g. filled, canceled...)
     history         transaction history of every order update
@@ -179,8 +183,8 @@ class Order:
     fee_rate: float
     # Runtime-mutable fields
     actual_filled: float = 0.0  # until filled
-    price: Optional[float] = None
-    limit_price: Optional[float] = None  # None for market orders
+    price: float | None = None
+    limit_price: float | None = None  # None for market orders
     status: OrderState = OrderState.NEW
     initial_booked_notion: float = 0.0
     reserved_notion_left: float = 0.0  # until filled
@@ -190,10 +194,10 @@ class Order:
     actual_fee: float = 0.0  #  until filled
     ts_create: int = field(default_factory=lambda: int(time.time() * 1000))
     ts_update: int = field(default_factory=lambda: int(time.time() * 1000))
-    ts_finish: Optional[int] = None  # updated when status→closed
-    comment: Optional[str] = None  # optional comment for the order
+    ts_finish: int | None = None  # updated when status→closed
+    comment: str | None = None  # optional comment for the order
     # History management
-    history: Dict[int, OrderHistory] = field(default_factory=dict)
+    history: dict[int, OrderHistory] = field(default_factory=dict)
     history_count: int = 0  # next free index (not last!)
     _seed_history: bool = True
 
@@ -216,8 +220,8 @@ class Order:
         """Return a plain dict representation. Optionally strip history to keep payloads small."""
         d = asdict(self)
         # enums -> their raw value so json.dumps works
-        d["side"]   = self.side.value
-        d["type"]   = self.type.value
+        d["side"] = self.side.value
+        d["type"] = self.type.value
         d["status"] = self.status.value
         if not include_history:
             d.pop("history", None)
@@ -229,7 +233,7 @@ class Order:
         return json.dumps(d, separators=(",", ":"))
 
     @classmethod
-    def from_json(cls, blob: str, *, include_history: bool = False) -> "Order":
+    def from_json(cls, blob: str, *, include_history: bool = False) -> Order:
         data = json.loads(blob)
         # normalise string literals back to Enum instances
         if isinstance(data.get("side"), str):
@@ -243,7 +247,9 @@ class Order:
             raw_hist = data.get("history", {}) or {}
             hist: dict[int, OrderHistory] = {}
             # rebuild contiguous indices 0..N-1 to avoid gaps
-            for i, (_, v) in enumerate(sorted(((int(k), v) for k, v in raw_hist.items()), key=lambda x: x[0])):
+            for i, (_, v) in enumerate(
+                sorted(((int(k), v) for k, v in raw_hist.items()), key=lambda x: x[0])
+            ):
                 hist[i] = OrderHistory(**v)
             data["history"] = hist
             data["history_count"] = len(hist)
@@ -264,17 +270,19 @@ class Order:
         return cls(**data)
 
     # History management ---------------------------------------------
-    def add_history(self,
-                    ts: int,
-                    status: str,
-                    price: Optional[float] = None,
-                    amount_remain: Optional[float] = None,
-                    actual_filled: Optional[float] = None,
-                    reserved_notion_left: Optional[float] = None,
-                    actual_notion: Optional[float] = None,
-                    reserved_fee_left: Optional[float] = None,
-                    actual_fee: Optional[float] = None,
-                    comment: Optional[str] = None) -> None:
+    def add_history(
+        self,
+        ts: int,
+        status: str,
+        price: float | None = None,
+        amount_remain: float | None = None,
+        actual_filled: float | None = None,
+        reserved_notion_left: float | None = None,
+        actual_notion: float | None = None,
+        reserved_fee_left: float | None = None,
+        actual_fee: float | None = None,
+        comment: str | None = None,
+    ) -> None:
         """Add a new history entry."""
         history = OrderHistory(
             ts=ts,
@@ -286,7 +294,7 @@ class Order:
             actual_fee=actual_fee,
             reserved_notion_left=reserved_notion_left,
             reserved_fee_left=reserved_fee_left,
-            comment=comment
+            comment=comment,
         )
         idx = self.history_count
         self.history[idx] = history
@@ -304,7 +312,7 @@ class Order:
             # (i.e., the amount that can still be sold)
             # This is the difference between the total amount and what has been filled
             return max(self.amount - self.actual_filled, 0.0)
-    
+
     @property
     def residual_quote(self) -> float:
         """What’s still reserved in quote currency (USDT) that must be released."""
@@ -315,7 +323,9 @@ class Order:
             # For buy orders, the residual quote is the sum of reserved notion and fee
             # This is the total value that was reserved for the order but not yet filled
             # It includes both the notion value and the fee that was reserved
-            return max(self.reserved_notion_left, 0.0) + max(self.reserved_fee_left, 0.0)
+            return max(self.reserved_notion_left, 0.0) + max(
+                self.reserved_fee_left, 0.0
+            )
         else:
             # For sell orders, the residual quote is the fee that was reserved
             # This is the fee that was reserved for the order but not yet paid
@@ -332,12 +342,12 @@ class Order:
         return max(self.amount - self.actual_filled, 0.0)
 
     @property
-    def last_history(self) -> Optional[OrderHistory]:
+    def last_history(self) -> OrderHistory | None:
         """Get the last history entry."""
         if self.history and self.history_count >= 0:
-            return self.history.get(self.history_count -1)
+            return self.history.get(self.history_count - 1)
         return None
-    
+
     def public_payload(self) -> dict:
         d = self.to_dict(include_history=False)
         return d

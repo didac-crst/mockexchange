@@ -21,12 +21,19 @@ from __future__ import annotations
 # Third-party imports
 # -----------------------------------------------------------------------------
 import os
+from datetime import UTC, datetime  #  ← add datetime import
 from pathlib import Path
-from dotenv import load_dotenv
-from datetime import datetime, timezone  #  ← add datetime import
 
 import streamlit as st
+from dotenv import load_dotenv
 from streamlit_autorefresh import st_autorefresh
+
+# -----------------------------------------------------------------------------
+# Local imports (after Streamlit initialisation)
+# -----------------------------------------------------------------------------
+from app._pages import order_details, orders, performance, portfolio
+from app._pages._helpers import TS_FMT, convert_to_local_time, update_page
+from app.config import settings
 
 # -----------------------------------------------------------------------------
 # Configuration
@@ -46,13 +53,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
-# -----------------------------------------------------------------------------
-# Local imports (after Streamlit initialisation)
-# -----------------------------------------------------------------------------
-from app.config import settings
-from app._pages import portfolio, orders, performance, order_details
-from app._pages._helpers import update_page, TS_FMT, convert_to_local_time
 
 # -----------------------------------------------------------------------------
 # 1) Sidebar – navigation radio
@@ -104,9 +104,9 @@ st.sidebar.markdown("---")
 # ────────────────────────────────────────────────────────────────
 # UTC clock (updates on every autorefresh)
 # ────────────────────────────────────────────────────────────────
-utc_now = datetime.now(timezone.utc).strftime(TS_FMT)
+utc_now = datetime.now(UTC).strftime(TS_FMT)
 # Put it wherever you like: sidebar, main body, or page footer
-local_time = convert_to_local_time(datetime.now(timezone.utc), TS_FMT)
+local_time = convert_to_local_time(datetime.now(UTC), TS_FMT)
 st.sidebar.metric(
     label="🕒 Last refresh:",
     value=local_time,

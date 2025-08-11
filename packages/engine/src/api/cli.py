@@ -1,6 +1,14 @@
 # cli.py  ── thin HTTP wrapper around the FastAPI service
 from __future__ import annotations
 
+import argparse
+import json
+import os
+import sys
+from typing import Any
+
+import httpx  # pip install httpx
+
 """Command-line helper for *MockExchange*.
 
 Adds coverage for all current API endpoints (August 2025).
@@ -31,14 +39,6 @@ mockx overview-trades --side buy --assets BTC,ETH
 ```
 """
 
-import argparse
-import json
-import os
-import sys
-from typing import Any, Dict, Optional
-
-import httpx  # pip install httpx
-
 # ────────────────────────────── Config ──────────────────────────────── #
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 API_KEY = os.getenv("API_KEY", "invalid-key")
@@ -56,13 +56,13 @@ def _get(path: str, **params):
     return r.json()
 
 
-def _post(path: str, payload: Optional[Dict[str, Any]] = None):
+def _post(path: str, payload: dict[str, Any] | None = None):
     r = client.post(path, json=payload or {})
     _raise_for_status(r)
     return r.json()
 
 
-def _patch(path: str, payload: Dict[str, Any]):
+def _patch(path: str, payload: dict[str, Any]):
     r = client.patch(path, json=payload)
     _raise_for_status(r)
     return r.json()

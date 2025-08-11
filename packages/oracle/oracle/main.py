@@ -35,11 +35,11 @@ Environment variables (with defaults)
 - LOG_LEVEL=INFO
 """
 
-import os
-import time
-import signal
 import logging
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+import os
+import signal
+import time
+from collections.abc import Iterable, Sequence
 
 import ccxt
 import redis
@@ -78,12 +78,12 @@ log = logging.getLogger("mockx-oracle")
 # --- Helpers ------------------------------------------------------------------
 
 
-def parse_csv(raw: str) -> List[str]:
+def parse_csv(raw: str) -> list[str]:
     """Parse a comma-separated list into a clean list of unique, order-preserving items."""
     if not raw:
         return []
     seen = set()
-    out: List[str] = []
+    out: list[str] = []
     for s in (x.strip() for x in raw.split(",")):
         if s and s not in seen:
             seen.add(s)
@@ -91,7 +91,7 @@ def parse_csv(raw: str) -> List[str]:
     return out
 
 
-def normalize_timestamp(ts: Optional[float]) -> float:
+def normalize_timestamp(ts: float | None) -> float:
     """Return a float epoch seconds; fall back to now() if input is None/invalid. Convert ms→s."""
     try:
         if ts is None:
@@ -102,7 +102,7 @@ def normalize_timestamp(ts: Optional[float]) -> float:
         return float(time.time())
 
 
-def normalize_ticker(sym: str, t: Dict) -> Dict:
+def normalize_ticker(sym: str, t: dict) -> dict:
     """
     Normalize a ccxt ticker dict to the schema we persist in Valkey.
 
@@ -131,7 +131,7 @@ def normalize_ticker(sym: str, t: Dict) -> Dict:
 
 def discover_symbols_for_quotes(
     exchange: "ccxt.Exchange", quotes: Sequence[str], limit_per_quote: int
-) -> List[str]:
+) -> list[str]:
     """
     Discover symbols ending with any of the provided quotes (e.g., */USDT, */EUR), up to
     `limit_per_quote` per quote. Duplicates across quotes are de-duplicated, order preserved.
@@ -151,7 +151,7 @@ def discover_symbols_for_quotes(
 
     # Order-preserving de-dupe
     seen = set()
-    results: List[str] = []
+    results: list[str] = []
     for q in quotes:
         cnt = 0
         suffix = f"/{q}"
@@ -171,7 +171,7 @@ def discover_symbols_for_quotes(
 
 
 def write_tickers(
-    r: "redis.Redis", root: str, items: Iterable[Tuple[str, Dict]]
+    r: "redis.Redis", root: str, items: Iterable[tuple[str, dict]]
 ) -> None:
     """Write a batch of (symbol, ticker_dict) pairs into Valkey under f'{root}{symbol}'."""
     for sym, t in items:

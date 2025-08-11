@@ -19,22 +19,19 @@ reference for new contributors.
 import os
 import time  # noqa: F401  # imported for completeness – not used directly yet
 from pathlib import Path
+
+import plotly.graph_objects as go
+import streamlit as st
 from dotenv import load_dotenv
 
-import pandas as pd
-import plotly.express as px
-import streamlit as st
-import plotly.graph_objects as go
-import altair as alt
+from app.services.api import get_overview_capital, get_trades_overview
 
-from app.services.api import get_trades_overview,  get_overview_capital
 from ._helpers import (
+    CHART_COLORS,
     _display_performance_details,
     advanced_filter_toggle,
     tvpi_gauge,
-    CHART_COLORS,
 )
-from ._colors import _row_style
 
 # -----------------------------------------------------------------------------
 # Configuration & constants
@@ -51,6 +48,7 @@ FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 300))  # default 5 min
 # Main page renderer – Streamlit entry‑point
 # -----------------------------------------------------------------------------
 
+
 def render() -> None:  # noqa: D401 – imperative mood is clearer here
     """Render the **Order Book** page.
 
@@ -65,14 +63,13 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # ------------------------------------------------------------------
     # Keep track of the auto‑refresh ticker so we can detect new reruns
     # ------------------------------------------------------------------
-    curr_tick = st.session_state.get("refresh", 0)
-    last_tick = st.session_state.get("_last_refresh_tick", None)
+    # curr_tick = st.session_state.get("refresh", 0)  # Unused variable
+    # last_tick = st.session_state.get("_last_refresh_tick", None)  # Unused variable
 
     # ------------------------------------------------------------------
     # 2) Fetch raw data from the API and pre‑process
     # ------------------------------------------------------------------
-    base = os.getenv("UI_URL", "http://localhost:8000")
-
+    # base = os.getenv("UI_URL", "http://localhost:8000")  # Unused variable
 
     trades_summary, cash_asset = get_trades_overview()
     summary_capital = get_overview_capital()
@@ -90,24 +87,34 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     net_investment = paid_in_capital - distributions  # net invested capital
 
     # --- core amounts --------------------------------------------------
-    incomplete_data        = trades_summary["TOTAL"]["amount_value_incomplete"]
-    total_buys             = trades_summary["BUY"]["notional"]
-    total_sells            = trades_summary["SELL"]["notional"]
-    total_paid_fees        = trades_summary["TOTAL"]["fee"]
+    incomplete_data = trades_summary["TOTAL"]["amount_value_incomplete"]
+    total_buys = trades_summary["BUY"]["notional"]
+    total_sells = trades_summary["SELL"]["notional"]
+    total_paid_fees = trades_summary["TOTAL"]["fee"]
 
-    buy_current_value      = trades_summary["BUY"]["amount_value"] # Current value of all buy trades - even if part of them have already been sold
-    sell_current_value     = trades_summary["SELL"]["amount_value"] # Current value of all sell trades - somehow is the missing opportunity value
-    volatile_assets        = buy_current_value - sell_current_value # still held
-    liquid_assets          = equity - volatile_assets  # cash + liquid assets
+    buy_current_value = trades_summary["BUY"][
+        "amount_value"
+    ]  # Current value of all buy trades - even if part of them have already been sold
+    sell_current_value = trades_summary["SELL"][
+        "amount_value"
+    ]  # Current value of all sell trades - somehow is the missing opportunity value
+    volatile_assets = buy_current_value - sell_current_value  # still held
+    liquid_assets = equity - volatile_assets  # cash + liquid assets
 
     # --- cash & P&L figures -------------------------------------------
-    net_earnings           = equity - net_investment  # after fees
-    gross_earnings         = net_earnings + total_paid_fees  # before fees
+    net_earnings = equity - net_investment  # after fees
+    gross_earnings = net_earnings + total_paid_fees  # before fees
 
     # --- multiples (gross) --------------------------------------------
-    rvpi = equity / paid_in_capital if paid_in_capital > 0 else None # RVPI = Residual Value to Paid-In
-    dpi  = distributions / paid_in_capital if paid_in_capital > 0 else None # DPI = Distributions to Paid-In
-    tvpi = dpi + rvpi if None not in (dpi, rvpi) else None # TVPI = Total Value to Paid-In
+    rvpi = (
+        equity / paid_in_capital if paid_in_capital > 0 else None
+    )  # RVPI = Residual Value to Paid-In
+    dpi = (
+        distributions / paid_in_capital if paid_in_capital > 0 else None
+    )  # DPI = Distributions to Paid-In
+    tvpi = (
+        dpi + rvpi if None not in (dpi, rvpi) else None
+    )  # TVPI = Total Value to Paid-In
 
     _display_performance_details(
         equity=equity,
@@ -128,7 +135,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
         dpi=dpi,
         tvpi=tvpi,
         cash_asset=cash_asset,
-        advanced_display=advanced_display
+        advanced_display=advanced_display,
     )
 
     # Graph 1 --------------------------------------------------
@@ -142,14 +149,16 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     st.subheader("Capital Breakdown")
     fig2 = go.Figure()
 
-    gross_PL_color = CHART_COLORS['green'] if gross_earnings >= 0 else CHART_COLORS['red']
+    gross_PL_color = (
+        CHART_COLORS["green"] if gross_earnings >= 0 else CHART_COLORS["red"]
+    )
     steps_fig2 = [
         # label                 y-value                     measure      colour
-        ("Net Investment",      net_investment,            "absolute",  CHART_COLORS['blue']),
-        ("Gross P&L",           gross_earnings,            "relative",  gross_PL_color),
-        ("Fees",               -total_paid_fees,           "relative",  CHART_COLORS['red']),
-        ("Volatile Assets",    -volatile_assets,           "relative",  CHART_COLORS['blue']),
-        ("Cash Equivalents",   -liquid_assets,             "relative",  CHART_COLORS['blue']),
+        ("Net Investment", net_investment, "absolute", CHART_COLORS["blue"]),
+        ("Gross P&L", gross_earnings, "relative", gross_PL_color),
+        ("Fees", -total_paid_fees, "relative", CHART_COLORS["red"]),
+        ("Volatile Assets", -volatile_assets, "relative", CHART_COLORS["blue"]),
+        ("Cash Equivalents", -liquid_assets, "relative", CHART_COLORS["blue"]),
     ]
 
     cum_base = 0
@@ -160,10 +169,10 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
                 y=[y_val],
                 measure=[meas],
                 base=cum_base if meas != "absolute" else None,
-                increasing=dict(marker=dict(color=colour)),
-                decreasing=dict(marker=dict(color=colour)),
-                totals=dict(marker=dict(color=colour)),
-                showlegend=False
+                increasing={"marker": {"color": colour}},
+                decreasing={"marker": {"color": colour}},
+                totals={"marker": {"color": colour}},
+                showlegend=False,
             )
         )
         # Update running base for the next bar (only if not 'total')

@@ -21,9 +21,11 @@ possible.
 # --------------------------------------------------------------------------- #
 # Imports & helpers
 # --------------------------------------------------------------------------- #
-import pytest
 import random
-from .helpers import reset, deposit, withdrawal, get_tickers, get_ticker_price
+
+import pytest
+
+from .helpers import deposit, get_ticker_price, get_tickers, reset, withdrawal
 
 MAIN_ASSET = "USDT"  # base cash asset (1:1 pricing)
 NUMBER_OF_ASSETS = 30  # upper limit of distinct assets touched per run
