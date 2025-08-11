@@ -23,6 +23,23 @@ test: ## Run tests for all packages
 	cd packages/periscope && poetry run pytest
 	cd packages/oracle && poetry run pytest
 
+test-engine: ## Run engine tests
+	cd packages/engine && poetry run pytest
+
+test-oracle: ## Run oracle tests
+	cd packages/oracle && poetry run pytest
+
+test-periscope: ## Run periscope tests
+	cd packages/periscope && poetry run pytest
+
+test-unit: ## Run unit tests only
+	cd packages/engine && poetry run pytest tests/unit/
+	cd packages/oracle && poetry run pytest
+	cd packages/periscope && poetry run pytest
+
+test-integration: ## Run integration tests only
+	cd packages/engine && poetry run pytest tests/integration/
+
 lint: ## Run linting for all packages
 	poetry run ruff check .
 	poetry run mypy packages/engine/src
