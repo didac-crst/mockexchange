@@ -23,7 +23,9 @@ services:
     environment:
       - EXCHANGE=${EXCHANGE}
       - SYMBOLS=${SYMBOLS}
-      - REDIS_URL=${REDIS_URL}
+      - VALKEY_HOST=${VALKEY_HOST}
+      - VALKEY_PORT=${VALKEY_PORT}
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD}
       - INTERVAL_SEC=${INTERVAL_SEC}
     depends_on:
       - valkey
@@ -40,7 +42,9 @@ services:
     ports:
       - "${ENGINE_PORT}:8000"
     environment:
-      - REDIS_URL=${REDIS_URL}
+      - VALKEY_HOST=${VALKEY_HOST}
+      - VALKEY_PORT=${VALKEY_PORT}
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD}
       - LOG_LEVEL=${LOG_LEVEL}
       - COMMISSION=${COMMISSION}
       - API_KEY=${API_KEY}
@@ -60,7 +64,7 @@ services:
     ports:
       - "${PERISCOPE_PORT}:8501"
     environment:
-      - API_URL=${API_URL}
+      - API_URL=http://engine:8000
       - UI_URL=${UI_URL}
       - APP_TITLE=${APP_TITLE}
       - LOGO_FILE=${LOGO_FILE}

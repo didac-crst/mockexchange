@@ -128,8 +128,12 @@ class ModifyTickerReq(BaseModel):
 
 # ───────────────────── initialise actor engine ──────────────────────── #
 REFRESH_S = int(os.getenv("TICK_LOOP_SEC", "10"))
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-_r = redis.from_url(REDIS_URL, decode_responses=True)
+VALKEY_HOST = os.getenv("VALKEY_HOST", "localhost")
+VALKEY_PORT = int(os.getenv("VALKEY_PORT", "6379"))
+VALKEY_PASSWORD = os.getenv("VALKEY_PASSWORD", "")
+_r = redis.Redis(
+    host=VALKEY_HOST, port=VALKEY_PORT, password=VALKEY_PASSWORD, decode_responses=True
+)
 MY_ID = f"{socket.gethostname()}:{os.getpid()}"
 TEST_ENV = os.getenv("TEST_ENV", "FALSE").lower() in ("1", "true", "yes")
 API_KEY = os.getenv("API_KEY", "invalid-key")
@@ -139,6 +143,11 @@ STALE_AFTER_SEC = int(float(os.getenv("STALE_AFTER_H", "24")) * 3600)
 EXPIRE_AFTER_SEC = int(float(os.getenv("EXPIRE_AFTER_H", "24")) * 3600)
 SANITY_CHECK_EVERY_SEC = int(float(os.getenv("SANITY_CHECK_EVERY_MIN", 5)) * 60)
 
+REDIS_URL = (
+    f"redis://:{VALKEY_PASSWORD}@{VALKEY_HOST}:{VALKEY_PORT}/0"
+    if VALKEY_PASSWORD
+    else f"redis://{VALKEY_HOST}:{VALKEY_PORT}/0"
+)
 ENGINE = start_engine(redis_url=REDIS_URL, commission=COMMISSION)
 
 LOCK_KEY = "engine:leader"

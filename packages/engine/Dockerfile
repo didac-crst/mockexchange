@@ -23,4 +23,4 @@ RUN ls -l ./src
 RUN python -m pip install --no-cache-dir --editable .
 
 EXPOSE 8000
-CMD ["uvicorn", "mockexchange_api.server:app", "--host", "0.0.0.0", "--port", "8000", "--log-config", "./src/mockexchange_api/log_cfg.json"]
+CMD ["uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000", "--log-config", "./src/api/log_cfg.json"]

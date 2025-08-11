@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format clean start stop logs start-valkey start-engine start-oracle start-periscope stop-valkey stop-engine stop-oracle stop-periscope logs-valkey logs-engine logs-oracle logs-periscope examples
+.PHONY: help install dev test lint format clean start stop logs start-valkey start-engine start-oracle start-periscope stop-valkey stop-engine stop-oracle stop-periscope logs-valkey logs-engine logs-oracle logs-periscope restart restart-valkey restart-engine restart-oracle restart-periscope restart-no-cache restart-valkey-no-cache restart-engine-no-cache restart-oracle-no-cache restart-periscope-no-cache examples
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -109,6 +109,31 @@ restart-engine: stop-engine start-engine ## Restart only the engine service
 restart-oracle: stop-oracle start-oracle ## Restart only the oracle service
 
 restart-periscope: stop-periscope start-periscope ## Restart only the periscope service
+
+restart-no-cache: ## Restart all services with fresh Docker builds (no cache)
+	docker-compose down
+	docker-compose build --no-cache
+	docker-compose up -d
+
+restart-valkey-no-cache: ## Restart valkey service with fresh Docker build (no cache)
+	docker-compose stop valkey
+	docker-compose build --no-cache valkey
+	docker-compose up -d valkey
+
+restart-engine-no-cache: ## Restart engine service with fresh Docker build (no cache)
+	docker-compose stop engine
+	docker-compose build --no-cache engine
+	docker-compose up -d engine
+
+restart-oracle-no-cache: ## Restart oracle service with fresh Docker build (no cache)
+	docker-compose stop oracle
+	docker-compose build --no-cache oracle
+	docker-compose up -d oracle
+
+restart-periscope-no-cache: ## Restart periscope service with fresh Docker build (no cache)
+	docker-compose stop periscope
+	docker-compose build --no-cache periscope
+	docker-compose up -d periscope
 
 status: ## Show service status
 	docker-compose ps

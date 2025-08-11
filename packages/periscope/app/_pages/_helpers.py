@@ -789,7 +789,7 @@ def _display_performance_details(
                     "delta_color_rule": "normal",
                 },
             ]
-        else:
+        elif tvpi is not None:
             specs3 = [
                 {
                     "label": "Multiple ▶ TVPI (Total Value to Paid-In)",
@@ -800,6 +800,8 @@ def _display_performance_details(
                     "delta_color_rule": "normal",
                 }
             ]
+        else:
+            specs3 = []
 
         show_metrics_bulk(c1, specs1)
         show_metrics_bulk(c2, specs2)

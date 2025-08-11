@@ -59,10 +59,9 @@ QUOTE_FALLBACK = os.getenv("QUOTE", "USDT")
 DISCOVER_QUOTES = os.getenv("DISCOVER_QUOTES", "false").lower() == "true"
 DISCOVER_LIMIT = int(os.getenv("DISCOVER_LIMIT", "0"))
 
-REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
-REDIS_PORT = os.getenv("REDIS_PORT", "6379")
-REDIS_DB = os.getenv("REDIS_DB", "0")
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+VALKEY_HOST = os.getenv("VALKEY_HOST", "127.0.0.1")
+VALKEY_PORT = os.getenv("VALKEY_PORT", "6379")
+VALKEY_PASSWORD = os.getenv("VALKEY_PASSWORD", "")
 
 INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "10"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -107,7 +106,7 @@ def normalize_ticker(sym: str, t: dict) -> dict:
     Normalize a ccxt ticker dict to the schema we persist in Valkey.
 
     Fallback precedence for price:
-      last -> close -> mid(bid, ask) -> None
+      last -> close -> mid(bid, ask) -> 0.0
     """
     bid = t.get("bid")
     ask = t.get("ask")
@@ -115,14 +114,18 @@ def normalize_ticker(sym: str, t: dict) -> dict:
     price = t.get("last") or t.get("close")
     if price is None and (bid is not None and ask is not None):
         price = (bid + ask) / 2.0
+    if price is None:
+        price = 0.0
 
     ts = normalize_timestamp(t.get("timestamp"))
+    if ts is None:
+        ts = 0.0
 
     return {
         "price": price,
         "timestamp": ts,
-        "bid": bid,
-        "ask": ask,
+        "bid": bid if bid is not None else 0.0,
+        "ask": ask if ask is not None else 0.0,
         "bidVolume": t.get("bidVolume") or 0.0,
         "askVolume": t.get("askVolume") or 0.0,
         "symbol": sym,
@@ -137,16 +140,17 @@ def discover_symbols_for_quotes(
     `limit_per_quote` per quote. Duplicates across quotes are de-duplicated, order preserved.
     """
     _has_limit = limit_per_quote > 0
-    msg = (
-        "Discovering markets for quotes=%s (limit per quote=%d)..."
-        if _has_limit
-        else "Discovering markets for quotes=%s (no limit)..."
-    )
-    log.info(
-        msg,
-        quotes,
-        limit_per_quote,
-    )
+    if _has_limit:
+        log.info(
+            "Discovering markets for quotes=%s (limit per quote=%d)...",
+            quotes,
+            limit_per_quote,
+        )
+    else:
+        log.info(
+            "Discovering markets for quotes=%s (no limit)...",
+            quotes,
+        )
     markets = exchange.load_markets()
 
     # Order-preserving de-dupe
@@ -203,12 +207,15 @@ def main() -> int:
     # Initialize exchange + Redis
     ex = getattr(ccxt, EXCHANGE)({"enableRateLimit": True})
 
-    if REDIS_PASSWORD:
-        REDIS_URL = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+    if VALKEY_PASSWORD:
+        r = redis.Redis(
+            host=VALKEY_HOST,
+            port=int(VALKEY_PORT),
+            password=VALKEY_PASSWORD,
+            decode_responses=True,
+        )
     else:
-        REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
-
-    r = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+        r = redis.Redis(host=VALKEY_HOST, port=int(VALKEY_PORT), decode_responses=True)
 
     # Determine symbols
     symbols = parse_csv(SYMBOLS_RAW)
@@ -242,10 +249,24 @@ def main() -> int:
         start = time.time()
         try:
             if hasattr(ex, "fetch_tickers"):
-                # Batch fetch preferred when available
-                tickers = ex.fetch_tickers(symbols) if symbols else ex.fetch_tickers()
-                write_tickers(r, VALKEY_TICKERS_ROOT, tickers.items())
-                log.debug("Updated %d symbols (batch).", len(tickers))
+                # Always fetch all tickers to avoid URL length issues, then filter locally
+                all_tickers = ex.fetch_tickers()
+
+                if symbols:
+                    # Filter to only requested symbols
+                    filtered_tickers = {
+                        sym: all_tickers[sym] for sym in symbols if sym in all_tickers
+                    }
+                    write_tickers(r, VALKEY_TICKERS_ROOT, filtered_tickers.items())
+                    log.debug(
+                        "Updated %d symbols (filtered from %d total).",
+                        len(filtered_tickers),
+                        len(all_tickers),
+                    )
+                else:
+                    # No symbols specified, use all tickers
+                    write_tickers(r, VALKEY_TICKERS_ROOT, all_tickers.items())
+                    log.debug("Updated %d symbols (all available).", len(all_tickers))
             else:
                 # Fallback: per-symbol
                 count = 0

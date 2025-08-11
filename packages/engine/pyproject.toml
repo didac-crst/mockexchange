@@ -47,11 +47,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
-    "--strict-config",
-    "--cov=core",
-    "--cov=api", 
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov"
+    "--strict-config"
 ]
 
 [build-system]

@@ -449,9 +449,9 @@ mockexchange/
 ## 📚 Documentation
 
 - [Valkey README](packages/valkey/README.md)
+- [Oracle README](packages/oracle/README.md)
 - [Engine README](packages/engine/README.md)
 - [Periscope README](packages/periscope/README.md)
-- [Oracle README](packages/oracle/README.md)
 - [MockX Gateway](https://github.com/didac-crst/mockexchange-gateway)
 
 ---
