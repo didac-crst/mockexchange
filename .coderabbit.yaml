@@ -1,0 +1,97 @@
+# CodeRabbit Configuration for MockExchange
+# This file customizes how CodeRabbit analyzes and reviews your code
+
+# Repository context for better AI understanding
+repository:
+  description: "MockExchange - A complete paper trading platform with matching engine, price feeds, and dashboard"
+  context: |
+    This is a monorepo containing a complete cryptocurrency trading simulation platform:
+    - MockX Engine: Core trading engine with order matching and REST API
+    - MockX Oracle: Price feed service using CCXT to fetch real market data
+    - MockX Periscope: Streamlit dashboard for portfolio and order visualization
+    - MockX Valkey: Redis-compatible database for data persistence
+    - Order Generator: Example tool for generating random trading activity
+    
+    Key technologies: Python, FastAPI, Streamlit, Redis/Valkey, Docker, Poetry
+    Architecture: Microservices with centralized configuration via .env
+
+# Review settings
+review:
+  # Enable comprehensive code review
+  enabled: true
+  
+  # Focus areas for this trading platform
+  focus_areas:
+    - "Security (API authentication, input validation)"
+    - "Performance (order matching, database queries)"
+    - "Data integrity (price validation, balance calculations)"
+    - "Error handling and logging"
+    - "Docker configuration and deployment"
+    - "Test coverage and quality"
+    - "Documentation consistency"
+  
+  # Custom rules for trading platform
+  rules:
+    - "Ensure all price data is validated before storage"
+    - "Check for proper error handling in order processing"
+    - "Verify Docker configurations are production-ready"
+    - "Ensure environment variables are properly documented"
+    - "Check test coverage for critical trading functions"
+
+# Test settings
+test:
+  enabled: true
+  # Run tests for affected packages only
+  command: |
+    if [[ -d "packages/engine" && -n "$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'packages/engine')" ]]; then
+      cd packages/engine && poetry run pytest -v
+    fi
+    if [[ -d "packages/oracle" && -n "$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'packages/oracle')" ]]; then
+      cd packages/oracle && poetry run pytest -v
+    fi
+    if [[ -d "packages/periscope" && -n "$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'packages/periscope')" ]]; then
+      cd packages/periscope && poetry run pytest -v
+    fi
+
+# PR settings
+pull_request:
+  # Auto-approve if tests pass and review is positive
+  auto_approve: false
+  
+  # Add labels based on changes
+  labels:
+    - "enhancement"
+    - "documentation"
+    - "bug"
+    - "security"
+    - "performance"
+  
+  # Custom PR description template
+  description_template: |
+    ## Changes Made
+    {changes}
+    
+    ## Testing
+    - [ ] Unit tests pass
+    - [ ] Integration tests pass
+    - [ ] Docker builds successfully
+    - [ ] Documentation updated
+    
+    ## Impact
+    {impact}
+    
+    ## Related Issues
+    {issues}
+
+# Ignore patterns (files CodeRabbit should skip)
+ignore:
+  - "*.lock"
+  - "poetry.lock"
+  - ".pytest_cache/"
+  - "__pycache__/"
+  - "*.pyc"
+  - ".DS_Store"
+  - ".env"
+  - "node_modules/"
+  - "dist/"
+  - "build/"

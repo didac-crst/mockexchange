@@ -1,0 +1,81 @@
+name: CodeRabbit Integration
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  coderabbit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          
+      - name: Install dependencies
+        run: |
+          poetry install
+          cd packages/engine && poetry install
+          cd ../oracle && poetry install
+          cd ../periscope && poetry install
+          
+      - name: Run tests for affected packages
+        run: |
+          # Run tests only for packages that have changes
+          if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -q "packages/engine"; then
+            echo "Testing engine package..."
+            cd packages/engine && poetry run pytest -v
+          fi
+          
+          if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -q "packages/oracle"; then
+            echo "Testing oracle package..."
+            cd packages/oracle && poetry run pytest -v
+          fi
+          
+          if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -q "packages/periscope"; then
+            echo "Testing periscope package..."
+            cd packages/periscope && poetry run pytest -v
+          fi
+          
+      - name: Run linting
+        run: |
+          poetry run ruff check .
+          poetry run black --check .
+          
+      - name: CodeRabbit Review
+        uses: coderabbitai/PR-Agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: .
+          output: github
+          review_comment_lgtm: false
+          enable_custom_instructions: true
+          custom_instructions: |
+            You are reviewing code for MockExchange, a cryptocurrency trading simulation platform.
+            
+            Focus on:
+            1. Security - especially around API authentication and data validation
+            2. Performance - order matching efficiency and database operations
+            3. Data integrity - price validation and balance calculations
+            4. Error handling - proper exception handling and logging
+            5. Docker configuration - production readiness
+            6. Test coverage - ensure critical functions are tested
+            7. Documentation - consistency across READMEs
+            
+            Be thorough but constructive. Suggest improvements when possible.

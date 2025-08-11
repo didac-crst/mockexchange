@@ -1,0 +1,21 @@
+# Global owners
+* @didac-crst
+
+# Package-specific owners (optional - for larger teams)
+packages/engine/ @didac-crst
+packages/oracle/ @didac-crst
+packages/periscope/ @didac-crst
+packages/valkey/ @didac-crst
+
+# Examples and tools
+examples/ @didac-crst
+
+# Documentation
+README.md @didac-crst
+docs/ @didac-crst
+
+# Configuration files
+.env.example @didac-crst
+docker-compose.yml @didac-crst
+Makefile @didac-crst
+pyproject.toml @didac-crst
