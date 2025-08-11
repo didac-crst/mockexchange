@@ -31,6 +31,16 @@ cp .env.example .env
 ./manage.sh start --reset
 ```
 
+**Makefile commands:**
+```bash
+make order-generator              # Fresh start with reset
+make order-generator-restart      # Continue without reset
+make order-generator-restart-reset # Continue with reset
+make order-generator-logs         # View logs
+make order-generator-stop         # Stop the generator
+make order-generator-status       # Check status
+```
+
 ## Future Examples
 
 We plan to add more examples including:

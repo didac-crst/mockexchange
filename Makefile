@@ -101,13 +101,29 @@ examples: ## Show available examples
 	@echo "Available examples:"
 	@echo "  order-generator  - Random order generator for load testing"
 	@echo ""
-	@echo "Usage:"
+	@echo "Order Generator Commands:"
+	@echo "  make order-generator           # Fresh start with reset"
+	@echo "  make order-generator-restart   # Continue without reset"
+	@echo "  make order-generator-restart-reset # Continue with reset"
+	@echo "  make order-generator-logs      # View logs"
+	@echo "  make order-generator-stop      # Stop generator"
+	@echo "  make order-generator-status    # Check status"
+	@echo ""
+	@echo "Manual usage:"
 	@echo "  cd examples/order-generator"
 	@echo "  ./manage.sh start --reset"
 
-order-generator: ## Start the order generator example
-	@echo "Starting order generator..."
+order-generator: ## Start the order generator example (fresh start with reset)
+	@echo "Starting order generator (fresh start with reset)..."
 	@cd examples/order-generator && ./manage.sh start --reset
+
+order-generator-restart: ## Restart the order generator (continue without reset)
+	@echo "Restarting order generator (continue without reset)..."
+	@cd examples/order-generator && ./manage.sh restart
+
+order-generator-restart-reset: ## Restart the order generator with reset
+	@echo "Restarting order generator with reset..."
+	@cd examples/order-generator && ./manage.sh restart --reset
 
 order-generator-logs: ## Show order generator logs
 	@cd examples/order-generator && ./manage.sh logs

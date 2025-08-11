@@ -336,14 +336,23 @@ A Dockerized tool that generates random orders to test your MockExchange instanc
 # Show available examples
 make examples
 
-# Start the order generator
+# Start the order generator (fresh start with reset)
 make order-generator
+
+# Continue without reset
+make order-generator-restart
+
+# Continue with reset
+make order-generator-restart-reset
 
 # View logs
 make order-generator-logs
 
 # Stop the generator
 make order-generator-stop
+
+# Check status
+make order-generator-status
 ```
 
 **Manual usage:**
