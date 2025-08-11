@@ -10,7 +10,6 @@ import os
 import random
 import time
 from math import floor, log10
-from pathlib import Path
 
 import httpx
 

@@ -185,21 +185,27 @@ def write_tickers(
     """Write a batch of (symbol, ticker_dict) pairs into Valkey under f'{root}{symbol}'."""
     skipped_count = 0
     written_count = 0
-    
+
     for sym, t in items:
         payload = normalize_ticker(sym, t)
-        
+
         # Check if price is positive before writing to valkey
         if is_valid_price(payload["price"]):
             r.hset(f"{root}{sym}", mapping=payload)
             written_count += 1
         else:
-            log.debug("Skipping %s: price is not positive (%.6f)", sym, payload["price"])
+            log.debug(
+                "Skipping %s: price is not positive (%.6f)", sym, payload["price"]
+            )
             skipped_count += 1
-    
+
     if skipped_count > 0:
-        log.info("Processed %d tickers: %d written, %d skipped (non-positive prices)", 
-                written_count + skipped_count, written_count, skipped_count)
+        log.info(
+            "Processed %d tickers: %d written, %d skipped (non-positive prices)",
+            written_count + skipped_count,
+            written_count,
+            skipped_count,
+        )
     else:
         log.debug("Updated %d symbols", written_count)
 
