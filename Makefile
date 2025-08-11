@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format clean start stop logs start-valkey start-engine start-oracle start-periscope stop-valkey stop-engine stop-oracle stop-periscope logs-valkey logs-engine logs-oracle logs-periscope
+.PHONY: help install dev test lint format clean start stop logs start-valkey start-engine start-oracle start-periscope stop-valkey stop-engine stop-oracle stop-periscope logs-valkey logs-engine logs-oracle logs-periscope examples
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -95,3 +95,25 @@ restart-periscope: stop-periscope start-periscope ## Restart only the periscope 
 
 status: ## Show service status
 	docker-compose ps
+
+# Examples and Tools
+examples: ## Show available examples
+	@echo "Available examples:"
+	@echo "  order-generator  - Random order generator for load testing"
+	@echo ""
+	@echo "Usage:"
+	@echo "  cd examples/order-generator"
+	@echo "  ./manage.sh start --reset"
+
+order-generator: ## Start the order generator example
+	@echo "Starting order generator..."
+	@cd examples/order-generator && ./manage.sh start --reset
+
+order-generator-logs: ## Show order generator logs
+	@cd examples/order-generator && ./manage.sh logs
+
+order-generator-stop: ## Stop the order generator
+	@cd examples/order-generator && ./manage.sh stop
+
+order-generator-status: ## Show order generator status
+	@cd examples/order-generator && ./manage.sh status

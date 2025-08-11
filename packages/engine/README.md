@@ -334,10 +334,10 @@ Useful flags:
 
 ---
 
-## Dry Run Example 🚀  
+## Order Generator Example 🚀  
 
-After validating with tests, run a continuous Dockerized dry run to simulate random orders (no strategy), which will cause portfolio value erosion over time 📉.  
-See the detailed [dry run README](examples/dry_run/README.md) for setup, tunable parameters, and usage.
+After validating with tests, you can run the order generator to simulate random orders (no strategy), which will cause portfolio value erosion over time 📉.  
+See the detailed [order generator README](../../examples/order-generator/README.md) for setup, tunable parameters, and usage.
 
 ---
 

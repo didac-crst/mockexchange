@@ -1,7 +1,7 @@
 services:
   order-generator:
     build: .
-    container_name: dryrun-order-gen
+    container_name: order-generator
     restart: unless-stopped
     # Pass the .env file automatically
     env_file:

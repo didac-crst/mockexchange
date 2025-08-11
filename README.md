@@ -28,6 +28,7 @@ This repository contains the full **MockExchange** paper-trading platform:
   - [Individual Service Management](#individual-service-management)
   - [Common Use Cases](#common-use-cases)
 - [🔧 Environment Configuration](#-environment-configuration)
+- [📚 Examples](#-examples)
   - [Quick Setup](#quick-setup)
   - [Key Configuration Sections](#key-configuration-sections)
     - [**Valkey (Database)**](#valkey-database)
@@ -322,6 +323,44 @@ make start-valkey make start-engine make start-periscope  # Skip oracle if using
 
 ---
 
+## 📚 Examples
+
+The `examples/` directory contains tools and examples that demonstrate how to use the MockExchange platform.
+
+### Order Generator
+
+A Dockerized tool that generates random orders to test your MockExchange instance:
+
+```bash
+# Show available examples
+make examples
+
+# Start the order generator
+make order-generator
+
+# View logs
+make order-generator-logs
+
+# Stop the generator
+make order-generator-stop
+```
+
+**Manual usage:**
+```bash
+# Ensure MockExchange stack is running
+make start
+
+# Start the order generator
+cd examples/order-generator
+cp .env.example .env
+# Edit .env with your API settings
+./manage.sh start --reset
+```
+
+For more details, see [examples/README.md](examples/README.md).
+
+---
+
 ## 🔧 Environment Configuration
 
 All environment variables are centralized in the root `.env` file. This eliminates duplication and makes configuration management much easier.
@@ -370,6 +409,9 @@ mockexchange/
 │   ├── engine/        # MockX Engine (core/ + api/)
 │   ├── periscope/     # MockX Periscope (dashboard)
 │   └── oracle/        # MockX Oracle (price feeds)
+├── examples/          # Examples and tools
+│   ├── order-generator/ # Random order generator
+│   └── README.md      # Examples overview
 ├── .github/workflows/ # CI/CD pipelines
 ├── docker-compose.yml # Full stack orchestration
 ├── .env.example       # Environment configuration template
