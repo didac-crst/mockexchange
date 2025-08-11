@@ -1,6 +1,6 @@
 # MockExchange Suite <!-- omit in toc -->
 
-**_Trade without fear, greed, or actual money — because sometimes the best way to lose less is to not play at all._**
+**_Trade without fear, greed, or actual money — where every fake loss is a real step up._**
 
 This repository contains the full **MockExchange** paper-trading platform:
 - **MockX Engine** – Matching engine, portfolio tracking, and API layer.
@@ -27,8 +27,9 @@ This repository contains the full **MockExchange** paper-trading platform:
   - [Development Setup](#development-setup)
   - [Individual Service Management](#individual-service-management)
   - [Common Use Cases](#common-use-cases)
+- [� Examples](#-examples)
+  - [Order Generator](#order-generator)
 - [🔧 Environment Configuration](#-environment-configuration)
-- [📚 Examples](#-examples)
   - [Quick Setup](#quick-setup)
   - [Key Configuration Sections](#key-configuration-sections)
     - [**Valkey (Database)**](#valkey-database)
