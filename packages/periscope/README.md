@@ -40,12 +40,13 @@ The dashboard uses environment variables from the root `.env` file. Key variable
 
 | Variable          | Default                 | Description                  |
 | ----------------- | ----------------------- | ---------------------------- |
-| `PERISCOPE_PORT`  | `8501`                  | Dashboard port               |
 | `API_URL`         | `http://localhost:8000` | Engine API URL               |
 | `API_KEY`         | `dev-key`               | Authentication key           |
 | `REFRESH_SECONDS` | `60`                    | Auto-refresh interval        |
 | `QUOTE_ASSET`     | `USDT`                  | Portfolio valuation currency |
 | `APP_TITLE`       | `MockExchange`          | Dashboard title              |
+
+**Note**: For Docker deployment, `API_URL` should be `http://engine:8000`. For local development, use `http://localhost:8000`.
 
 See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
 

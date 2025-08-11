@@ -53,14 +53,14 @@ When running with `TEST_ENV=true`, the API documentation is available at:
 
 The engine uses environment variables from the root `.env` file. Key variables include:
 
-| Variable        | Default       | Description                             |
-| --------------- | ------------- | --------------------------------------- |
-| `ENGINE_PORT`   | `8000`        | API server port                         |
-| `API_KEY`       | `invalid-key` | Authentication key for API requests     |
-| `COMMISSION`    | `0.00075`     | Trading fee rate (0.075%)               |
-| `CASH_ASSET`    | `USDT`        | Reference currency for PnL calculations |
-| `TICK_LOOP_SEC` | `10`          | Price tick processing interval          |
-| `TEST_ENV`      | `false`       | Enable API docs and disable auth        |
+| Variable      | Default       | Description                             |
+| ------------- | ------------- | --------------------------------------- |
+| `ENGINE_PORT` | `8000`        | API server port                         |
+| `API_KEY`     | `dev-key`     | Authentication key for API requests     |
+| `COMMISSION`  | `0.00075`     | Trading fee rate (0.075%)               |
+| `CASH_ASSET`  | `USDT`        | Reference currency for PnL calculations |
+| `REDIS_URL`   | `redis://...` | Redis connection string                 |
+| `TEST_ENV`    | `false`       | Enable API docs and disable auth        |
 
 See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
 

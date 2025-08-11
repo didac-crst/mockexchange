@@ -381,6 +381,8 @@ All environment variables are centralized in the root `.env` file. This eliminat
 cp .env.example .env
 ```
 
+**Note**: The `.env.example` is configured for local development. For Docker deployment, change `API_URL` from `http://localhost:8000` to `http://engine:8000`.
+
 ### Key Configuration Sections
 
 #### **Valkey (Database)**

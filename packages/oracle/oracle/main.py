@@ -53,9 +53,9 @@ load_dotenv()
 EXCHANGE = os.getenv("EXCHANGE", "binance")
 SYMBOLS_RAW = os.getenv("SYMBOLS", "")
 
-# Preferred multi-quote var; fallback to legacy single QUOTE
+# Quote assets for discovery (comma-separated)
 QUOTES_RAW = os.getenv("QUOTES", "")
-LEGACY_QUOTE = os.getenv("QUOTE", "USDT")
+QUOTE_FALLBACK = os.getenv("QUOTE", "USDT")
 DISCOVER_QUOTES = os.getenv("DISCOVER_QUOTES", "false").lower() == "true"
 DISCOVER_LIMIT = int(os.getenv("DISCOVER_LIMIT", "0"))
 
@@ -189,8 +189,8 @@ def main() -> int:
     - Fetch tickers via ccxt (batch when available, otherwise per-symbol).
     - Upsert into Valkey hashes under {VALKEY_TICKERS_ROOT}{symbol}.
     """
-    # Build QUOTES list (prefer QUOTES, fallback to QUOTE)
-    quotes = parse_csv(QUOTES_RAW) or [LEGACY_QUOTE]
+    # Build quotes list (prefer QUOTES, fallback to QUOTE)
+    quotes = parse_csv(QUOTES_RAW) or [QUOTE_FALLBACK]
 
     log.info(
         "Starting MockX Oracle — exchange=%s quotes=%s interval=%ss root='%s'",

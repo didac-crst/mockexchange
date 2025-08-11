@@ -36,14 +36,16 @@ make status
 
 The Oracle uses environment variables from the root `.env` file. Key variables include:
 
-| Variable          | Default             | Description                 |
-| ----------------- | ------------------- | --------------------------- |
-| `EXCHANGE`        | `binance`           | Exchange to fetch data from |
-| `SYMBOLS`         | `BTC/USDT,ETH/USDT` | Trading pairs to monitor    |
-| `INTERVAL_SEC`    | `10`                | Price update frequency      |
-| `DISCOVER_ENABLE` | `false`             | Enable auto-discovery mode  |
-| `DISCOVER_QUOTES` | `USDT,EUR`          | Quote assets for discovery  |
-| `DISCOVER_LIMIT`  | `10`                | Max markets per quote asset |
+| Variable          | Default             | Description                               |
+| ----------------- | ------------------- | ----------------------------------------- |
+| `EXCHANGE`        | `binance`           | Exchange to fetch data from               |
+| `SYMBOLS`         | `BTC/USDT,ETH/USDT` | Trading pairs to monitor                  |
+| `QUOTES`          | `USDT`              | Quote assets for discovery                |
+| `QUOTE`           | `USDT`              | Fallback quote asset (if QUOTES is empty) |
+| `INTERVAL_SEC`    | `10`                | Price update frequency                    |
+| `DISCOVER_QUOTES` | `false`             | Enable discovery mode (`true`/`false`)    |
+| `DISCOVER_LIMIT`  | `0`                 | Max markets per quote asset (0=unlimited) |
+| `REDIS_URL`       | `redis://...`       | Redis connection string                   |
 
 See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
 
@@ -75,6 +77,86 @@ HSET tickers:BTC/USDT price 50000.00 timestamp 1703123456.789 bid 49999.50 ask 5
 ```
 
 ---
+
+## Discovery Mode
+
+The Oracle can automatically discover trading pairs when `DISCOVER_QUOTES=true`:
+
+- **Manual Mode** (`DISCOVER_QUOTES=false`): Uses only the `SYMBOLS` list
+- **Discovery Mode** (`DISCOVER_QUOTES=true`): Automatically finds markets ending with specified quote assets
+- **Limit Control** (`DISCOVER_LIMIT`): Maximum markets per quote asset (0 = unlimited)
+
+### **How to Discover All USDT Trading Pairs**
+
+To discover all trading pairs that end with USDT:
+
+```bash
+# In your .env file:
+QUOTES=USDT                    # Quote asset to discover
+DISCOVER_QUOTES=true           # Enable discovery mode
+DISCOVER_LIMIT=0               # No limit (get all USDT pairs)
+SYMBOLS=                       # Leave empty to use discovery
+```
+
+This will automatically find all markets like `BTC/USDT`, `ETH/USDT`, `ADA/USDT`, etc.
+
+**Note**: If `QUOTES` is empty, the Oracle will fall back to using the `QUOTE` variable (default: `USDT`).
+
+### **Multiple Quote Assets**
+
+You can also discover multiple quote assets at once:
+
+```bash
+# Discover both USDT and EUR pairs
+QUOTES=USDT,EUR
+DISCOVER_QUOTES=true
+DISCOVER_LIMIT=10              # Max 10 pairs per quote asset
+```
+
+### **Practical Examples**
+
+#### **Example 1: Manual Mode (Default)**
+```bash
+# .env configuration
+EXCHANGE=binance
+SYMBOLS=BTC/USDT,ETH/USDT,ADA/USDT
+DISCOVER_QUOTES=false
+```
+**Result**: Only fetches BTC/USDT, ETH/USDT, and ADA/USDT
+
+#### **Example 2: Discover All USDT Pairs**
+```bash
+# .env configuration
+EXCHANGE=binance
+SYMBOLS=                           # Leave empty
+QUOTES=USDT
+DISCOVER_QUOTES=true
+DISCOVER_LIMIT=0                   # No limit
+```
+**Result**: Discovers all available USDT trading pairs (BTC/USDT, ETH/USDT, ADA/USDT, etc.)
+
+#### **Example 3: Discover Top 10 USDT Pairs**
+```bash
+# .env configuration
+EXCHANGE=binance
+SYMBOLS=
+QUOTES=USDT
+DISCOVER_QUOTES=true
+DISCOVER_LIMIT=10
+```
+**Result**: Discovers first 10 USDT trading pairs found
+
+#### **Example 4: Using QUOTE Fallback**
+```bash
+# .env configuration
+EXCHANGE=binance
+SYMBOLS=
+QUOTES=                    # Empty - will use QUOTE fallback
+QUOTE=USDT                 # Fallback quote asset
+DISCOVER_QUOTES=true
+DISCOVER_LIMIT=5
+```
+**Result**: Discovers first 5 EUR trading pairs (BTC/EUR, ETH/EUR, etc.)
 
 ## Supported Exchanges
 
