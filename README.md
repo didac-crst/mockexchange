@@ -29,6 +29,8 @@ This repository contains the full **MockExchange** paper-trading platform:
     - [**Deploying Versioned Releases**](#deploying-versioned-releases)
     - [**Release Process**](#release-process)
     - [**Docker Image Tags**](#docker-image-tags)
+    - [**Release Workflow**](#release-workflow)
+    - [**Version Management**](#version-management)
   - [📚 Examples](#-examples)
     - [Order Generator](#order-generator)
   - [🔧 Environment Configuration](#-environment-configuration)
@@ -280,45 +282,58 @@ make status            # Show all service statuses
 
 ## 🚀 Release Management
 
-MockExchange uses a comprehensive release management system with versioned Docker images and automated workflows.
+MockExchange uses a comprehensive release management system with versioned Docker images and automated workflows. This ensures reproducible deployments and easy rollbacks.
 
 ### **Quick Release Commands**
 
+The release script (`./scripts/release.sh`) handles the complete release process:
+
 ```bash
-# Create a patch release (auto-increment patch version)
+# Create a patch release (auto-increment patch version: 0.3.0 → 0.3.1)
 ./scripts/release.sh -p
 
-# Create a minor release (auto-increment minor version)  
+# Create a minor release (auto-increment minor version: 0.3.0 → 0.4.0)  
 ./scripts/release.sh -m
 
-# Release specific version
+# Create a major release (auto-increment major version: 0.3.0 → 1.0.0)
+./scripts/release.sh -M
+
+# Release specific version (e.g., for hotfixes)
 ./scripts/release.sh v0.3.0
 
-# Dry run to see what would happen
+# Dry run to see what would happen without making changes
 ./scripts/release.sh --dry-run v0.3.0
+
+# Show help and available options
+./scripts/release.sh --help
 ```
 
 ### **Makefile Release Commands**
 
+The Makefile provides convenient shortcuts for common release tasks:
+
 ```bash
-# Show current version and recent tags
+# Show current version and recent git tags
 make version
 
-# Create git tag
+# Create git tag for specific version
 make tag version=v0.3.0
 
-# Build and push Docker images
+# Build and push Docker images for a version
 make release-docker version=v0.3.0
 
-# Complete release (test + tag + docker)
+# Complete release workflow (test + tag + docker)
 make release version=v0.3.0
 
-# Auto-increment versions
-make release-patch
-make release-minor
+# Auto-increment versions (convenience commands)
+make release-patch    # 0.3.0 → 0.3.1
+make release-minor    # 0.3.0 → 0.4.0
+make release-major    # 0.3.0 → 1.0.0
 ```
 
 ### **Deploying Versioned Releases**
+
+Deploy specific versions to ensure consistency across environments:
 
 ```bash
 # Deploy specific version (after building with make release-docker)
@@ -330,26 +345,67 @@ docker-compose up -d
 # Build and deploy in one step
 make release-docker version=v0.3.0
 VERSION=v0.3.0 docker-compose up -d
+
+# Deploy with specific version and rebuild images
+VERSION=v0.3.0 docker-compose up -d --build
 ```
 
 ### **Release Process**
 
-1. **Development**: Features developed on feature branches
-2. **Testing**: All tests must pass before release
-3. **Tagging**: Create annotated git tag with version
-4. **Docker**: Build and push versioned images
-5. **Deployment**: Deploy using versioned Docker images
-6. **Documentation**: Update changelog and release notes
+The release process follows these steps to ensure quality and reproducibility:
+
+1. **Development**: Features developed on feature branches with proper testing
+2. **Testing**: All tests must pass before release (`make test`)
+3. **Version Bump**: Update version in `pyproject.toml` and other config files
+4. **Tagging**: Create annotated git tag with version and release notes
+5. **Docker Build**: Build versioned Docker images for all services
+6. **Deployment**: Deploy using versioned Docker images for consistency
+7. **Documentation**: Update changelog and release notes
+8. **Verification**: Test deployed services to ensure they work correctly
 
 ### **Docker Image Tags**
 
-Each release creates multiple Docker image tags for reproducibility:
+Each release creates multiple Docker image tags for different use cases:
 
-- `mockx-engine:0.3.0` - Version tag
-- `mockx-engine:0.3.0-abc1234` - Version + short SHA  
-- `mockx-engine:latest` - Latest stable
+- `mockx-engine:0.3.0` - **Version tag** (recommended for production)
+- `mockx-engine:0.3.0-abc1234` - **Version + short SHA** (for debugging specific builds)
+- `mockx-engine:latest` - **Latest stable** (for development)
 
-**Local images only** - no registry required. Images are built and stored locally.
+**Local images only** - no external registry required. Images are built and stored locally for simplicity.
+
+### **Release Workflow**
+
+Here's the typical workflow for creating a new release:
+
+```bash
+# 1. Ensure all tests pass
+make test
+
+# 2. Create a patch release (most common)
+./scripts/release.sh -p
+
+# 3. Deploy the new version
+VERSION=$(cat pyproject.toml | grep version | cut -d'"' -f2) docker-compose up -d
+
+# 4. Verify deployment
+make status
+curl http://localhost:8000/health
+```
+
+### **Version Management**
+
+MockExchange follows [Semantic Versioning](https://semver.org/) (SemVer):
+
+- **MAJOR.MINOR.PATCH** format (e.g., `0.3.0`)
+- **PATCH** (0.3.0 → 0.3.1): Bug fixes and minor improvements
+- **MINOR** (0.3.0 → 0.4.0): New features, backward compatible
+- **MAJOR** (0.3.0 → 1.0.0): Breaking changes
+
+**Version files updated during release:**
+- `pyproject.toml` (root and package versions)
+- `packages/*/pyproject.toml` (individual package versions)
+- `CHANGELOG.md` (release notes)
+- Git tags (annotated with release notes)
 ```
 
 ### Common Use Cases
