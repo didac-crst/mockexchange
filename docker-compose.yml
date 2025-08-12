@@ -14,7 +14,7 @@ services:
 
   # MockX Oracle - price feed service
   oracle:
-    image: ${DOCKER_REGISTRY:-didac}/mockx-oracle:${VERSION:-latest}
+    image: mockx-oracle:${VERSION:-latest}
     build:
       context: ./packages/oracle
       dockerfile: Dockerfile
@@ -34,7 +34,7 @@ services:
 
   # MockX Engine - core trading engine
   engine:
-    image: ${DOCKER_REGISTRY:-didac}/mockx-engine:${VERSION:-latest}
+    image: mockx-engine:${VERSION:-latest}
     build:
       context: ./packages/engine
       dockerfile: Dockerfile
@@ -57,7 +57,7 @@ services:
 
   # MockX Periscope - dashboard
   periscope:
-    image: ${DOCKER_REGISTRY:-didac}/mockx-periscope:${VERSION:-latest}
+    image: mockx-periscope:${VERSION:-latest}
     build:
       context: ./packages/periscope
       dockerfile: Dockerfile

@@ -216,97 +216,72 @@ Related (external):
 
 ## 🚀 Quick Start
 
-### Option 1: One-Command Setup (Recommended)
-1. **Setup environment** (first time only):
+### Prerequisites
+- **Docker** and **Docker Compose** installed
+- **Git** for cloning the repository
+
+### 1. Clone and Setup
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/mockexchange.git
+cd mockexchange
+
+# Setup environment (first time only)
 cp .env.example .env
 # Edit .env if needed (defaults work for most cases)
 ```
 
-2. **Start everything**:
+### 2. Start All Services
 ```bash
+# One command to start everything
 make start
 ```
 
-This launches:
-- **MockX Valkey** (Redis fork) on port 6379
-- **MockX Oracle** (price feed) 
-- **MockX Engine** (API) on port 8000
+**What this launches:**
+- **MockX Valkey** (Redis-compatible database) on port 6379
+- **MockX Oracle** (price feed service) 
+- **MockX Engine** (trading API) on port 8000
 - **MockX Periscope** (dashboard) on port 8501
 
-Access your services:
-- **API**: http://localhost:8000
-- **Dashboard**: http://localhost:8501
-- **Logs**: `make logs`
+### 3. Access Your Services
+- **📊 Dashboard**: http://localhost:8501
+- **🔌 API**: http://localhost:8000
+- **📖 API Docs**: http://localhost:8000/docs
+- **📋 Logs**: `make logs`
 
-### Option 2: Manual Setup
-If you prefer to run services individually:
+### Alternative: Manual Service Management
+If you prefer to start services individually:
 
-#### 0. Setup environment
 ```bash
-cp .env.example .env
-```
+# Start services in order (recommended)
+make start-valkey      # Database first
+make start-oracle      # Price feed
+make start-engine      # Trading API
+make start-periscope   # Dashboard
 
-#### 1. Start MockX Valkey
-```bash
-make start-valkey
-```
-
-#### 2. Start MockX Oracle
-```bash
-make start-oracle
-```
-
-#### 3. Start MockX Engine
-```bash
-make start-engine
-```
-
-#### 4. Start MockX Periscope
-```bash
-make start-periscope
+# Or stop/restart individual services
+make stop-engine       # Stop only the API
+make restart-oracle    # Restart price feed
+make logs-periscope    # View dashboard logs
 ```
 
 ### Development Setup
 For contributors and developers:
 
 ```bash
-# Install dependencies and dev tools
+# Install development dependencies
 make dev
 
-# Run tests
+# Run all tests
 make test
 
-# Format code
+# Format and lint code
 make format
-
-# Check code quality
 make lint
+
+# Check service status
+make status
 ```
-
-### Individual Service Management
-You can also manage services individually:
-
-```bash
-# Start specific services
-make start-valkey      # Start only the database
-make start-engine      # Start only the engine
-make start-oracle      # Start only the oracle  
-make start-periscope   # Start only the dashboard
-
-# Stop specific services
-make stop-valkey       # Stop only the database
-make stop-engine       # Stop only the engine
-make stop-oracle       # Stop only the oracle
-make stop-periscope    # Stop only the dashboard
-
-# Restart specific services
-make restart-valkey    # Restart only the database
-make restart-engine    # Restart only the engine
-make restart-oracle    # Restart only the oracle
-make restart-periscope # Restart only the dashboard
-
-# View logs for specific services
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
 make logs-oracle       # Oracle logs only
@@ -358,16 +333,15 @@ make release-minor
 ### **Deploying Versioned Releases**
 
 ```bash
-# Deploy specific version
+# Deploy specific version (after building with make release-docker)
 VERSION=v0.3.0 docker-compose up -d
 
-# Deploy latest
+# Deploy latest (uses local images)
 docker-compose up -d
 
-# Pull and run specific version
-docker pull didac/mockx-engine:v0.3.0
-docker pull didac/mockx-oracle:v0.3.0
-docker pull didac/mockx-periscope:v0.3.0
+# Build and deploy in one step
+make release-docker version=v0.3.0
+VERSION=v0.3.0 docker-compose up -d
 ```
 
 ### **Release Process**
@@ -384,10 +358,10 @@ docker pull didac/mockx-periscope:v0.3.0
 Each release creates multiple Docker image tags for reproducibility:
 
 - `mockx-engine:0.3.0` - Version tag
-- `mockx-engine:0.3.0-abc1234` - Version + short SHA
+- `mockx-engine:0.3.0-abc1234` - Version + short SHA  
 - `mockx-engine:latest` - Latest stable
 
-This ensures you can always deploy the exact code that was tested and tagged.
+**Local images only** - no registry required. Images are built and stored locally.
 ```
 
 ### Common Use Cases

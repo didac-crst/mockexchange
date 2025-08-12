@@ -193,31 +193,22 @@ tag-delete: ## Delete a git tag (use with caution)
 	@git push origin :refs/tags/$(version)
 	@echo "✅ Tag $(version) deleted"
 
-release-docker: ## Build and push Docker images for current version
-	@echo "Building and pushing Docker images for $(version)..."
+release-docker: ## Build Docker images for current version (local only)
+	@echo "Building Docker images for $(version)..."
 	@echo "Building mockx-engine..."
-	docker build -t $(docker_registry)/mockx-engine:$(version) -t $(docker_registry)/mockx-engine:$(version)-$(sha) -t $(docker_registry)/mockx-engine:latest packages/engine
-	docker push $(docker_registry)/mockx-engine:$(version)
-	docker push $(docker_registry)/mockx-engine:$(version)-$(sha)
-	docker push $(docker_registry)/mockx-engine:latest
+	docker build -t mockx-engine:$(version) -t mockx-engine:$(version)-$(sha) -t mockx-engine:latest packages/engine
 	@echo "Building mockx-oracle..."
-	docker build -t $(docker_registry)/mockx-oracle:$(version) -t $(docker_registry)/mockx-oracle:$(version)-$(sha) -t $(docker_registry)/mockx-oracle:latest packages/oracle
-	docker push $(docker_registry)/mockx-oracle:$(version)
-	docker push $(docker_registry)/mockx-oracle:$(version)-$(sha)
-	docker push $(docker_registry)/mockx-oracle:latest
+	docker build -t mockx-oracle:$(version) -t mockx-oracle:$(version)-$(sha) -t mockx-oracle:latest packages/oracle
 	@echo "Building mockx-periscope..."
-	docker build -t $(docker_registry)/mockx-periscope:$(version) -t $(docker_registry)/mockx-periscope:$(version)-$(sha) -t $(docker_registry)/mockx-periscope:latest packages/periscope
-	docker push $(docker_registry)/mockx-periscope:$(version)
-	docker push $(docker_registry)/mockx-periscope:$(version)-$(sha)
-	docker push $(docker_registry)/mockx-periscope:latest
-	@echo "✅ All Docker images built and pushed for $(version)"
+	docker build -t mockx-periscope:$(version) -t mockx-periscope:$(version)-$(sha) -t mockx-periscope:latest packages/periscope
+	@echo "✅ All Docker images built locally for $(version)"
 
-release: test tag release-docker ## Complete release: test, tag, and push Docker images
+release: test tag release-docker ## Complete release: test, tag, and build Docker images
 	@echo "🎉 Release $(version) completed successfully!"
 	@echo "📋 Next steps:"
 	@echo "  1. Update CHANGELOG.md with release date"
-	@echo "  2. Create GitHub Release with notes"
-	@echo "  3. Deploy to production using versioned images"
+	@echo "  2. Deploy using: VERSION=$(version) docker-compose up -d"
+	@echo "  3. Monitor deployment and verify functionality"
 
 release-patch: ## Quick patch release (increment patch version)
 	@$(eval CURRENT_VERSION := $(shell git describe --tags --abbrev=0))
