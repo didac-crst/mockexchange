@@ -1,0 +1,204 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  DOCKER_REGISTRY: didac
+  VERSION: ${{ github.ref_name }}
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          
+      - name: Install dependencies
+        run: |
+          poetry install
+          cd packages/engine && poetry install
+          cd ../oracle && poetry install
+          cd ../periscope && poetry install
+          
+      - name: Run tests
+        run: |
+          poetry run pytest packages/engine/tests/ -v
+          poetry run pytest packages/oracle/tests/ -v
+          poetry run pytest packages/periscope/tests/ -v
+          
+      - name: Run linting
+        run: |
+          poetry run ruff check .
+          poetry run black --check .
+
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.DOCKER_REGISTRY }}/mockx-engine
+            ${{ env.DOCKER_REGISTRY }}/mockx-oracle
+            ${{ env.DOCKER_REGISTRY }}/mockx-periscope
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix={{branch}}-
+            
+      - name: Build and push Engine
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/engine
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/mockx-engine:${{ env.VERSION }}
+            ${{ env.DOCKER_REGISTRY }}/mockx-engine:${{ env.VERSION }}-${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/mockx-engine:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Build and push Oracle
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/oracle
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/mockx-oracle:${{ env.VERSION }}
+            ${{ env.DOCKER_REGISTRY }}/mockx-oracle:${{ env.VERSION }}-${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/mockx-oracle:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Build and push Periscope
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/periscope
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/mockx-periscope:${{ env.VERSION }}
+            ${{ env.DOCKER_REGISTRY }}/mockx-periscope:${{ env.VERSION }}-${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/mockx-periscope:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [test, build-and-push]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get commits since last tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # First release, get all commits
+            COMMITS=$(git log --oneline --no-merges)
+          else
+            COMMITS=$(git log --oneline --no-merges ${PREVIOUS_TAG}..HEAD)
+          fi
+          
+          # Generate release notes
+          echo "## What's Changed" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### Commits in this release:" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "$COMMITS" | while read -r commit; do
+            echo "- $commit" >> release_notes.md
+          done
+          echo "" >> release_notes.md
+          echo "## Docker Images" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "The following Docker images have been built and pushed:" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "- \`${{ env.DOCKER_REGISTRY }}/mockx-engine:${{ env.VERSION }}\`" >> release_notes.md
+          echo "- \`${{ env.DOCKER_REGISTRY }}/mockx-oracle:${{ env.VERSION }}\`" >> release_notes.md
+          echo "- \`${{ env.DOCKER_REGISTRY }}/mockx-periscope:${{ env.VERSION }}\`" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## Quick Start" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "```bash" >> release_notes.md
+          echo "# Pull and run the latest version" >> release_notes.md
+          echo "docker pull ${{ env.DOCKER_REGISTRY }}/mockx-engine:${{ env.VERSION }}" >> release_notes.md
+          echo "docker pull ${{ env.DOCKER_REGISTRY }}/mockx-oracle:${{ env.VERSION }}" >> release_notes.md
+          echo "docker pull ${{ env.DOCKER_REGISTRY }}/mockx-periscope:${{ env.VERSION }}" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "# Or use docker-compose with versioned images" >> release_notes.md
+          echo "VERSION=${{ env.VERSION }} docker-compose up -d" >> release_notes.md
+          echo "```" >> release_notes.md
+          
+          # Set output for next step
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: MockExchange ${{ env.VERSION }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+
+  notify:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    needs: create-release
+    if: always()
+    steps:
+      - name: Release Summary
+        run: |
+          echo "🎉 MockExchange ${{ env.VERSION }} has been released!"
+          echo ""
+          echo "📦 Docker Images:"
+          echo "  - ${{ env.DOCKER_REGISTRY }}/mockx-engine:${{ env.VERSION }}"
+          echo "  - ${{ env.DOCKER_REGISTRY }}/mockx-oracle:${{ env.VERSION }}"
+          echo "  - ${{ env.DOCKER_REGISTRY }}/mockx-periscope:${{ env.VERSION }}"
+          echo ""
+          echo "🔗 Release URL:"
+          echo "  https://github.com/${{ github.repository }}/releases/tag/${{ env.VERSION }}"
+          echo ""
+          echo "📋 Next Steps:"
+          echo "  1. Update CHANGELOG.md with release date"
+          echo "  2. Deploy to production using versioned images"
+          echo "  3. Monitor deployment and verify functionality"

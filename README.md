@@ -311,6 +311,80 @@ make logs-periscope    # Dashboard logs only
 
 # Check service status
 make status            # Show all service statuses
+
+## 🚀 Release Management
+
+MockExchange uses a comprehensive release management system with versioned Docker images and automated workflows.
+
+### **Quick Release Commands**
+
+```bash
+# Create a patch release (auto-increment patch version)
+./scripts/release.sh -p
+
+# Create a minor release (auto-increment minor version)  
+./scripts/release.sh -m
+
+# Release specific version
+./scripts/release.sh v0.3.0
+
+# Dry run to see what would happen
+./scripts/release.sh --dry-run v0.3.0
+```
+
+### **Makefile Release Commands**
+
+```bash
+# Show current version and recent tags
+make version
+
+# Create git tag
+make tag version=v0.3.0
+
+# Build and push Docker images
+make release-docker version=v0.3.0
+
+# Complete release (test + tag + docker)
+make release version=v0.3.0
+
+# Auto-increment versions
+make release-patch
+make release-minor
+```
+
+### **Deploying Versioned Releases**
+
+```bash
+# Deploy specific version
+VERSION=v0.3.0 docker-compose up -d
+
+# Deploy latest
+docker-compose up -d
+
+# Pull and run specific version
+docker pull didac/mockx-engine:v0.3.0
+docker pull didac/mockx-oracle:v0.3.0
+docker pull didac/mockx-periscope:v0.3.0
+```
+
+### **Release Process**
+
+1. **Development**: Features developed on feature branches
+2. **Testing**: All tests must pass before release
+3. **Tagging**: Create annotated git tag with version
+4. **Docker**: Build and push versioned images
+5. **Deployment**: Deploy using versioned Docker images
+6. **Documentation**: Update changelog and release notes
+
+### **Docker Image Tags**
+
+Each release creates multiple Docker image tags for reproducibility:
+
+- `mockx-engine:0.3.0` - Version tag
+- `mockx-engine:0.3.0-abc1234` - Version + short SHA
+- `mockx-engine:latest` - Latest stable
+
+This ensures you can always deploy the exact code that was tested and tagged.
 ```
 
 ### Common Use Cases

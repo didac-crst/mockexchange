@@ -175,3 +175,70 @@ order-generator-stop: ## Stop the order generator
 
 order-generator-status: ## Show order generator status
 	@cd examples/order-generator && ./manage.sh status
+
+# Release Management
+version ?= v0.3.0
+sha := $(shell git rev-parse --short HEAD)
+docker_registry ?= didac
+
+tag: ## Create and push a git tag for release
+	@echo "Creating tag $(version)..."
+	@git tag -a $(version) -m "MockExchange $(version)"
+	@git push origin $(version)
+	@echo "✅ Tag $(version) created and pushed"
+
+tag-delete: ## Delete a git tag (use with caution)
+	@echo "Deleting tag $(version)..."
+	@git tag -d $(version)
+	@git push origin :refs/tags/$(version)
+	@echo "✅ Tag $(version) deleted"
+
+release-docker: ## Build and push Docker images for current version
+	@echo "Building and pushing Docker images for $(version)..."
+	@echo "Building mockx-engine..."
+	docker build -t $(docker_registry)/mockx-engine:$(version) -t $(docker_registry)/mockx-engine:$(version)-$(sha) -t $(docker_registry)/mockx-engine:latest packages/engine
+	docker push $(docker_registry)/mockx-engine:$(version)
+	docker push $(docker_registry)/mockx-engine:$(version)-$(sha)
+	docker push $(docker_registry)/mockx-engine:latest
+	@echo "Building mockx-oracle..."
+	docker build -t $(docker_registry)/mockx-oracle:$(version) -t $(docker_registry)/mockx-oracle:$(version)-$(sha) -t $(docker_registry)/mockx-oracle:latest packages/oracle
+	docker push $(docker_registry)/mockx-oracle:$(version)
+	docker push $(docker_registry)/mockx-oracle:$(version)-$(sha)
+	docker push $(docker_registry)/mockx-oracle:latest
+	@echo "Building mockx-periscope..."
+	docker build -t $(docker_registry)/mockx-periscope:$(version) -t $(docker_registry)/mockx-periscope:$(version)-$(sha) -t $(docker_registry)/mockx-periscope:latest packages/periscope
+	docker push $(docker_registry)/mockx-periscope:$(version)
+	docker push $(docker_registry)/mockx-periscope:$(version)-$(sha)
+	docker push $(docker_registry)/mockx-periscope:latest
+	@echo "✅ All Docker images built and pushed for $(version)"
+
+release: test tag release-docker ## Complete release: test, tag, and push Docker images
+	@echo "🎉 Release $(version) completed successfully!"
+	@echo "📋 Next steps:"
+	@echo "  1. Update CHANGELOG.md with release date"
+	@echo "  2. Create GitHub Release with notes"
+	@echo "  3. Deploy to production using versioned images"
+
+release-patch: ## Quick patch release (increment patch version)
+	@$(eval CURRENT_VERSION := $(shell git describe --tags --abbrev=0))
+	@$(eval NEW_VERSION := $(shell echo $(CURRENT_VERSION) | awk -F. '{print $$1"."$$2"."$$3+1}'))
+	@echo "Creating patch release: $(CURRENT_VERSION) → $(NEW_VERSION)"
+	@make release version=$(NEW_VERSION)
+
+release-minor: ## Minor release (increment minor version)
+	@$(eval CURRENT_VERSION := $(shell git describe --tags --abbrev=0))
+	@$(eval NEW_VERSION := $(shell echo $(CURRENT_VERSION) | awk -F. '{print $$1"."$$2+1".0"}'))
+	@echo "Creating minor release: $(CURRENT_VERSION) → $(NEW_VERSION)"
+	@make release version=$(NEW_VERSION)
+
+version: ## Show current version and available tags
+	@echo "Current version: $(version)"
+	@echo "Git SHA: $(sha)"
+	@echo ""
+	@echo "Recent tags:"
+	@git tag --sort=-version:refname | head -10
+	@echo ""
+	@echo "Usage:"
+	@echo "  make release version=v0.3.0     # Specific version"
+	@echo "  make release-patch              # Auto-increment patch"
+	@echo "  make release-minor              # Auto-increment minor"
