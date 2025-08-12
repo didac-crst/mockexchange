@@ -197,31 +197,56 @@ create_tag() {
     fi
 }
 
-# Build Docker images locally
+# Build and push Docker images
 build_docker_images() {
     local version=$1
     local sha
     sha=$(git rev-parse --short HEAD)
     
-    print_info "Building Docker images for $version..."
+    print_info "Building and pushing Docker images for $version..."
     
     if [[ $DRY_RUN == false ]]; then
-        # Build each service locally
+        # Check Docker credentials
+        if [[ -z "$DOCKER_USERNAME" || -z "$DOCKER_PASSWORD" ]]; then
+            print_warning "Docker credentials not set. Please set DOCKER_USERNAME and DOCKER_PASSWORD"
+            print_info "You can still build images locally, but they won't be pushed"
+        fi
+        
+        # Build and push each service
         local services=("engine" "oracle" "periscope")
         for service in "${services[@]}"; do
             print_info "Building $service..."
-            docker build -t "mockx-$service:$version" \
-                        -t "mockx-$service:$version-$sha" \
-                        -t "mockx-$service:latest" \
-                        "packages/$service"
+            if ! docker build -t "$DOCKER_REGISTRY/mockx-$service:$version" \
+                            -t "$DOCKER_REGISTRY/mockx-$service:$version-$sha" \
+                            -t "$DOCKER_REGISTRY/mockx-$service:latest" \
+                            "packages/$service"; then
+                print_error "Failed to build $service image"
+                exit 1
+            fi
+            
+            if [[ -n "$DOCKER_USERNAME" && -n "$DOCKER_PASSWORD" ]]; then
+                print_info "Pushing $service..."
+                if ! docker push "$DOCKER_REGISTRY/mockx-$service:$version" || \
+                   ! docker push "$DOCKER_REGISTRY/mockx-$service:$version-$sha" || \
+                   ! docker push "$DOCKER_REGISTRY/mockx-$service:latest"; then
+                    print_error "Failed to push $service images"
+                    exit 1
+                fi
+            fi
         done
         
-        print_success "Docker images built locally"
+        print_success "Docker images built and pushed"
     else
-        print_info "DRY RUN: Would build Docker images locally"
-        print_info "  - mockx-engine:$version"
-        print_info "  - mockx-oracle:$version"
-        print_info "  - mockx-periscope:$version"
+        print_info "DRY RUN: Would build and push Docker images"
+        print_info "  - $DOCKER_REGISTRY/mockx-engine:$version"
+        print_info "  - $DOCKER_REGISTRY/mockx-oracle:$version"
+        print_info "  - $DOCKER_REGISTRY/mockx-periscope:$version"
+    fi
+}
+        print_info "DRY RUN: Would build and push Docker images"
+        print_info "  - $DOCKER_REGISTRY/mockx-engine:$version"
+        print_info "  - $DOCKER_REGISTRY/mockx-oracle:$version"
+        print_info "  - $DOCKER_REGISTRY/mockx-periscope:$version"
     fi
 }
 
@@ -293,7 +318,15 @@ main() {
         create_tag "$VERSION"
     fi
     
-    if [[ $NO_DOCKER == false ]]; then
+        local repo_url
+        repo_url=$(git config --get remote.origin.url)
+        local github_repo
+        if [[ $repo_url =~ github\.com[:/]([^/]+/[^/]+)(.git)?$ ]]; then
+            github_repo="${BASH_REMATCH[1]}"
+            echo "  1. Verify the release on GitHub: https://github.com/$github_repo/releases/tag/$VERSION"
+        else
+            echo "  1. Verify the release on your git hosting platform"
+        fi
         build_docker_images "$VERSION"
     fi
     
