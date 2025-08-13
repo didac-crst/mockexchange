@@ -33,12 +33,45 @@ jobs:
       - name: Start services
         run: |
           docker run -d --name mockx-valkey -p 6379:6379 valkey/valkey:7-alpine --requirepass testpass
-          sleep 5
+          # Wait for Valkey to be ready
+          for i in {1..60}; do
+            if docker exec mockx-valkey sh -lc 'valkey-cli -a testpass ping' 2>/dev/null | grep -q PONG; then
+              echo "Valkey is ready"
+              break
+            fi
+            echo "Waiting for Valkey… ($i)"
+            sleep 1
+          done
+          # Fail if not ready
+          docker exec mockx-valkey sh -lc 'valkey-cli -a testpass ping' 2>/dev/null | grep -q PONG
           cd packages/engine
           poetry run uvicorn api.server:app --host 0.0.0.0 --port 8000 &
-          sleep 10
+          echo "UVICORN_PID=$!" >> "$GITHUB_ENV"
+          # Wait for engine HTTP readiness
+          for i in {1..60}; do
+            if curl -sf -o /dev/null http://127.0.0.1:8000/ || curl -sf -o /dev/null http://127.0.0.1:8000/health || curl -sf -o /dev/null http://127.0.0.1:8000/docs; then
+              echo "Engine API is ready"
+              break
+            fi
+            echo "Waiting for Engine API… ($i)"
+            sleep 1
+          done
           cd ../..
 
+      - name: Run integration tests
+        run: |
+          cd packages/engine
+          poetry run pytest tests/integration/ -v
+          cd ../..
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop mockx-valkey || true
+          docker rm mockx-valkey || true
+          if [ -n "${UVICORN_PID:-}" ]; then
+            kill "${UVICORN_PID}" 2>/dev/null || true
+          fi
       - name: Run integration tests
         run: |
           cd packages/engine
