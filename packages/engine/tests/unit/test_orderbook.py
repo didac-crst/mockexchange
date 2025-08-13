@@ -5,8 +5,8 @@ Unit tests for the OrderBook class.
 import unittest
 from unittest.mock import Mock, patch
 
+from core._types import Order, OrderState
 from core.orderbook import OrderBook
-from core._types import Order, OrderSide, OrderState, OrderType
 
 
 class TestOrderBook(unittest.TestCase):

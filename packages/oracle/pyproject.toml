@@ -34,11 +34,11 @@ addopts = [
 
 [tool.black]
 line-length = 88
-target-version = ['py311', 'py312']
+target-version = ['py312']
 include = '\.pyi?$'
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
@@ -55,6 +55,8 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    "E731",  # lambda assigned to name (refactor later)
+    "UP040", # TypeAlias -> `type` keyword (refactor later)
 ]
 
 [build-system]

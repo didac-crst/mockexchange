@@ -1,6 +1,6 @@
 # MockExchange Suite <!-- omit in toc -->
 
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
 [![Poetry](https://img.shields.io/badge/poetry-managed-orange.svg)](https://python-poetry.org/)
@@ -21,6 +21,7 @@ This repository contains the full **MockExchange** paper-trading platform:
 
 ---
 
+## 📑 Table of Contents <!-- omit in toc -->
 - [Check service status](#check-service-status)
   - [🚀 Release Management](#-release-management)
     - [**Quick Release Commands**](#quick-release-commands)
@@ -42,10 +43,8 @@ This repository contains the full **MockExchange** paper-trading platform:
     - [Benefits of Centralized Configuration](#benefits-of-centralized-configuration)
   - [🗂 Monorepo Structure](#-monorepo-structure)
   - [📚 Documentation](#-documentation)
-    - [**Core Documentation**](#core-documentation)
-    - [**Project Documentation**](#project-documentation)
-    - [**External Resources**](#external-resources)
   - [🪪 License](#-license)
+
 ---
 
 ## TL;DR
@@ -155,7 +154,7 @@ that trades smarter than I did.
 - 🌐 **ccxt-inspired interface** — follows familiar trading API patterns to simplify bot integration.
 - 📊 **Full visibility** — Periscope dashboard for live monitoring of balances, orders, and performance metrics.
 - 🔮 **Realistic market simulation** — Oracle injects live exchange prices into a safe, risk-free trading environment.
-- 🚀 **Ready for production** — Dockerized services with pinned versions, path-filtered CI, and clear interface boundaries.
+- 🚀 **Ready for production** — Dockerized services, path-filtered CI, and clear interface boundaries.
 - 🛠 **Developer-friendly** — One-command setup, pre-commit hooks, comprehensive testing, and linting.
 
 ---
@@ -537,8 +536,6 @@ mockexchange/
 ├── Makefile          # Development commands
 ├── pyproject.toml    # Root workspace config
 ├── .pre-commit-config.yaml # Code quality hooks
-├── CHANGELOG.md      # Version history and release notes
-├── DOCKER_VERSIONS.md # Docker version pinning documentation
 └── README.md         # This file
 ```
 
@@ -546,19 +543,11 @@ mockexchange/
 
 ## 📚 Documentation
 
-### **Core Documentation**
-- [Valkey README](packages/valkey/README.md) - Database layer and data structures
-- [Oracle README](packages/oracle/README.md) - Price feed service and configuration
-- [Engine README](packages/engine/README.md) - Trading engine and API reference
-- [Periscope README](packages/periscope/README.md) - Dashboard features and usage
-
-### **Project Documentation**
-- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
-- [Docker Version Pinning](DOCKER_VERSIONS.md) - Reproducible Docker builds
-- [Examples README](examples/README.md) - Usage examples and tools
-
-### **External Resources**
-- [MockX Gateway](https://github.com/didac-crst/mockexchange-gateway) - ccxt-style Python client
+- [Valkey README](packages/valkey/README.md)
+- [Oracle README](packages/oracle/README.md)
+- [Engine README](packages/engine/README.md)
+- [Periscope README](packages/periscope/README.md)
+- [MockX Gateway](https://github.com/didac-crst/mockexchange-gateway)
 
 ---
 

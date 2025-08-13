@@ -18,8 +18,8 @@ dev: ## Install development dependencies
 	poetry install --with dev
 	pre-commit install
 
-test: ## Run tests for all packages
-	cd packages/engine && poetry run pytest
+test: ## Run unit tests for all packages (fast, no external dependencies)
+	cd packages/engine && poetry run pytest tests/unit/
 	cd packages/periscope && poetry run pytest
 	cd packages/oracle && poetry run pytest
 
@@ -32,13 +32,20 @@ test-oracle: ## Run oracle tests
 test-periscope: ## Run periscope tests
 	cd packages/periscope && poetry run pytest
 
-test-unit: ## Run unit tests only
+test-unit: ## Run unit tests only (same as 'test')
 	cd packages/engine && poetry run pytest tests/unit/
 	cd packages/oracle && poetry run pytest
 	cd packages/periscope && poetry run pytest
 
-test-integration: ## Run integration tests only
+test-integration: ## Run integration tests only (requires running services)
 	cd packages/engine && poetry run pytest tests/integration/
+
+test-integration-fresh: restart-no-cache test-integration ## Run integration tests with fresh Docker builds (no cache)
+
+test-integration-engine: ## Run engine integration tests only (requires running services)
+	cd packages/engine && poetry run pytest tests/integration/
+
+test-integration-engine-fresh: restart-engine-no-cache test-integration-engine ## Run engine integration tests with fresh engine build (no cache)
 
 lint: ## Run linting for all packages
 	poetry run ruff check .
@@ -203,7 +210,7 @@ release-docker: ## Build Docker images for current version (local only)
 	docker build -t mockx-periscope:$(version) -t mockx-periscope:$(version)-$(sha) -t mockx-periscope:latest packages/periscope
 	@echo "✅ All Docker images built locally for $(version)"
 
-release: test tag release-docker ## Complete release: test, tag, and build Docker images
+release: test tag release-docker ## Complete release: unit tests, tag, and build Docker images
 	@echo "🎉 Release $(version) completed successfully!"
 	@echo "📋 Next steps:"
 	@echo "  1. Update CHANGELOG.md with release date"

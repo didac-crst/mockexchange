@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      # Optional cache to speed up installs (safe to add later)
+      # - name: Cache Poetry venv
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ./.venv
+      #     key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        run: |
+          set -e
+          poetry install
+          cd packages/engine && poetry install
+          cd ../oracle && poetry install
+          cd ../periscope && poetry install
+
+      - name: Run unit tests for affected packages
+        run: |
+          set -e
+          BEFORE="${{ github.event.before || 'HEAD^' }}"
+          AFTER="${{ github.sha }}"
+          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "^packages/engine/"; then
+            echo "Testing engine unit tests…"; cd packages/engine && poetry run pytest tests/unit/ -v; cd - >/dev/null
+          fi
+          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "^packages/oracle/"; then
+            echo "Testing oracle…"; cd packages/oracle && poetry run pytest -v; cd - >/dev/null
+          fi
+          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "^packages/periscope/"; then
+            echo "Testing periscope…"; cd packages/periscope && poetry run pytest -v; cd - >/dev/null
+          fi
+
+      - name: Lint
+        run: |
+          poetry run ruff check .
+          poetry run black --check .

@@ -1,8 +1,9 @@
 """Unit tests for Periscope API integration."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
+
 from app.services.api import get_balance, get_orders, get_prices
 
 
