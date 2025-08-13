@@ -34,11 +34,11 @@ addopts = [
 
 [tool.black]
 line-length = 88
-target-version = ['py311', 'py312']
+target-version = ['py312']
 include = '\.pyi?$'
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
