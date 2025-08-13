@@ -26,8 +26,8 @@ wheels/
 *.egg
 MANIFEST
 
-# Poetry
-poetry.lock
+# Poetry - only ignore root lock file, keep package lock files
+/poetry.lock
 
 # Testing
 .pytest_cache/
