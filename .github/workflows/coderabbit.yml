@@ -59,7 +59,7 @@ jobs:
           poetry run black --check .
 
       - name: CodeRabbit AI Code Review
-        uses: coderabbitai/coderabbit-action@v1
+        uses: coderabbitai/coderabbit-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # coderabbit_token: ${{ secrets.CODERABBIT_TOKEN }} # only if your plan needs it
