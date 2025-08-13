@@ -5,7 +5,17 @@ All notable changes to MockExchange will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2024-08-12
+## [0.1.1] - 2025-08-12
+
+### Fixed
+- **Documentation**: Updated README badges to accurately reflect current project state
+  - Fixed Python version badge from 3.11+ to 3.12+ to match actual requirements
+  - Removed outdated README.md.backup file
+  - All badges now correctly represent current project configuration
+
+---
+
+## [0.1.0] - 2025-08-12
 
 ### Added
 - **MockX Engine**: Complete trading engine with order matching, portfolio tracking, and REST API
