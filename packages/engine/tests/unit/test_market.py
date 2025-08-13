@@ -3,7 +3,7 @@ Unit tests for the Market class.
 """
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from core.market import Market
 

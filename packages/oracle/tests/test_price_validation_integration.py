@@ -1,9 +1,8 @@
 """Integration tests for price validation functionality."""
 
-import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-from oracle.main import write_tickers, is_valid_price
+from oracle.main import write_tickers
 
 
 class TestPriceValidationIntegration:

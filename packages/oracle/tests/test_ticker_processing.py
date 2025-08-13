@@ -1,6 +1,6 @@
 """Unit tests for ticker processing functionality."""
 
-from oracle.main import normalize_ticker, normalize_timestamp, is_valid_price
+from oracle.main import is_valid_price, normalize_ticker, normalize_timestamp
 
 
 class TestTickerProcessing:

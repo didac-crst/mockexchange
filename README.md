@@ -21,40 +21,31 @@ This repository contains the full **MockExchange** paper-trading platform:
 
 ---
 
-- [TL;DR](#tldr)
-- [📜 Story](#-story)
-- [✨ Core Features](#-core-features)
-- [🗺 Architecture & Ecosystem](#-architecture--ecosystem)
-- [📦 Packages in this Monorepo](#-packages-in-this-monorepo)
-- [🚀 Quick Start](#-quick-start)
-  - [Prerequisites](#prerequisites)
-  - [1. Clone and Setup](#1-clone-and-setup)
-  - [2. Start All Services](#2-start-all-services)
-  - [3. Access Your Services](#3-access-your-services)
-  - [Alternative: Manual Service Management](#alternative-manual-service-management)
-  - [Development Setup](#development-setup)
-- [🚀 Release Management](#-release-management)
-  - [**Quick Release Commands**](#quick-release-commands)
-  - [**Makefile Release Commands**](#makefile-release-commands)
-  - [**Deploying Versioned Releases**](#deploying-versioned-releases)
-  - [**Release Process**](#release-process)
-  - [**Docker Image Tags**](#docker-image-tags)
-  - [**Release Workflow**](#release-workflow)
-  - [**Version Management**](#version-management)
-  - [Common Use Cases](#common-use-cases)
-- [📚 Examples](#-examples)
-  - [Order Generator](#order-generator)
-- [🔧 Environment Configuration](#-environment-configuration)
-  - [Quick Setup](#quick-setup)
-  - [Key Configuration Sections](#key-configuration-sections)
-    - [**Valkey (Database)**](#valkey-database)
-    - [**Oracle (Price Feeds)**](#oracle-price-feeds)
-    - [**Engine (API)**](#engine-api)
-    - [**Periscope (Dashboard)**](#periscope-dashboard)
-  - [Benefits of Centralized Configuration](#benefits-of-centralized-configuration)
-- [🗂 Monorepo Structure](#-monorepo-structure)
-- [📚 Documentation](#-documentation)
-- [🪪 License](#-license)
+- [Check service status](#check-service-status)
+  - [🚀 Release Management](#-release-management)
+    - [**Quick Release Commands**](#quick-release-commands)
+    - [**Makefile Release Commands**](#makefile-release-commands)
+    - [**Deploying Versioned Releases**](#deploying-versioned-releases)
+    - [**Release Process**](#release-process)
+    - [**Docker Image Tags**](#docker-image-tags)
+    - [**Release Workflow**](#release-workflow)
+    - [**Version Management**](#version-management)
+  - [📚 Examples](#-examples)
+    - [Order Generator](#order-generator)
+  - [🔧 Environment Configuration](#-environment-configuration)
+    - [Quick Setup](#quick-setup)
+    - [Key Configuration Sections](#key-configuration-sections)
+      - [**Valkey (Database)**](#valkey-database)
+      - [**Oracle (Price Feeds)**](#oracle-price-feeds)
+      - [**Engine (API)**](#engine-api)
+      - [**Periscope (Dashboard)**](#periscope-dashboard)
+    - [Benefits of Centralized Configuration](#benefits-of-centralized-configuration)
+  - [🗂 Monorepo Structure](#-monorepo-structure)
+  - [📚 Documentation](#-documentation)
+    - [**Core Documentation**](#core-documentation)
+    - [**Project Documentation**](#project-documentation)
+    - [**External Resources**](#external-resources)
+  - [🪪 License](#-license)
 ---
 
 ## TL;DR
@@ -164,7 +155,7 @@ that trades smarter than I did.
 - 🌐 **ccxt-inspired interface** — follows familiar trading API patterns to simplify bot integration.
 - 📊 **Full visibility** — Periscope dashboard for live monitoring of balances, orders, and performance metrics.
 - 🔮 **Realistic market simulation** — Oracle injects live exchange prices into a safe, risk-free trading environment.
-- 🚀 **Ready for production** — Dockerized services, path-filtered CI, and clear interface boundaries.
+- 🚀 **Ready for production** — Dockerized services with pinned versions, path-filtered CI, and clear interface boundaries.
 - 🛠 **Developer-friendly** — One-command setup, pre-commit hooks, comprehensive testing, and linting.
 
 ---
@@ -546,6 +537,8 @@ mockexchange/
 ├── Makefile          # Development commands
 ├── pyproject.toml    # Root workspace config
 ├── .pre-commit-config.yaml # Code quality hooks
+├── CHANGELOG.md      # Version history and release notes
+├── DOCKER_VERSIONS.md # Docker version pinning documentation
 └── README.md         # This file
 ```
 
@@ -553,11 +546,19 @@ mockexchange/
 
 ## 📚 Documentation
 
-- [Valkey README](packages/valkey/README.md)
-- [Oracle README](packages/oracle/README.md)
-- [Engine README](packages/engine/README.md)
-- [Periscope README](packages/periscope/README.md)
-- [MockX Gateway](https://github.com/didac-crst/mockexchange-gateway)
+### **Core Documentation**
+- [Valkey README](packages/valkey/README.md) - Database layer and data structures
+- [Oracle README](packages/oracle/README.md) - Price feed service and configuration
+- [Engine README](packages/engine/README.md) - Trading engine and API reference
+- [Periscope README](packages/periscope/README.md) - Dashboard features and usage
+
+### **Project Documentation**
+- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+- [Docker Version Pinning](DOCKER_VERSIONS.md) - Reproducible Docker builds
+- [Examples README](examples/README.md) - Usage examples and tools
+
+### **External Resources**
+- [MockX Gateway](https://github.com/didac-crst/mockexchange-gateway) - ccxt-style Python client
 
 ---
 

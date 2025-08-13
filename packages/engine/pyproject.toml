@@ -12,7 +12,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.11,<4.0"        # already enforces the interpreter version
+python = ">=3.12,<4.0"        # already enforces the interpreter version
 redis    = "^5.0"
 fastapi  = "^0.111"
 uvicorn  = { extras = ["standard"], version = "^0.30" }
@@ -20,6 +20,7 @@ pydantic = "^2.6"
 python-multipart = "^0.0.20"
 pykka = "^3.1"
 pandas = "^2.3"
+numpy = ">=1.26.0,<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest          = "^8.2"
