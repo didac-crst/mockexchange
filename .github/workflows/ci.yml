@@ -1,4 +1,4 @@
-name: CodeRabbit Integration
+name: CI
 
 on:
   pull_request:
@@ -11,10 +11,10 @@ permissions:
   pull-requests: write
 
 jobs:
-  coderabbit:
+  ci:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -31,8 +31,16 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
+      # Optional cache to speed up installs (safe to add later)
+      # - name: Cache Poetry venv
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ./.venv
+      #     key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
       - name: Install dependencies
         run: |
+          set -e
           poetry install
           cd packages/engine && poetry install
           cd ../oracle && poetry install
@@ -43,23 +51,17 @@ jobs:
           set -e
           BEFORE="${{ github.event.before || 'HEAD^' }}"
           AFTER="${{ github.sha }}"
-          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "packages/engine"; then
-            echo "Testing engine package..."; cd packages/engine && poetry run pytest -v; cd - >/dev/null
+          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "^packages/engine/"; then
+            echo "Testing engine…"; cd packages/engine && poetry run pytest -v; cd - >/dev/null
           fi
-          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "packages/oracle"; then
-            echo "Testing oracle package..."; cd packages/oracle && poetry run pytest -v; cd - >/dev/null
+          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "^packages/oracle/"; then
+            echo "Testing oracle…"; cd packages/oracle && poetry run pytest -v; cd - >/dev/null
           fi
-          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "packages/periscope"; then
-            echo "Testing periscope package..."; cd packages/periscope && poetry run pytest -v; cd - >/dev/null
+          if git diff --name-only "$BEFORE" "$AFTER" | grep -q "^packages/periscope/"; then
+            echo "Testing periscope…"; cd packages/periscope && poetry run pytest -v; cd - >/dev/null
           fi
 
-      - name: Run linting
+      - name: Lint
         run: |
           poetry run ruff check .
           poetry run black --check .
-
-      - name: CodeRabbit AI Code Review
-        uses: coderabbitai/coderabbit-action@main
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # coderabbit_token: ${{ secrets.CODERABBIT_TOKEN }} # only if your plan needs it
