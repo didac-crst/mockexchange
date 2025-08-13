@@ -21,7 +21,7 @@ This repository contains the full **MockExchange** paper-trading platform:
 
 ---
 
-## Table of Contents
+## Table of Contents <!-- omit in toc -->
 
 - [TL;DR](#tldr)
 - [📜 Story](#-story)
