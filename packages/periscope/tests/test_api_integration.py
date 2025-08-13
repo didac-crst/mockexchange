@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from app.services.api import get_balance, get_orders, get_prices
 
 
