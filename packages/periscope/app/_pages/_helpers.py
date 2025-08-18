@@ -485,7 +485,9 @@ def show_metrics_bulk(column, specs: list[dict]) -> None:
 # -----------------------------------------------------------------------------
 
 
-def _display_portfolio_details(assets_overview: dict | None = None, advanced_display: bool = False) -> None:  # noqa: D401
+def _display_portfolio_details(
+    assets_overview: dict | None = None, advanced_display: bool = False
+) -> None:  # noqa: D401
     """Show an advanced *equity vs frozen* breakdown in three metric columns.
 
     Uses the provided assets overview data or fetches it from ``/overview/assets`` (via
@@ -634,41 +636,48 @@ def _display_portfolio_details(assets_overview: dict | None = None, advanced_dis
 
 def _display_assets_pie_chart(assets_overview: dict) -> None:
     """Display a pie chart showing frozen vs free cash and assets values.
-    
+
     Creates a pie chart showing the distribution of:
     - Frozen cash
-    - Free cash  
+    - Free cash
     - Frozen total assets (value)
     - Free total assets (value)
     """
     balance_summary = assets_overview.get("balance_source", {})
     cash_asset = assets_overview.get("misc", {}).get("cash_asset", "")
-    
+
     # Extract the values we need for the pie chart
     frozen_cash = balance_summary.get("cash_frozen_value", 0.0)
     free_cash = balance_summary.get("cash_free_value", 0.0)
     frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
     free_assets = balance_summary.get("assets_free_value", 0.0)
     
+    # Debug: Print the values to see what we're working with
+    st.write("Debug - Assets Overview Data:")
+    st.write(f"Frozen Cash: {frozen_cash}")
+    st.write(f"Free Cash: {free_cash}")
+    st.write(f"Frozen Assets: {frozen_assets}")
+    st.write(f"Free Assets: {free_assets}")
+
     # Create data for the pie chart
     pie_data = {
         "Category": [
             f"Frozen Cash ({cash_asset})",
-            f"Free Cash ({cash_asset})", 
+            f"Free Cash ({cash_asset})",
             f"Frozen Assets ({cash_asset})",
-            f"Free Assets ({cash_asset})"
+            f"Free Assets ({cash_asset})",
         ],
-        "Value": [frozen_cash, free_cash, frozen_assets, free_assets]
+        "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
     }
-    
+
     # Filter out zero values to avoid empty slices
     df = pd.DataFrame(pie_data)
     df = df[df["Value"] > 0]
-    
+
     if df.empty:
         st.info("No assets data available for pie chart.")
         return
-    
+
     # Create the pie chart
     fig = px.pie(df, names="Category", values="Value", hole=0.4)
     fig.update_layout(
@@ -677,14 +686,14 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         height=500,
         margin={"t": 60, "b": 40, "l": 40, "r": 40},
     )
-    
+
     # Add value labels on the pie slices
     fig.update_traces(
-        textposition='inside',
-        textinfo='percent+label',
-        hovertemplate='<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>'
+        textposition="inside",
+        textinfo="percent+label",
+        hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
 
 
