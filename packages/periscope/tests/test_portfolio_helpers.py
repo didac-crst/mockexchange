@@ -45,7 +45,12 @@ class TestPortfolioHelpersLogic:
 
         # Verify the data structure
         assert len(df) == 4  # All values are non-zero
-        assert df["Category"].tolist() == ["Frozen Cash", "Free Cash", "Frozen Assets", "Free Assets"]
+        assert df["Category"].tolist() == [
+            "Frozen Cash",
+            "Free Cash",
+            "Frozen Assets",
+            "Free Assets",
+        ]
         assert df["Value"].tolist() == [1000.0, 5000.0, 2000.0, 8000.0]
 
     def test_assets_pie_chart_with_zero_values(self):

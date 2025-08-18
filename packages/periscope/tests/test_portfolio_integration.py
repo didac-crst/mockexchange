@@ -14,13 +14,15 @@ class TestPortfolioPageLogic:
         balance_data = {
             "equity": 15000.0,
             "quote_asset": "USDT",
-            "assets_df": pd.DataFrame({
-                "asset": ["BTC", "ETH", "USDT"],
-                "free": [1.0, 10.0, 5000.0],
-                "used": [0.1, 1.0, 0.0],
-                "total": [1.1, 11.0, 5000.0],
-                "quote_price": [50000.0, 3000.0, 1.0],
-            }),
+            "assets_df": pd.DataFrame(
+                {
+                    "asset": ["BTC", "ETH", "USDT"],
+                    "free": [1.0, 10.0, 5000.0],
+                    "used": [0.1, 1.0, 0.0],
+                    "total": [1.1, 11.0, 5000.0],
+                    "quote_price": [50000.0, 3000.0, 1.0],
+                }
+            ),
         }
 
         # Mock assets overview data
@@ -98,13 +100,15 @@ class TestPortfolioPageLogic:
         balance_data = {
             "equity": 15000.0,
             "quote_asset": "USDT",
-            "assets_df": pd.DataFrame({
-                "asset": ["BTC", "ETH", "ADA", "XRP", "DOT"],
-                "free": [1.0, 10.0, 1000.0, 5000.0, 100.0],
-                "used": [0.1, 1.0, 100.0, 500.0, 10.0],
-                "total": [1.1, 11.0, 1100.0, 5500.0, 110.0],
-                "quote_price": [50000.0, 3000.0, 1.0, 0.5, 10.0],
-            }),
+            "assets_df": pd.DataFrame(
+                {
+                    "asset": ["BTC", "ETH", "ADA", "XRP", "DOT"],
+                    "free": [1.0, 10.0, 1000.0, 5000.0, 100.0],
+                    "used": [0.1, 1.0, 100.0, 500.0, 10.0],
+                    "total": [1.1, 11.0, 1100.0, 5500.0, 110.0],
+                    "quote_price": [50000.0, 3000.0, 1.0, 0.5, 10.0],
+                }
+            ),
         }
 
         # Process data
@@ -181,7 +185,10 @@ class TestPortfolioPageLogic:
         assert col1 != col2
 
         # Test subheader creation logic
-        subheaders = ["Portfolio Distribution by Asset", "Asset Distribution: Frozen vs Free"]
+        subheaders = [
+            "Portfolio Distribution by Asset",
+            "Asset Distribution: Frozen vs Free",
+        ]
         assert len(subheaders) == 2
         assert "Portfolio Distribution by Asset" in subheaders
         assert "Asset Distribution: Frozen vs Free" in subheaders
@@ -196,13 +203,15 @@ class TestPortfolioDataValidation:
         valid_balance_data = {
             "equity": 15000.0,
             "quote_asset": "USDT",
-            "assets_df": pd.DataFrame({
-                "asset": ["BTC", "ETH"],
-                "free": [1.0, 10.0],
-                "used": [0.1, 1.0],
-                "total": [1.1, 11.0],
-                "quote_price": [50000.0, 3000.0],
-            }),
+            "assets_df": pd.DataFrame(
+                {
+                    "asset": ["BTC", "ETH"],
+                    "free": [1.0, 10.0],
+                    "used": [0.1, 1.0],
+                    "total": [1.1, 11.0],
+                    "quote_price": [50000.0, 3000.0],
+                }
+            ),
         }
 
         # Verify required keys
@@ -219,11 +228,13 @@ class TestPortfolioDataValidation:
     def test_validate_chart_data_processing(self):
         """Test validation of chart data processing."""
         # Mock data
-        df = pd.DataFrame({
-            "asset": ["BTC", "ETH", "ADA"],
-            "total": [1.1, 11.0, 1100.0],
-            "quote_price": [50000.0, 3000.0, 1.0],
-        })
+        df = pd.DataFrame(
+            {
+                "asset": ["BTC", "ETH", "ADA"],
+                "total": [1.1, 11.0, 1100.0],
+                "quote_price": [50000.0, 3000.0, 1.0],
+            }
+        )
 
         # Process data
         df["value"] = df["total"] * df["quote_price"]
