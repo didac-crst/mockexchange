@@ -56,37 +56,38 @@ See the [main README](../../README.md#-environment-configuration) for the comple
 ### **Performance Page**
 <img src="./docs/img/page_performance.png" alt="Performance Dashboard" width="800">
 
-- **Trade Statistics** - Aggregated trading metrics and performance indicators
-- **Performance Charts** - Visual representation of trading activity over time
-- **Asset Performance** - Individual asset performance tracking and analysis
-- **Historical Data** - Comprehensive view of trading history and patterns
+- **Trade Overview** - Summary of all trades with buy/sell breakdowns and fee analysis
+- **Capital Metrics** - Equity, deposits, withdrawals, and net investment tracking
+- **Advanced Filters** - Interactive filtering by trade status, side, type, and asset
+- **Visual Degradation** - Color-coded rows that highlight recent activity and fade over time
+- **Real-time Updates** - Auto-refresh with persistent filter settings
 
 ### **Portfolio Page**
 <img src="./docs/img/page_portfolio.png" alt="Portfolio Dashboard" width="800">
 
-- **Asset Balances** - Free, used, and total balances for each asset
-- **Portfolio Value** - Total value in quote currency (USDT)
-- **Asset Allocation** - Interactive pie chart showing portfolio distribution
-- **Performance Metrics** - PnL and percentage changes
-- **Real-time Updates** - Auto-refresh with configurable intervals
+- **Asset Overview** - Current holdings with free, used, and total balances per asset
+- **Portfolio Value** - Total equity and market value in quote currency (USDT)
+- **Asset Allocation** - Interactive donut chart with "Other" grouping for small positions
+- **Advanced Breakdown** - Toggle between simple equity view and detailed cash/asset breakdown
+- **Sortable Table** - Human-readable table with formatted numbers and portfolio shares
 
 ### **Order Book Page**
 <img src="./docs/img/page_order_book.png" alt="Order Book" width="800">
 
-- **Order List** - All orders with status, price, and execution details
-- **Filtering** - Filter by status, symbol, side, and time range
-- **Real-time Updates** - Live order status changes
-- **Order Details** - Click any order to view complete information and history
-- **Interactive Navigation** - Seamless navigation between different views
+- **Order Management** - Complete order history with status, price, and execution details
+- **Smart Filtering** - Filter by status, symbol, side, type, and configurable time range
+- **Data Range Control** - Slider to fetch recent orders (10-1000) or entire order book
+- **Visual Feedback** - Color-coded rows highlighting new activity with fade-out effect
+- **Order Details Access** - Click any order to view complete information and execution history
 
 ### **Order Details Page**
 <img src="./docs/img/page_order_details.png" alt="Order Details" width="800">
 
-- **Complete Order Information** - Full order details including creation time, execution time, and status
-- **Order History** - Complete execution history with timestamps and prices
-- **Trade Breakdown** - Detailed view of all trades that fulfilled the order
-- **Navigation Integration** - Easy return to main views with contextual navigation buttons
-- **Real-time Data** - Live updates of order status and execution details
+- **Order Summary** - Complete order information including status, type, and timestamps
+- **Execution History** - Step-by-step order history with timestamps and price changes
+- **Trade Breakdown** - Detailed view of all individual trades that fulfilled the order
+- **Order Actions** - Cancel open orders directly from the interface
+- **Navigation** - Contextual navigation buttons to return to main views
 
 ## Architecture
 
