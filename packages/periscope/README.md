@@ -56,11 +56,11 @@ See the [main README](../../README.md#-environment-configuration) for the comple
 ### **Performance Page**
 <img src="./docs/img/page_performance.png" alt="Performance Dashboard" width="800">
 
-- **Trade Overview** - Summary of all trades with buy/sell breakdowns and fee analysis
-- **Capital Metrics** - Equity, deposits, withdrawals, and net investment tracking
-- **Advanced Filters** - Interactive filtering by trade status, side, type, and asset
-- **Visual Degradation** - Color-coded rows that highlight recent activity and fade over time
-- **Real-time Updates** - Auto-refresh with persistent filter settings
+- **Investment Multiples** - RVPI, DPI, and TVPI ratios for performance measurement
+- **Capital Breakdown** - Waterfall chart showing distribution between net investment, P&L, assets, and cash
+- **Performance Metrics** - Gross/net earnings, fees, and current asset valuations
+- **Advanced Toggle** - Switch between simple and detailed performance views
+- **Real-time Updates** - Auto-refresh with current portfolio performance data
 
 ### **Portfolio Page**
 <img src="./docs/img/page_portfolio.png" alt="Portfolio Dashboard" width="800">
