@@ -35,14 +35,15 @@ This repository contains the full **MockExchange** paper-trading platform:
   - [3. Access Your Services](#3-access-your-services)
   - [Alternative: Manual Service Management](#alternative-manual-service-management)
   - [Development Setup](#development-setup)
-- [🚀 Release Management](#-release-management)
-  - [**Quick Release Commands**](#quick-release-commands)
-  - [**Makefile Release Commands**](#makefile-release-commands)
-  - [**Deploying Versioned Releases**](#deploying-versioned-releases)
-  - [**Release Process**](#release-process)
-  - [**Docker Image Tags**](#docker-image-tags)
-  - [**Release Workflow**](#release-workflow)
-  - [**Version Management**](#version-management)
+- [🚀 How we ship](#-how-we-ship)
+  - [Standard Workflow (Recommended)](#standard-workflow-recommended)
+  - [Release Branch Workflow (For Complex Releases)](#release-branch-workflow-for-complex-releases)
+  - [Release Branch Script Features](#release-branch-script-features)
+  - [When to use Release Branches](#when-to-use-release-branches)
+- [📦 Install from GitHub tags](#-install-from-github-tags)
+  - [Oracle](#oracle)
+  - [Engine](#engine)
+  - [Periscope](#periscope)
 - [📚 Examples](#-examples)
   - [Common Use Cases](#common-use-cases)
   - [Order Generator](#order-generator)
@@ -287,6 +288,10 @@ make lint
 
 # Check service status
 make status
+
+# Release management
+make release-branch    # Create release branch (interactive)
+make version          # Show current version and tags
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -296,132 +301,126 @@ make logs-periscope    # Dashboard logs only
 # Check service status
 make status            # Show all service statuses
 
-## 🚀 Release Management
+## 🚀 How we ship
 
-MockExchange uses a comprehensive release management system with versioned Docker images and automated workflows. This ensures reproducible deployments and easy rollbacks.
+### Standard Workflow (Recommended)
+1. Create a feature branch, implement changes.
+2. Open a Pull Request (PR). CI runs tests and lint.
+3. When green, merge into `main`.
+4. **Create a release**:
+   - **GitHub UI** (Recommended): **Releases** → *Draft a new release* → Tag `vX.Y.Z` → Publish
+   - **CLI**: 
+     ```bash
+     git checkout main && git pull --ff-only
+     git tag -a vX.Y.Z -m "MockExchange vX.Y.Z"
+     git push origin vX.Y.Z
+     ```
 
-### **Quick Release Commands**
+CI will run on the tag to validate the release commit.
 
-The release script (`./scripts/release.sh`) handles the complete release process:
+### Release Branch Workflow (For Complex Releases)
+For more control or when you need to freeze changes for QA/testing:
 
+1. Create feature branch → implement changes
+2. Open PR → CI runs tests
+3. **Create release branch** (automated):
+   ```bash
+   # Interactive mode (recommended)
+   make release-branch
+   
+   # Direct mode
+   ./scripts/create-release-branch.sh patch    # 0.1.0 → 0.1.1
+   ./scripts/create-release-branch.sh minor    # 0.1.0 → 0.2.0
+   ./scripts/create-release-branch.sh major    # 0.1.0 → 1.0.0
+   
+       # Preview what would happen
+    ./scripts/create-release-branch.sh patch --dry-run
+    ```
+4. **Push the release branch**: `git push -u origin release/vX.Y.Z`
+5. **Tag the release branch**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+6. **Push tag**: `git push origin vX.Y.Z`
+7. **Merge to main** after release is validated
+
+### Release Branch Script Features
+
+The `scripts/create-release-branch.sh` script provides:
+
+- **🔄 Automatic version calculation** - Fetches latest tags and calculates next version
+- **✅ Git validation** - Checks branch, working directory, and remote sync
+- **🛡️ Safety features** - Dry-run mode, confirmations, error handling
+- **🎨 User-friendly** - Colored output, clear instructions, help text
+- **📋 Next steps** - Shows what to do after branch creation
+
+**Requirements:**
+- Must be on `main` branch (or confirm override)
+- Working directory must be clean
+- Remote tags must be up to date
+
+**Examples:**
 ```bash
-# Create a patch release (auto-increment patch version: 0.3.0 → 0.3.1)
-./scripts/release.sh -p
+# See what would happen
+./scripts/create-release-branch.sh patch --dry-run
 
-# Create a minor release (auto-increment minor version: 0.3.0 → 0.4.0)  
-./scripts/release.sh -m
+# Create a patch release branch
+./scripts/create-release-branch.sh patch
 
-# Create a major release (auto-increment major version: 0.3.0 → 1.0.0)
-./scripts/release.sh -M
-
-# Release specific version (e.g., for hotfixes)
-./scripts/release.sh v0.3.0
-
-# Dry run to see what would happen without making changes
-./scripts/release.sh --dry-run v0.3.0
-
-# Show help and available options
-./scripts/release.sh --help
+# Interactive mode with menu
+make release-branch
 ```
 
-### **Makefile Release Commands**
-
-The Makefile provides convenient shortcuts for common release tasks:
+### Quick Reference: Common Release Commands
 
 ```bash
-# Show current version and recent git tags
+# Check current version and tags
 make version
 
-# Create git tag for specific version
-make tag version=v0.3.0
+# Create release branch (interactive)
+make release-branch
 
-# Build and push Docker images for a version
-make release-docker version=v0.3.0
+# Create release branch (direct)
+./scripts/create-release-branch.sh patch
 
-# Complete release workflow (test + tag + docker)
-make release version=v0.3.0
+# Create and push a tag
+git tag -a v0.1.1 -m "Release v0.1.1"
+git push origin v0.1.1
 
-# Auto-increment versions (convenience commands)
-make release-patch    # 0.3.0 → 0.3.1
-make release-minor    # 0.3.0 → 0.4.0
-make release-major    # 0.3.0 → 1.0.0
+# Deploy specific version
+VERSION=v0.1.1 docker-compose up -d
 ```
 
-### **Deploying Versioned Releases**
+### When to use Release Branches
 
-Deploy specific versions to ensure consistency across environments:
+Use a release branch when you need to:
+- **Freeze changes** for QA/testing while `main` continues development
+- **Cherry-pick hotfixes** onto a stable release candidate
+- **Maintain multiple release lines** (e.g., v1.x and v2.x simultaneously)
+
+**Default workflow**: Tag directly on `main` for simplicity.
+
+## 📦 Install from GitHub tags
+
+You can install any service directly from a Git tag:
+
+#### Oracle
+```bash
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/oracle"
+```
+
+#### Engine
+```bash
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/engine"
+```
+
+#### Periscope
+```bash
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/periscope"
+```
+
+Alternatively, clone at a tag and install with Poetry inside each package:
 
 ```bash
-# Deploy specific version (after building with make release-docker)
-VERSION=v0.3.0 docker-compose up -d
-
-# Deploy latest (uses local images)
-docker-compose up -d
-
-# Build and deploy in one step
-make release-docker version=v0.3.0
-VERSION=v0.3.0 docker-compose up -d
-
-# Deploy with specific version and rebuild images
-VERSION=v0.3.0 docker-compose up -d --build
-```
-
-### **Release Process**
-
-The release process follows these steps to ensure quality and reproducibility:
-
-1. **Development**: Features developed on feature branches with proper testing
-2. **Testing**: All tests must pass before release (`make test`)
-3. **Version Bump**: Update version in `pyproject.toml` and other config files
-4. **Tagging**: Create annotated git tag with version and release notes
-5. **Docker Build**: Build versioned Docker images for all services
-6. **Deployment**: Deploy using versioned Docker images for consistency
-7. **Documentation**: Update changelog and release notes
-8. **Verification**: Test deployed services to ensure they work correctly
-
-### **Docker Image Tags**
-
-Each release creates multiple Docker image tags for different use cases:
-
-- `mockx-engine:0.3.0` - **Version tag** (recommended for production)
-- `mockx-engine:0.3.0-abc1234` - **Version + short SHA** (for debugging specific builds)
-- `mockx-engine:latest` - **Latest stable** (for development)
-
-**Local images only** - no external registry required. Images are built and stored locally for simplicity.
-
-### **Release Workflow**
-
-Here's the typical workflow for creating a new release:
-
-```bash
-# 1. Ensure all tests pass
-make test
-
-# 2. Create a patch release (most common)
-./scripts/release.sh -p
-
-# 3. Deploy the new version
-VERSION=$(cat pyproject.toml | grep version | cut -d'"' -f2) docker-compose up -d
-
-# 4. Verify deployment
-make status
-curl http://localhost:8000/health
-```
-
-### **Version Management**
-
-MockExchange follows [Semantic Versioning](https://semver.org/) (SemVer):
-
-- **MAJOR.MINOR.PATCH** format (e.g., `0.3.0`)
-- **PATCH** (0.3.0 → 0.3.1): Bug fixes and minor improvements
-- **MINOR** (0.3.0 → 0.4.0): New features, backward compatible
-- **MAJOR** (0.3.0 → 1.0.0): Breaking changes
-
-**Version files updated during release:**
-- `pyproject.toml` (root and package versions)
-- `packages/*/pyproject.toml` (individual package versions)
-- `CHANGELOG.md` (release notes)
-- Git tags (annotated with release notes)
+git clone --depth 1 --branch vX.Y.Z git@github.com:didac-crst/mockexchange.git
+cd mockexchange/packages/engine && poetry install
 ```
 
 ### Common Use Cases
@@ -552,6 +551,8 @@ mockexchange/
 ├── Makefile          # Development commands
 ├── pyproject.toml    # Root workspace config
 ├── .pre-commit-config.yaml # Code quality hooks
+├── scripts/          # Development and release scripts
+│   └── create-release-branch.sh # Automated release branch creation
 ├── CHANGELOG.md      # Version history and release notes
 ├── DOCKER_VERSIONS.md # Docker version pinning documentation
 └── README.md         # This file

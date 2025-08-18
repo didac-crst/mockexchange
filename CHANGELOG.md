@@ -3,9 +3,44 @@
 All notable changes to MockExchange will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project uses tags (`vX.Y.Z`) as releases.
 
-## [0.1.1] - 2025-08-12
+Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a new release' UI. CI runs on tags to validate the release.
+
+## [Unreleased]
+- (Add new entries under here in PRs)
+
+## [v0.1.2] - 2025-08-18
+
+### Added
+- **Release Branch Script**: Automated release branch creation with version calculation
+  - Automatic version bumping (patch, minor, major)
+  - Git validation and safety checks
+  - Dry-run mode and interactive usage
+  - Makefile integration with `make release-branch`
+  - Comprehensive error handling and user-friendly output
+
+### Changed
+- **Release Process**: Simplified to use Git tags instead of complex local scripts
+  - Removed `scripts/release.sh` and all references to it
+  - Updated CI to run on Git tags (`v*.*.*`) for release validation
+  - Streamlined workflow to `git tag -a vX.Y.Z && git push origin vX.Y.Z`
+  - Added GitHub Releases UI as recommended approach
+
+### Fixed
+- **Documentation**: Updated README badges (Python version 3.11+ → 3.12+)
+- **Documentation**: Removed outdated README.md.backup file
+- **Release Script**: Fixed version calculation bug that caused incorrect branch names
+- **Release Script**: Resolved output pollution issue in version detection
+
+### Documentation
+- **README**: Added "How we ship" and "Install from GitHub tags" sections
+- **README**: Added comprehensive release branch script documentation
+- **README**: Updated monorepo structure and development setup
+- **CHANGELOG**: Simplified to follow Keep a Changelog format
+- **PR Template**: Added comprehensive checklist for contributions
+
+## [v0.1.1] - 2025-08-12
 
 ### Fixed
 - **Documentation**: Updated README badges to accurately reflect current project state
@@ -15,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2025-08-12
+## [v0.1.0] - 2025-08-12
 
 ### Added
 - **MockX Engine**: Complete trading engine with order matching, portfolio tracking, and REST API
@@ -74,31 +109,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test assertion errors in integration tests
 - Environment variable handling across services
 
----
 
-## Versioning Strategy
-
-MockExchange uses **unified versioning** across all packages (Engine, Oracle, Periscope, Valkey) since they are typically deployed together.
-
-- **Major (x.0.0)**: Breaking changes, major features
-- **Minor (x.y.0)**: New features, enhancements
-- **Patch (x.y.z)**: Bug fixes, minor improvements
-
-## Release Process
-
-1. **Development**: Features developed on feature branches
-2. **Testing**: All tests must pass before release
-3. **Tagging**: Create annotated git tag with version
-4. **Docker**: Build and push versioned images
-5. **Deployment**: Deploy using versioned Docker images
-6. **Documentation**: Update changelog and release notes
-
-## Docker Image Tags
-
-Each release creates multiple Docker image tags for reproducibility:
-
-- `mockx-engine:0.1.0` - Version tag
-- `mockx-engine:0.1.0-abc1234` - Version + short SHA
-- `mockx-engine:latest` - Latest stable
-
-This ensures you can always deploy the exact code that was tested and tagged.
