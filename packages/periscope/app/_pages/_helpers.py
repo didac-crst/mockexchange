@@ -678,7 +678,7 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         return
 
     # Define the exact order we want for the pie chart
-    desired_order = ["Free Cash", "Free Assets", "Frozen Assets", "Frozen Cash"]
+    desired_order = ["Free Cash", "Frozen Cash", "Frozen Assets", "Free Assets"]
     
     # Create a categorical type with the desired order
     df["Category"] = pd.Categorical(df["Category"], categories=desired_order, ordered=True)
