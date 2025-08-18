@@ -683,14 +683,14 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
 
     # Create the pie chart with custom colors
     fig = px.pie(
-        df, 
-        names="Category", 
-        values="Value", 
+        df,
+        names="Category",
+        values="Value",
         hole=0.4,
         color="Category",
         color_discrete_map=color_map
     )
-    
+
     fig.update_layout(
         autosize=True,
         height=400,  # Reduced height for mobile
