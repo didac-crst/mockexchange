@@ -313,6 +313,11 @@ def get_tempo_avg_trade_summary(
 
     start_time = df_raw["ts_update"].min() / 1000  # Convert to seconds
     timespan = time.time() - start_time  # in seconds
+    # When the order horizon is less than 1 hour, we prefer to calculate the timespan as the difference
+    # between the last order and the first order to avoid fluctuations in the average trade summary.
+    if timespan < 3600:
+        stop_time = df_raw["ts_update"].max() / 1000  # Convert to seconds
+        timespan = stop_time - start_time + 30  # Add 30 seconds to the timespan to avoid division by very small numbers
     # Executed orders
     df_filt = df_raw[["id", "side", "actual_notion", "actual_fee"]].copy()
     df_filt = df_filt[df_filt["actual_notion"] > 0]  # Filter out zero notional orders

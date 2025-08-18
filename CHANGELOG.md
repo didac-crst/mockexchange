@@ -39,6 +39,11 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Standardized image widths to 800px for consistent display
   - Improved feature descriptions with more detailed explanations
   - Corrected Performance page description to accurately reflect investment multiples and capital breakdown
+- **Periscope Performance**: Improved timespan calculation for trade summaries
+  - Enhanced timespan calculation for orders with horizon less than 1 hour
+  - Uses difference between last and first order instead of current time
+  - Adds 30-second buffer to avoid division by very small numbers
+  - Prevents fluctuations in average trade summary calculations
 
 ## [v0.1.4] - 2025-08-18
 
