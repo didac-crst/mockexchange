@@ -28,6 +28,7 @@ from zoneinfo import ZoneInfo  # Python 3.9+
 
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -484,16 +485,19 @@ def show_metrics_bulk(column, specs: list[dict]) -> None:
 # -----------------------------------------------------------------------------
 
 
-def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa: D401
+def _display_portfolio_details(assets_overview: dict | None = None, advanced_display: bool = False) -> None:  # noqa: D401
     """Show an advanced *equity vs frozen* breakdown in three metric columns.
 
-    Fetches the combined summary from ``/overview/assets`` (via
+    Uses the provided assets overview data or fetches it from ``/overview/assets`` (via
     ``get_assets_overview``), then prints a grid of **st.metric** widgets
     comparing *portfolio* vs *order-book* numbers.  Any mismatch is
     flagged with a warning icon (⚠️) in front of the figure.
     """
 
-    summary = get_assets_overview()
+    if assets_overview is None:
+        summary = get_assets_overview()
+    else:
+        summary = assets_overview
     misc = summary.get("misc", {})
     cash_asset = misc.get("cash_asset", "")
     mismatch = misc.get("mismatch", {})  # dict[field -> bool]
@@ -626,6 +630,62 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
             },
         ]
         show_metrics_bulk(c1, specs1)
+
+
+def _display_assets_pie_chart(assets_overview: dict) -> None:
+    """Display a pie chart showing frozen vs free cash and assets values.
+    
+    Creates a pie chart showing the distribution of:
+    - Frozen cash
+    - Free cash  
+    - Frozen total assets (value)
+    - Free total assets (value)
+    """
+    balance_summary = assets_overview.get("balance_source", {})
+    cash_asset = assets_overview.get("misc", {}).get("cash_asset", "")
+    
+    # Extract the values we need for the pie chart
+    frozen_cash = balance_summary.get("cash_frozen_value", 0.0)
+    free_cash = balance_summary.get("cash_free_value", 0.0)
+    frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
+    free_assets = balance_summary.get("assets_free_value", 0.0)
+    
+    # Create data for the pie chart
+    pie_data = {
+        "Category": [
+            f"Frozen Cash ({cash_asset})",
+            f"Free Cash ({cash_asset})", 
+            f"Frozen Assets ({cash_asset})",
+            f"Free Assets ({cash_asset})"
+        ],
+        "Value": [frozen_cash, free_cash, frozen_assets, free_assets]
+    }
+    
+    # Filter out zero values to avoid empty slices
+    df = pd.DataFrame(pie_data)
+    df = df[df["Value"] > 0]
+    
+    if df.empty:
+        st.info("No assets data available for pie chart.")
+        return
+    
+    # Create the pie chart
+    fig = px.pie(df, names="Category", values="Value", hole=0.4)
+    fig.update_layout(
+        title="Asset Distribution: Frozen vs Free",
+        autosize=True,
+        height=500,
+        margin={"t": 60, "b": 40, "l": 40, "r": 40},
+    )
+    
+    # Add value labels on the pie slices
+    fig.update_traces(
+        textposition='inside',
+        textinfo='percent+label',
+        hovertemplate='<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>'
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # -----------------------------------------------------------------------------

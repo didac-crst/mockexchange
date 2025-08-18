@@ -25,10 +25,11 @@ import plotly.express as px
 import streamlit as st
 
 # First‑party / project --------------------------------------------------------
-from app.services.api import get_balance
+from app.services.api import get_balance, get_assets_overview
 
 from ._helpers import (
     _display_portfolio_details,
+    _display_assets_pie_chart,
     _format_significant_float,
     advanced_filter_toggle,
 )
@@ -75,9 +76,14 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     advanced_display = advanced_filter_toggle()
 
     # ------------------------------------------------------------------
-    # 2) Portfolio metrics (simple vs advanced)
+    # 2) Get assets overview data once to avoid duplicate API calls
     # ------------------------------------------------------------------
-    _display_portfolio_details(advanced_display=advanced_display)
+    assets_overview = get_assets_overview()
+    
+    # ------------------------------------------------------------------
+    # 3) Portfolio metrics (simple vs advanced)
+    # ------------------------------------------------------------------
+    _display_portfolio_details(assets_overview=assets_overview, advanced_display=advanced_display)
 
     # ------------------------------------------------------------------
     # 3) Build a numeric DataFrame with helper columns
@@ -109,6 +115,11 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
         margin={"t": 40, "b": 40, "l": 40, "r": 40},
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    # ------------------------------------------------------------------
+    # 4.5) Second pie chart - Asset distribution (frozen vs free)
+    # ------------------------------------------------------------------
+    _display_assets_pie_chart(assets_overview)
 
     # ------------------------------------------------------------------
     # 5) Pretty table below the chart
