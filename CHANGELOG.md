@@ -9,6 +9,13 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 
 ## [Unreleased]
 
+### Fixed
+- **Periscope Configuration**: Centralized environment variable loading
+  - Updated config.py to load .env from multiple paths for Docker compatibility
+  - Fixed API_URL loading from incorrect paths in Docker containers
+  - Resolved 'localhost:8000' connection errors in order details page
+  - All API calls now correctly use centralized configuration
+
 ## [v0.1.4] - 2025-08-18
 
 ### Added
