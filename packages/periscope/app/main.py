@@ -82,11 +82,31 @@ if not oid:
 else:
     # When viewing order details, set page to "Order Book" for consistency
     page = "Order Book"
-    # Add a back button to return to the order book
-    if st.sidebar.button("← Back to Order Book", key="back_to_orders"):
-        # Clear the order_id parameter to return to order book
-        st.query_params.clear()
-        st.rerun()
+    # Add navigation buttons to return to different pages
+    st.sidebar.markdown("**Navigate back to:**")
+    
+    col1, col2, col3 = st.sidebar.columns(3)
+    
+    with col1:
+        if st.button("Performance", key="back_to_performance"):
+            # Navigate back to performance page
+            st.query_params.clear()
+            st.query_params["page"] = "Performance"
+            st.rerun()
+    
+    with col2:
+        if st.button("Portfolio", key="back_to_portfolio"):
+            # Navigate back to portfolio page
+            st.query_params.clear()
+            st.query_params["page"] = "Portfolio"
+            st.rerun()
+    
+    with col3:
+        if st.button("Order Book", key="back_to_orders"):
+            # Navigate back to order book page
+            st.query_params.clear()
+            st.query_params["page"] = "Order Book"
+            st.rerun()
 
 # -----------------------------------------------------------------------------
 # 2) Auto-refresh – keeps data up-to-date without F5

@@ -21,7 +21,8 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Fixed connection errors when accessing order history
 - **Navigation UX**: Improved navigation when viewing order details
   - Disabled main navigation radio when viewing order details (order_id parameter)
-  - Added "Back to Order Book" button for easy navigation back
+  - Added three navigation buttons: "Performance", "Portfolio", "Order Book"
+  - Each button properly sets the page parameter for correct navigation
   - Cleaner, more focused interface when viewing specific orders
 
 ## [v0.1.4] - 2025-08-18
