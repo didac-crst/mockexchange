@@ -298,29 +298,38 @@ make status            # Show all service statuses
 
 ## 🚀 How we ship
 
+### Standard Workflow (Recommended)
 1. Create a feature branch, implement changes.
 2. Open a Pull Request (PR). CI runs tests and lint.
 3. When green, merge into `main`.
-4. **Create a tag** to release:
-   - From CLI:
+4. **Create a release**:
+   - **GitHub UI** (Recommended): **Releases** → *Draft a new release* → Tag `vX.Y.Z` → Publish
+   - **CLI**: 
      ```bash
      git checkout main && git pull --ff-only
      git tag -a vX.Y.Z -m "MockExchange vX.Y.Z"
      git push origin vX.Y.Z
      ```
-   - Or from GitHub UI: **Releases** → *Draft a new release* → Tag `vX.Y.Z` → Publish.
 
-CI will also run on the tag to validate the release commit.
+CI will run on the tag to validate the release commit.
 
-### Optional: stabilization branch
+### Alternative: Release Branch Workflow
+For more control or when you need to freeze changes:
+1. Create feature branch → implement changes
+2. Open PR → CI runs tests
+3. **Create release branch** from `main`: `git checkout -b release/vX.Y.Z`
+4. **Tag the release branch**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+5. **Push tag**: `git push origin vX.Y.Z`
+6. **Merge to main** after release is validated
 
-If you need to freeze changes for QA while `main` moves on:
-- Create `release/X.Y.Z` from `main`,
-- cherry-pick fixes onto it,
-- tag from that branch (`vX.Y.Z`),
-- merge back into `main` after release.
+### When to use Release Branches
 
-This is optional; default is tagging on `main`.
+Use a release branch when you need to:
+- **Freeze changes** for QA/testing while `main` continues development
+- **Cherry-pick hotfixes** onto a stable release candidate
+- **Maintain multiple release lines** (e.g., v1.x and v2.x simultaneously)
+
+**Default workflow**: Tag directly on `main` for simplicity.
 
 ## 📦 Install from GitHub tags
 
