@@ -10,7 +10,7 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 ## [Unreleased]
 - (Add new entries under here in PRs)
 
-## [v0.1.4] - 2025-08-18
+## [v0.1.3] - 2025-08-18
 
 ### Added
 - **Portfolio Dashboard Enhancement**: Added second pie chart for asset distribution analysis
