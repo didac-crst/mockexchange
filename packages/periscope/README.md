@@ -8,7 +8,8 @@ MockX Periscope provides:
 
 - **Portfolio Dashboard** - Real-time balance overview and asset allocation
 - **Order Management** - View and track order status and execution
-- **Trade History** - Complete trading activity and performance metrics
+- **Order Details** - Detailed view of individual orders with complete history
+- **Performance Analytics** - Comprehensive trading activity and performance metrics
 - **Real-time Updates** - Auto-refresh with configurable intervals
 - **Responsive Design** - Works on desktop and mobile devices
 - **Streamlit UI** - Modern, clean interface built with Streamlit
@@ -53,21 +54,39 @@ See the [main README](../../README.md#-environment-configuration) for the comple
 ## Features
 
 ### **Portfolio Page**
+![Portfolio Dashboard](./docs/img/page_portfolio.png)
+
 - **Asset Balances** - Free, used, and total balances for each asset
 - **Portfolio Value** - Total value in quote currency (USDT)
-- **Asset Allocation** - Pie chart showing portfolio distribution
+- **Asset Allocation** - Interactive pie chart showing portfolio distribution
 - **Performance Metrics** - PnL and percentage changes
+- **Real-time Updates** - Auto-refresh with configurable intervals
 
-### **Orders Page**
+### **Order Book Page**
+![Order Book](./docs/img/page_order_book.png)
+
 - **Order List** - All orders with status, price, and execution details
 - **Filtering** - Filter by status, symbol, side, and time range
 - **Real-time Updates** - Live order status changes
-- **Order Details** - Click to view complete order information
+- **Order Details** - Click any order to view complete information and history
+- **Interactive Navigation** - Seamless navigation between different views
+
+### **Order Details Page**
+![Order Details](./docs/img/page_order_details.png)
+
+- **Complete Order Information** - Full order details including creation time, execution time, and status
+- **Order History** - Complete execution history with timestamps and prices
+- **Trade Breakdown** - Detailed view of all trades that fulfilled the order
+- **Navigation Integration** - Easy return to main views with contextual navigation buttons
+- **Real-time Data** - Live updates of order status and execution details
 
 ### **Performance Page**
-- **Trade Statistics** - Aggregated trading metrics
-- **Performance Charts** - Visual representation of trading activity
-- **Asset Performance** - Individual asset performance tracking
+![Performance Dashboard](./docs/img/page_performance.png)
+
+- **Trade Statistics** - Aggregated trading metrics and performance indicators
+- **Performance Charts** - Visual representation of trading activity over time
+- **Asset Performance** - Individual asset performance tracking and analysis
+- **Historical Data** - Comprehensive view of trading history and patterns
 
 ## Architecture
 
@@ -102,10 +121,7 @@ streamlit run app/main.py
 - **Configuration** - Update `app/config.py`
 - **API Integration** - Extend `app/services/api.py`
 
-## Screenshots
 
-![Portfolio Dashboard](./docs/img/portfolio_page.png)
-![Orders Page](./docs/img/orders_page.png)
 
 ## Dependencies
 
