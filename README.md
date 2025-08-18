@@ -35,14 +35,15 @@ This repository contains the full **MockExchange** paper-trading platform:
   - [3. Access Your Services](#3-access-your-services)
   - [Alternative: Manual Service Management](#alternative-manual-service-management)
   - [Development Setup](#development-setup)
-- [🚀 Release Management](#-release-management)
-  - [**Quick Release Commands**](#quick-release-commands)
-  - [**Makefile Release Commands**](#makefile-release-commands)
-  - [**Deploying Versioned Releases**](#deploying-versioned-releases)
-  - [**Release Process**](#release-process)
-  - [**Docker Image Tags**](#docker-image-tags)
-  - [**Release Workflow**](#release-workflow)
-  - [**Version Management**](#version-management)
+- [🚀 How we ship](#-how-we-ship)
+  - [Standard Workflow (Recommended)](#standard-workflow-recommended)
+  - [Release Branch Workflow (For Complex Releases)](#release-branch-workflow-for-complex-releases)
+  - [Release Branch Script Features](#release-branch-script-features)
+  - [When to use Release Branches](#when-to-use-release-branches)
+- [📦 Install from GitHub tags](#-install-from-github-tags)
+  - [Oracle](#oracle)
+  - [Engine](#engine)
+  - [Periscope](#periscope)
 - [📚 Examples](#-examples)
   - [Common Use Cases](#common-use-cases)
   - [Order Generator](#order-generator)
@@ -332,12 +333,13 @@ For more control or when you need to freeze changes for QA/testing:
    ./scripts/create-release-branch.sh minor    # 0.1.0 → 0.2.0
    ./scripts/create-release-branch.sh major    # 0.1.0 → 1.0.0
    
-   # Preview what would happen
-   ./scripts/create-release-branch.sh patch --dry-run
-   ```
-4. **Tag the release branch**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
-5. **Push tag**: `git push origin vX.Y.Z`
-6. **Merge to main** after release is validated
+       # Preview what would happen
+    ./scripts/create-release-branch.sh patch --dry-run
+    ```
+4. **Push the release branch**: `git push -u origin release/vX.Y.Z`
+5. **Tag the release branch**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+6. **Push tag**: `git push origin vX.Y.Z`
+7. **Merge to main** after release is validated
 
 ### Release Branch Script Features
 
@@ -399,17 +401,17 @@ Use a release branch when you need to:
 
 You can install any service directly from a Git tag:
 
-**Oracle**
+#### Oracle
 ```bash
 pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/oracle"
 ```
 
-**Engine**
+#### Engine
 ```bash
 pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/engine"
 ```
 
-**Periscope**
+#### Periscope
 ```bash
 pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/periscope"
 ```
