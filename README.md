@@ -288,8 +288,9 @@ make lint
 # Check service status
 make status
 
-# Create release branches (when needed)
-make release-branch
+# Release management
+make release-branch    # Create release branch (interactive)
+make version          # Show current version and tags
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -316,23 +317,74 @@ make status            # Show all service statuses
 
 CI will run on the tag to validate the release commit.
 
-### Alternative: Release Branch Workflow
-For more control or when you need to freeze changes:
+### Release Branch Workflow (For Complex Releases)
+For more control or when you need to freeze changes for QA/testing:
+
 1. Create feature branch → implement changes
 2. Open PR → CI runs tests
 3. **Create release branch** (automated):
    ```bash
-   # Interactive mode
+   # Interactive mode (recommended)
    make release-branch
    
    # Direct mode
    ./scripts/create-release-branch.sh patch    # 0.1.0 → 0.1.1
    ./scripts/create-release-branch.sh minor    # 0.1.0 → 0.2.0
    ./scripts/create-release-branch.sh major    # 0.1.0 → 1.0.0
+   
+   # Preview what would happen
+   ./scripts/create-release-branch.sh patch --dry-run
    ```
 4. **Tag the release branch**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
 5. **Push tag**: `git push origin vX.Y.Z`
 6. **Merge to main** after release is validated
+
+### Release Branch Script Features
+
+The `scripts/create-release-branch.sh` script provides:
+
+- **🔄 Automatic version calculation** - Fetches latest tags and calculates next version
+- **✅ Git validation** - Checks branch, working directory, and remote sync
+- **🛡️ Safety features** - Dry-run mode, confirmations, error handling
+- **🎨 User-friendly** - Colored output, clear instructions, help text
+- **📋 Next steps** - Shows what to do after branch creation
+
+**Requirements:**
+- Must be on `main` branch (or confirm override)
+- Working directory must be clean
+- Remote tags must be up to date
+
+**Examples:**
+```bash
+# See what would happen
+./scripts/create-release-branch.sh patch --dry-run
+
+# Create a patch release branch
+./scripts/create-release-branch.sh patch
+
+# Interactive mode with menu
+make release-branch
+```
+
+### Quick Reference: Common Release Commands
+
+```bash
+# Check current version and tags
+make version
+
+# Create release branch (interactive)
+make release-branch
+
+# Create release branch (direct)
+./scripts/create-release-branch.sh patch
+
+# Create and push a tag
+git tag -a v0.1.1 -m "Release v0.1.1"
+git push origin v0.1.1
+
+# Deploy specific version
+VERSION=v0.1.1 docker-compose up -d
+```
 
 ### When to use Release Branches
 
@@ -497,6 +549,8 @@ mockexchange/
 ├── Makefile          # Development commands
 ├── pyproject.toml    # Root workspace config
 ├── .pre-commit-config.yaml # Code quality hooks
+├── scripts/          # Development and release scripts
+│   └── create-release-branch.sh # Automated release branch creation
 ├── CHANGELOG.md      # Version history and release notes
 ├── DOCKER_VERSIONS.md # Docker version pinning documentation
 └── README.md         # This file
