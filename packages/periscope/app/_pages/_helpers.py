@@ -12,7 +12,9 @@ The module groups three kinds of helpers:
    balance-vs-orderbook summary from the API and shows it as Streamlit
    metrics, highlighting mismatches with a warning icon.
 
-Only **docstrings and comments** have been added; no functional changes.
+This module contains shared formatting, metric rendering helpers, and chart utilities.
+Recent updates added assets pie-chart helpers and extended `_display_portfolio_details`
+to accept an optional `assets_overview` payload to avoid duplicate API calls.
 """
 
 from __future__ import annotations
@@ -533,7 +535,7 @@ def _display_portfolio_details(
                 "label": "Equity ▶ Frozen",
                 "value": balance_summary["total_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["total_frozen_value"],
+                "incomplete": mismatch.get("total_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
             },
@@ -541,7 +543,7 @@ def _display_portfolio_details(
                 "label": "Equity ▶ Frozen [Order book]",
                 "value": orders_summary["total_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["total_frozen_value"],
+                "incomplete": mismatch.get("total_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
                 "incomplete_display": True,
@@ -567,7 +569,7 @@ def _display_portfolio_details(
                 "label": "Cash Equivalents ▶ Frozen",
                 "value": balance_summary["cash_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["cash_frozen_value"],
+                "incomplete": mismatch.get("cash_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
             },
@@ -575,7 +577,7 @@ def _display_portfolio_details(
                 "label": "Cash Equivalents ▶ Frozen [Order book]",
                 "value": orders_summary["cash_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["cash_frozen_value"],
+                "incomplete": mismatch.get("cash_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
                 "incomplete_display": True,
@@ -601,7 +603,7 @@ def _display_portfolio_details(
                 "label": "Volatile Assets ▶ Frozen",
                 "value": balance_summary["assets_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["assets_frozen_value"],
+                "incomplete": mismatch.get("assets_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
             },
@@ -609,7 +611,7 @@ def _display_portfolio_details(
                 "label": "Volatile Assets ▶ Frozen [Order book]",
                 "value": orders_summary["assets_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["assets_frozen_value"],
+                "incomplete": mismatch.get("assets_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
                 "incomplete_display": True,
@@ -655,10 +657,10 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
     # Create data for the pie chart
     pie_data = {
         "Category": [
-            f"Frozen Cash ({cash_asset})",
-            f"Free Cash ({cash_asset})",
-            f"Frozen Assets ({cash_asset})",
-            f"Free Assets ({cash_asset})",
+            f"Frozen Cash",
+            f"Free Cash",
+            f"Frozen Assets",
+            f"Free Assets",
         ],
         "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
     }
