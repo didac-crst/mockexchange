@@ -85,6 +85,9 @@ else:
     # Add navigation buttons to return to different pages
     st.sidebar.markdown("**Navigate back to:**")
     
+    # Add indentation using markdown spaces
+    st.sidebar.markdown("&nbsp;")  # Add some spacing
+    
     if st.sidebar.button("Performance", key="back_to_performance"):
         # Navigate back to performance page
         st.query_params.clear()

@@ -70,13 +70,8 @@ def render(order_id: str) -> None:  # noqa: D401
     )  # noqa: E731
 
     # ------------------------------------------------------------------
-    # Back navigation – remove "order_id" query param and rerun main page
+    # Back navigation is now handled in main.py sidebar
     # ------------------------------------------------------------------
-    if st.button("← Back to Order Book"):
-        if "order_id" in st.query_params:
-            del st.query_params["order_id"]
-            update_page(page="Order Book")  # update query params
-        st.rerun()
 
     # ------------------------------------------------------------------
     # Fetch order (with history) from REST API
