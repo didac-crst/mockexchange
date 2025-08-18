@@ -8,7 +8,44 @@ and this project uses tags (`vX.Y.Z`) as releases.
 Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a new release' UI. CI runs on tags to validate the release.
 
 ## [Unreleased]
-- (Add new entries under here in PRs)
+
+## [v0.1.4] - 2025-08-18
+
+### Added
+- **Docker Compose Flexibility**: Support for external service connections
+  - Removed `depends_on` dependencies for flexible service startup
+  - Added `start-sequential` command for proper dependency ordering
+  - Support for connecting to external Valkey, Oracle, and Engine services
+  - Individual service startup commands for independent operation
+
+- **Makefile Enhancements**: New commands for flexible service management
+  - `make start-sequential` - Start services in dependency order (valkey → oracle → engine → periscope)
+  - `make start` - Start all services in parallel
+  - Individual service commands: `start-engine`, `start-oracle`, `start-periscope`, `start-valkey`
+  - Corresponding stop, restart, and logs commands for each service
+
+### Changed
+- **Docker Compose Configuration**: Updated for better flexibility
+  - Default version updated to 0.1.3
+  - Removed hard dependencies between services
+  - Enhanced environment variable support for external connections
+  - Periscope API_URL now configurable for external engine connections
+
+- **Periscope Portfolio Charts**: Improved mobile responsiveness and styling
+  - Fixed pie chart sizing issues on mobile devices
+  - Added custom color scheme for asset distribution chart:
+    * Free Cash: #0061FF (blue)
+    * Frozen Cash: #EF6C00 (orange)
+    * Free Assets: #0EC1FD (light blue)
+    * Frozen Assets: #FFB347 (light orange)
+  - Consolidated duplicate pie chart functions
+  - Reduced chart height to 400px for better mobile display
+  - Added explicit height parameters for consistent rendering
+
+### Fixed
+- **Mobile Display**: Resolved pie chart size inconsistencies on mobile devices
+- **Code Duplication**: Removed redundant `_display_assets_pie_chart_compact` function
+- **Docker Compose**: Fixed version mismatch between git tags and docker-compose.yml
 
 ## [v0.1.3] - 2025-08-18
 

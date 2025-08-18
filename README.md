@@ -240,8 +240,11 @@ cp .env.example .env
 
 ### 2. Start All Services
 ```bash
-# One command to start everything
+# Start all services in parallel (default)
 make start
+
+# Or start services in dependency order (recommended for first-time setup)
+make start-sequential
 ```
 
 **What this launches:**
@@ -257,7 +260,7 @@ make start
 - **📋 Logs**: `make logs`
 
 ### Alternative: Manual Service Management
-If you prefer to start services individually:
+If you prefer to start services individually or connect to external services:
 
 ```bash
 # Start services in order (recommended)
@@ -270,6 +273,12 @@ make start-periscope   # Dashboard
 make stop-engine       # Stop only the API
 make restart-oracle    # Restart price feed
 make logs-periscope    # View dashboard logs
+
+# Connect to external services (update .env first)
+# VALKEY_HOST=192.168.1.100
+# API_URL=http://192.168.1.101:8000
+make start-engine      # Engine connects to external Valkey
+make start-periscope   # Periscope connects to external Engine
 ```
 
 ### Development Setup
@@ -502,11 +511,15 @@ All environment variables are centralized in the root `.env` file. This eliminat
 cp .env.example .env
 ```
 
-**Note**: The `.env.example` is configured for local development. For Docker deployment, change `API_URL` from `http://localhost:8000` to `http://engine:8000`.
+**Note**: The `.env.example` is configured for Docker Compose. For external services, update:
+- `VALKEY_HOST` - Point to external Valkey/Redis server
+- `ENGINE_HOST` - Point to external Engine API server
+- `PERISCOPE_HOST` - Point to external Periscope dashboard server
 
 ### Key Configuration Sections
 
 #### **Valkey (Database)**
+- `VALKEY_HOST` - Database host (default: `valkey` for Docker, use IP for external)
 - `VALKEY_PASSWORD` - Database authentication
 - `VALKEY_PORT` - Database port (default: 6379)
 
@@ -516,11 +529,13 @@ cp .env.example .env
 - `INTERVAL_SEC` - Price update frequency
 
 #### **Engine (API)**
+- `ENGINE_HOST` - API server host (default: `engine` for Docker, use IP for external)
 - `ENGINE_PORT` - API server port (default: 8000)
 - `COMMISSION` - Trading commission rate
 - `API_KEY` - Authentication key
 
 #### **Periscope (Dashboard)**
+- `PERISCOPE_HOST` - Dashboard host (default: `localhost` for Docker, use IP for external)
 - `PERISCOPE_PORT` - Dashboard port (default: 8501)
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
@@ -531,6 +546,14 @@ cp .env.example .env
 - ✅ **Easy customization** - Change once, applies everywhere
 - ✅ **Better security** - Centralized password management
 - ✅ **Simplified deployment** - One config file to manage
+- ✅ **Automatic URL construction** - API_URL and UI_URL built from HOST:PORT variables
+
+### URL Construction
+The system automatically constructs URLs from HOST and PORT variables:
+- `API_URL = http://${ENGINE_HOST}:${ENGINE_PORT}` (for Periscope to connect to Engine)
+- `UI_URL = http://${PERISCOPE_HOST}:${PERISCOPE_PORT}` (for dashboard links)
+
+This means you only need to configure the individual HOST and PORT variables, not the full URLs.
 
 ---
 
