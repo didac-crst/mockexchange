@@ -9,6 +9,8 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 
 ## [Unreleased]
 
+## [v0.1.4] - 2025-08-18
+
 ### Added
 - **Docker Compose Flexibility**: Support for external service connections
   - Removed `depends_on` dependencies for flexible service startup
