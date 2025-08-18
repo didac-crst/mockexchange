@@ -287,6 +287,9 @@ make lint
 
 # Check service status
 make status
+
+# Create release branches (when needed)
+make release-branch
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -317,7 +320,16 @@ CI will run on the tag to validate the release commit.
 For more control or when you need to freeze changes:
 1. Create feature branch → implement changes
 2. Open PR → CI runs tests
-3. **Create release branch** from `main`: `git checkout -b release/vX.Y.Z`
+3. **Create release branch** (automated):
+   ```bash
+   # Interactive mode
+   make release-branch
+   
+   # Direct mode
+   ./scripts/create-release-branch.sh patch    # 0.1.0 → 0.1.1
+   ./scripts/create-release-branch.sh minor    # 0.1.0 → 0.2.0
+   ./scripts/create-release-branch.sh major    # 0.1.0 → 1.0.0
+   ```
 4. **Tag the release branch**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
 5. **Push tag**: `git push origin vX.Y.Z`
 6. **Merge to main** after release is validated
@@ -335,14 +347,14 @@ Use a release branch when you need to:
 
 You can install any service directly from a Git tag:
 
-**Engine**
-```bash
-pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/engine"
-```
-
 **Oracle**
 ```bash
 pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/oracle"
+```
+
+**Engine**
+```bash
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/engine"
 ```
 
 **Periscope**

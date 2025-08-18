@@ -197,3 +197,21 @@ version: ## Show current version and available tags
 	@echo "To create a release:"
 	@echo "  git tag -a vX.Y.Z -m 'Release vX.Y.Z'"
 	@echo "  git push origin vX.Y.Z"
+	@echo ""
+	@echo "To create a release branch:"
+	@echo "  ./scripts/create-release-branch.sh [patch|minor|major]"
+	@echo "  ./scripts/create-release-branch.sh patch --dry-run  # Preview"
+
+release-branch: ## Create a new release branch (interactive)
+	@echo "Creating release branch..."
+	@echo "Choose bump type:"
+	@echo "  1) patch (0.1.0 → 0.1.1)"
+	@echo "  2) minor (0.1.0 → 0.2.0)"
+	@echo "  3) major (0.1.0 → 1.0.0)"
+	@read -p "Enter choice (1-3): " choice; \
+	case $$choice in \
+		1) ./scripts/create-release-branch.sh patch ;; \
+		2) ./scripts/create-release-branch.sh minor ;; \
+		3) ./scripts/create-release-branch.sh major ;; \
+		*) echo "Invalid choice"; exit 1 ;; \
+	esac
