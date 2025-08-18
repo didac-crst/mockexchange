@@ -707,10 +707,10 @@ def _display_assets_pie_chart_compact(assets_overview: dict) -> None:
     # Create data for the pie chart
     pie_data = {
         "Category": [
-            f"Frozen Cash ({cash_asset})",
-            f"Free Cash ({cash_asset})",
-            f"Frozen Assets ({cash_asset})",
-            f"Free Assets ({cash_asset})",
+            "Frozen Cash",
+            "Free Cash",
+            "Frozen Assets",
+            "Free Assets",
         ],
         "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
     }
