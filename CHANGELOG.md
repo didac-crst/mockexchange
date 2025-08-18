@@ -19,6 +19,10 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Removed direct environment variable loading in order_details.py
   - Now uses centralized configuration from config.py
   - Fixed connection errors when accessing order history
+- **Navigation UX**: Improved navigation when viewing order details
+  - Disabled main navigation radio when viewing order details (order_id parameter)
+  - Added "Back to Order Book" button for easy navigation back
+  - Cleaner, more focused interface when viewing specific orders
 
 ## [v0.1.4] - 2025-08-18
 

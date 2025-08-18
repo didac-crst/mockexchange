@@ -69,14 +69,24 @@ oid = params.get("order_id")  # already a single value (or None)
 # Default to portfolio if param missing
 initial_page = params.get("page", "Performance")  # default to "Performance"
 
-# Two-page app: Portfolio ↔ Order Book
-page = st.sidebar.radio(
-    "Navigate",
-    ("Performance", "Portfolio", "Order Book"),
-    index=["Performance", "Portfolio", "Order Book"].index(initial_page),
-    key="sidebar_page",
-    on_change=update_page,  # Update URL query-params when page changes
-)
+# Only show navigation when not viewing order details
+if not oid:
+    # Three-page app: Performance ↔ Portfolio ↔ Order Book
+    page = st.sidebar.radio(
+        "Navigate",
+        ("Performance", "Portfolio", "Order Book"),
+        index=["Performance", "Portfolio", "Order Book"].index(initial_page),
+        key="sidebar_page",
+        on_change=update_page,  # Update URL query-params when page changes
+    )
+else:
+    # When viewing order details, set page to "Order Book" for consistency
+    page = "Order Book"
+    # Add a back button to return to the order book
+    if st.sidebar.button("← Back to Order Book", key="back_to_orders"):
+        # Clear the order_id parameter to return to order book
+        st.query_params.clear()
+        st.rerun()
 
 # -----------------------------------------------------------------------------
 # 2) Auto-refresh – keeps data up-to-date without F5
