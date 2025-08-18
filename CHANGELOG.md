@@ -10,6 +10,40 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 ## [Unreleased]
 - (Add new entries under here in PRs)
 
+## [v0.1.3] - 2025-08-18
+
+### Added
+- **Portfolio Dashboard Enhancement**: Added second pie chart for asset distribution analysis
+  - New pie chart showing frozen vs free cash and assets values
+  - Side-by-side layout with harmonized styling for both charts
+  - Optimized API calls by fetching assets overview data once
+  - Clean, professional labels without currency clutter
+  - Consistent donut chart styling with 40% hole and percentage labels
+  - Enhanced user experience with better visual organization
+
+### Changed
+- **Portfolio Page Layout**: Improved chart presentation and performance
+  - Refactored to avoid duplicate API calls to `get_assets_overview()`
+  - Added subheaders for better chart identification
+  - Harmonized chart styling (height, margins, text positioning)
+  - Streamlined function structure for better maintainability
+
+### Testing
+- **Comprehensive Test Suite**: Added extensive unit tests for new portfolio features
+  - Created `test_portfolio_helpers.py` with 8 tests for chart functions and data validation
+  - Created `test_portfolio_integration.py` with 10 tests for portfolio page integration
+  - Updated `test_api_integration.py` with 7 tests for API data structure validation
+  - Total of 25 new tests covering edge cases, error handling, and data validation
+  - All tests pass successfully: 21 periscope tests, 21 engine tests, 31 oracle tests
+
+### Fixed
+- **Test Infrastructure**: Resolved test execution issues across all packages
+  - Fixed import errors by installing all package dependencies
+  - Resolved 'No module named core' errors in engine tests
+  - Fixed streamlit import issues in periscope test environment
+  - Ensured proper virtual environment setup for all packages
+  - All 73 tests now pass across engine, periscope, and oracle packages
+
 ## [v0.1.2] - 2025-08-18
 
 ### Added
