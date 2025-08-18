@@ -636,7 +636,6 @@ def _display_portfolio_details(
         show_metrics_bulk(c1, specs1)
 
 
-
 def _display_assets_pie_chart(assets_overview: dict) -> None:
     """Display a pie chart showing frozen vs free cash and assets values.
 
@@ -675,9 +674,9 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
 
     # Define custom colors for each category
     color_map = {
-        "Free Cash": "#0061FF",      # blue
-        "Frozen Cash": "#EF6C00",    # orange
-        "Free Assets": "#0EC1FD",    # light blue
+        "Free Cash": "#0061FF",  # blue
+        "Frozen Cash": "#EF6C00",  # orange
+        "Free Assets": "#0EC1FD",  # light blue
         "Frozen Assets": "#FFB347",  # light orange
     }
 
@@ -688,7 +687,7 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         values="Value",
         hole=0.4,
         color="Category",
-        color_discrete_map=color_map
+        color_discrete_map=color_map,
     )
 
     fig.update_layout(
