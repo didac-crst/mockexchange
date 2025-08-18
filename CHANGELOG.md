@@ -24,6 +24,11 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Added three navigation buttons: "Performance", "Portfolio", "Order Book"
   - Each button properly sets the page parameter for correct navigation
   - Cleaner, more focused interface when viewing specific orders
+- **Navigation Design**: Enhanced main navigation with button-based interface
+  - Replaced radio buttons with regular buttons for better visual design
+  - Active page highlighted with secondary button style (disabled state)
+  - Inactive pages as clickable buttons with consistent width and indentation
+  - Improved user experience with clear visual indication of current page
 
 ## [v0.1.4] - 2025-08-18
 
