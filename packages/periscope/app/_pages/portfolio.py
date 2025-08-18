@@ -28,7 +28,7 @@ import streamlit as st
 from app.services.api import get_assets_overview, get_balance
 
 from ._helpers import (
-    _display_assets_pie_chart_compact,
+    _display_assets_pie_chart,
     _display_portfolio_details,
     _format_significant_float,
     advanced_filter_toggle,
@@ -113,14 +113,15 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     # ------------------------------------------------------------------
     # 4) Two pie charts side by side - harmonized styling
     # ------------------------------------------------------------------
-    col1, col2 = st.columns(2)
+    # Use responsive columns for better mobile display
+    col1, col2 = st.columns([1, 1], gap="medium")
 
     with col1:
         st.subheader("Portfolio Distribution by Asset")
         fig1 = px.pie(pie_df, names="asset", values="value", hole=0.4)
         fig1.update_layout(
             autosize=True,
-            height=500,
+            height=400,  # Reduced height for mobile
             margin={"t": 40, "b": 40, "l": 40, "r": 40},
             showlegend=True,
         )
@@ -129,11 +130,11 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
             textinfo="percent+label",
             hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
         )
-        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig1, use_container_width=True, height=400)
 
     with col2:
         st.subheader("Asset Distribution: Frozen vs Free")
-        _display_assets_pie_chart_compact(assets_overview)
+        _display_assets_pie_chart(assets_overview)
 
     # ------------------------------------------------------------------
     # 5) Pretty table below the chart

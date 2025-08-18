@@ -636,14 +636,15 @@ def _display_portfolio_details(
         show_metrics_bulk(c1, specs1)
 
 
+
 def _display_assets_pie_chart(assets_overview: dict) -> None:
     """Display a pie chart showing frozen vs free cash and assets values.
 
     Creates a pie chart showing the distribution of:
-    - Frozen cash
-    - Free cash
-    - Frozen total assets (value)
-    - Free total assets (value)
+    - Frozen cash (orange)
+    - Free cash (blue)
+    - Frozen total assets (light orange)
+    - Free total assets (light blue)
     """
     balance_summary = assets_overview.get("balance_source", {})
 
@@ -672,13 +673,29 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         st.info("No assets data available for pie chart.")
         return
 
-    # Create the pie chart
-    fig = px.pie(df, names="Category", values="Value", hole=0.4)
+    # Define custom colors for each category
+    color_map = {
+        "Free Cash": "#0061FF",      # blue
+        "Frozen Cash": "#EF6C00",    # orange
+        "Free Assets": "#0EC1FD",    # light blue
+        "Frozen Assets": "#FFB347",  # light orange
+    }
+
+    # Create the pie chart with custom colors
+    fig = px.pie(
+        df, 
+        names="Category", 
+        values="Value", 
+        hole=0.4,
+        color="Category",
+        color_discrete_map=color_map
+    )
+    
     fig.update_layout(
-        title="Asset Distribution: Frozen vs Free",
         autosize=True,
-        height=500,
-        margin={"t": 60, "b": 40, "l": 40, "r": 40},
+        height=400,  # Reduced height for mobile
+        margin={"t": 40, "b": 40, "l": 40, "r": 40},
+        showlegend=True,
     )
 
     # Add value labels on the pie slices
@@ -688,58 +705,7 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
     )
 
-    st.plotly_chart(fig, use_container_width=True)
-
-
-def _display_assets_pie_chart_compact(assets_overview: dict) -> None:
-    """Display a compact pie chart showing frozen vs free cash and assets values.
-
-    Compact version for side-by-side display with harmonized styling.
-    """
-    balance_summary = assets_overview.get("balance_source", {})
-
-    # Extract the values we need for the pie chart
-    frozen_cash = balance_summary.get("cash_frozen_value", 0.0)
-    free_cash = balance_summary.get("cash_free_value", 0.0)
-    frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
-    free_assets = balance_summary.get("assets_free_value", 0.0)
-
-    # Create data for the pie chart
-    pie_data = {
-        "Category": [
-            "Frozen Cash",
-            "Free Cash",
-            "Frozen Assets",
-            "Free Assets",
-        ],
-        "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
-    }
-
-    # Filter out zero values to avoid empty slices
-    df = pd.DataFrame(pie_data)
-    df = df[df["Value"] > 0]
-
-    if df.empty:
-        st.info("No assets data available for pie chart.")
-        return
-
-    # Create the pie chart with harmonized styling
-    fig = px.pie(df, names="Category", values="Value", hole=0.4)
-    fig.update_layout(
-        autosize=True,
-        height=500,
-        margin={"t": 40, "b": 40, "l": 40, "r": 40},
-        showlegend=True,
-    )
-
-    # Add value labels on the pie slices with harmonized styling
-    fig.update_traces(
-        textposition="inside",
-        textinfo="percent+label",
-        hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, height=400)
 
 
 # -----------------------------------------------------------------------------

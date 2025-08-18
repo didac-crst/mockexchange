@@ -62,50 +62,59 @@ clean: ## Clean up build artifacts
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
-start: ## Start all services with Docker Compose
-	docker-compose up -d
+start: ## Start all services in parallel
+	docker compose up -d
+
+start-sequential: ## Start all services in dependency order (valkey -> oracle -> engine -> periscope)
+	docker compose up -d valkey
+	sleep 3
+	docker compose up -d oracle
+	sleep 3
+	docker compose up -d engine
+	sleep 3
+	docker compose up -d periscope
 
 start-valkey: ## Start only the valkey service
-	docker-compose up -d valkey
+	docker compose up -d valkey
 
 start-engine: ## Start only the engine service
-	docker-compose up -d engine
+	docker compose up -d engine
 
 start-oracle: ## Start only the oracle service
-	docker-compose up -d oracle
+	docker compose up -d oracle
 
 start-periscope: ## Start only the periscope service
-	docker-compose up -d periscope
+	docker compose up -d periscope
 
 stop: ## Stop all services
-	docker-compose down
+	docker compose down
 
 stop-valkey: ## Stop only the valkey service
-	docker-compose stop valkey
+	docker compose stop valkey
 
 stop-engine: ## Stop only the engine service
-	docker-compose stop engine
+	docker compose stop engine
 
 stop-oracle: ## Stop only the oracle service
-	docker-compose stop oracle
+	docker compose stop oracle
 
 stop-periscope: ## Stop only the periscope service
-	docker-compose stop periscope
+	docker compose stop periscope
 
 logs: ## Show logs from all services
-	docker-compose logs -f
+	docker compose logs -f
 
 logs-valkey: ## Show valkey logs
-	docker-compose logs -f valkey
+	docker compose logs -f valkey
 
 logs-engine: ## Show engine logs
-	docker-compose logs -f engine
+	docker compose logs -f engine
 
 logs-oracle: ## Show oracle logs
-	docker-compose logs -f oracle
+	docker compose logs -f oracle
 
 logs-periscope: ## Show periscope logs
-	docker-compose logs -f periscope
+	docker compose logs -f periscope
 
 restart: stop start ## Restart all services
 
@@ -118,32 +127,32 @@ restart-oracle: stop-oracle start-oracle ## Restart only the oracle service
 restart-periscope: stop-periscope start-periscope ## Restart only the periscope service
 
 restart-no-cache: ## Restart all services with fresh Docker builds (no cache)
-	docker-compose down
-	docker-compose build --no-cache
-	docker-compose up -d
+	docker compose down
+	docker compose build --no-cache
+	docker compose up -d
 
 restart-valkey-no-cache: ## Restart valkey service with fresh Docker build (no cache)
-	docker-compose stop valkey
-	docker-compose build --no-cache valkey
-	docker-compose up -d valkey
+	docker compose stop valkey
+	docker compose build --no-cache valkey
+	docker compose up -d valkey
 
 restart-engine-no-cache: ## Restart engine service with fresh Docker build (no cache)
-	docker-compose stop engine
-	docker-compose build --no-cache engine
-	docker-compose up -d engine
+	docker compose stop engine
+	docker compose build --no-cache engine
+	docker compose up -d engine
 
 restart-oracle-no-cache: ## Restart oracle service with fresh Docker build (no cache)
-	docker-compose stop oracle
-	docker-compose build --no-cache oracle
-	docker-compose up -d oracle
+	docker compose stop oracle
+	docker compose build --no-cache oracle
+	docker compose up -d oracle
 
 restart-periscope-no-cache: ## Restart periscope service with fresh Docker build (no cache)
-	docker-compose stop periscope
-	docker-compose build --no-cache periscope
-	docker-compose up -d periscope
+	docker compose stop periscope
+	docker compose build --no-cache periscope
+	docker compose up -d periscope
 
 status: ## Show service status
-	docker-compose ps
+	docker compose ps
 
 # Examples and Tools
 examples: ## Show available examples
