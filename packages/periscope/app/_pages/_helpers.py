@@ -27,8 +27,8 @@ from typing import Literal
 from zoneinfo import ZoneInfo  # Python 3.9+
 
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -696,7 +696,6 @@ def _display_assets_pie_chart_compact(assets_overview: dict) -> None:
     Compact version for side-by-side display with harmonized styling.
     """
     balance_summary = assets_overview.get("balance_source", {})
-    cash_asset = assets_overview.get("misc", {}).get("cash_asset", "")
 
     # Extract the values we need for the pie chart
     frozen_cash = balance_summary.get("cash_frozen_value", 0.0)

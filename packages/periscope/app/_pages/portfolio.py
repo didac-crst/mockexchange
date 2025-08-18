@@ -25,12 +25,11 @@ import plotly.express as px
 import streamlit as st
 
 # First‑party / project --------------------------------------------------------
-from app.services.api import get_balance, get_assets_overview
+from app.services.api import get_assets_overview, get_balance
 
 from ._helpers import (
-    _display_portfolio_details,
-    _display_assets_pie_chart,
     _display_assets_pie_chart_compact,
+    _display_portfolio_details,
     _format_significant_float,
     advanced_filter_toggle,
 )
