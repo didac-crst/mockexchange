@@ -8,7 +8,22 @@ and this project uses tags (`vX.Y.Z`) as releases.
 Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a new release' UI. CI runs on tags to validate the release.
 
 ## [Unreleased]
-- (Add new entries under here in PRs)
+
+### Added
+- **Portfolio Dashboard Enhancement**: Added second pie chart for asset distribution analysis
+  - New pie chart showing frozen vs free cash and assets values
+  - Side-by-side layout with harmonized styling for both charts
+  - Optimized API calls by fetching assets overview data once
+  - Clean, professional labels without currency clutter
+  - Consistent donut chart styling with 40% hole and percentage labels
+  - Enhanced user experience with better visual organization
+
+### Changed
+- **Portfolio Page Layout**: Improved chart presentation and performance
+  - Refactored to avoid duplicate API calls to `get_assets_overview()`
+  - Added subheaders for better chart identification
+  - Harmonized chart styling (height, margins, text positioning)
+  - Streamlined function structure for better maintainability
 
 ## [v0.1.2] - 2025-08-18
 
