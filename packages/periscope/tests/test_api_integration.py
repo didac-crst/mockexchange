@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from app.services.api import get_balance, get_orders, get_prices
+from app.services.api import get_assets_overview, get_balance, get_orders, get_prices
 
 
 class TestAPIIntegration:
@@ -101,3 +101,75 @@ class TestAPIIntegration:
 
         with pytest.raises(requests.exceptions.ConnectionError):
             get_balance()
+
+    @patch("app.services.api._get")
+    def test_get_assets_overview_success(self, mock_get):
+        """Test successful assets overview retrieval."""
+        mock_get.return_value = {
+            "balance_source": {
+                "total_equity": 15000.0,
+                "total_free_value": 12000.0,
+                "total_frozen_value": 3000.0,
+                "cash_total_value": 8000.0,
+                "cash_free_value": 6000.0,
+                "cash_frozen_value": 2000.0,
+                "assets_total_value": 7000.0,
+                "assets_free_value": 6000.0,
+                "assets_frozen_value": 1000.0,
+            },
+            "orders_source": {
+                "total_frozen_value": 3000.0,
+                "cash_frozen_value": 2000.0,
+                "assets_frozen_value": 1000.0,
+            },
+            "misc": {
+                "cash_asset": "USDT",
+                "mismatch": {
+                    "total_frozen_value": False,
+                    "cash_frozen_value": False,
+                    "assets_frozen_value": False,
+                },
+            },
+        }
+
+        result = get_assets_overview()
+
+        assert "balance_source" in result
+        assert "orders_source" in result
+        assert "misc" in result
+        assert result["balance_source"]["total_equity"] == 15000.0
+        assert result["misc"]["cash_asset"] == "USDT"
+
+    @patch("app.services.api._get")
+    def test_get_assets_overview_api_error(self, mock_get):
+        """Test assets overview retrieval with API error."""
+        import requests
+
+        mock_get.side_effect = requests.exceptions.HTTPError("404 Not Found")
+
+        with pytest.raises(requests.exceptions.HTTPError):
+            get_assets_overview()
+
+    @patch("app.services.api._get")
+    def test_get_assets_overview_invalid_response(self, mock_get):
+        """Test assets overview retrieval with invalid response type."""
+        mock_get.return_value = "invalid_response_type"
+
+        with pytest.raises(TypeError):
+            get_assets_overview()
+
+    @patch("app.services.api._get")
+    def test_get_assets_overview_empty_data(self, mock_get):
+        """Test assets overview retrieval with empty data."""
+        mock_get.return_value = {
+            "balance_source": {},
+            "orders_source": {},
+            "misc": {"cash_asset": "USDT", "mismatch": {}},
+        }
+
+        result = get_assets_overview()
+
+        assert isinstance(result, dict)
+        assert "balance_source" in result
+        assert "orders_source" in result
+        assert "misc" in result
