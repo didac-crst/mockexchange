@@ -513,7 +513,8 @@ cp .env.example .env
 
 **Note**: The `.env.example` is configured for Docker Compose. For external services, update:
 - `VALKEY_HOST` - Point to external Valkey/Redis server
-- `API_URL` - Point to external Engine API server
+- `ENGINE_HOST` - Point to external Engine API server
+- `PERISCOPE_HOST` - Point to external Periscope dashboard server
 
 ### Key Configuration Sections
 
@@ -528,13 +529,14 @@ cp .env.example .env
 - `INTERVAL_SEC` - Price update frequency
 
 #### **Engine (API)**
+- `ENGINE_HOST` - API server host (default: `engine` for Docker, use IP for external)
 - `ENGINE_PORT` - API server port (default: 8000)
 - `COMMISSION` - Trading commission rate
 - `API_KEY` - Authentication key
 
 #### **Periscope (Dashboard)**
+- `PERISCOPE_HOST` - Dashboard host (default: `localhost` for Docker, use IP for external)
 - `PERISCOPE_PORT` - Dashboard port (default: 8501)
-- `API_URL` - Engine API URL (default: `http://engine:8000` for Docker, use IP for external)
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
 
@@ -544,6 +546,14 @@ cp .env.example .env
 - ✅ **Easy customization** - Change once, applies everywhere
 - ✅ **Better security** - Centralized password management
 - ✅ **Simplified deployment** - One config file to manage
+- ✅ **Automatic URL construction** - API_URL and UI_URL built from HOST:PORT variables
+
+### URL Construction
+The system automatically constructs URLs from HOST and PORT variables:
+- `API_URL = http://${ENGINE_HOST}:${ENGINE_PORT}` (for Periscope to connect to Engine)
+- `UI_URL = http://${PERISCOPE_HOST}:${PERISCOPE_PORT}` (for dashboard links)
+
+This means you only need to configure the individual HOST and PORT variables, not the full URLs.
 
 ---
 
