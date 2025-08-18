@@ -652,8 +652,6 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
     frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
     free_assets = balance_summary.get("assets_free_value", 0.0)
 
-
-
     # Create data for the pie chart
     pie_data = {
         "Category": [
@@ -683,6 +681,58 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
     )
 
     # Add value labels on the pie slices
+    fig.update_traces(
+        textposition="inside",
+        textinfo="percent+label",
+        hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def _display_assets_pie_chart_compact(assets_overview: dict) -> None:
+    """Display a compact pie chart showing frozen vs free cash and assets values.
+
+    Compact version for side-by-side display with harmonized styling.
+    """
+    balance_summary = assets_overview.get("balance_source", {})
+    cash_asset = assets_overview.get("misc", {}).get("cash_asset", "")
+
+    # Extract the values we need for the pie chart
+    frozen_cash = balance_summary.get("cash_frozen_value", 0.0)
+    free_cash = balance_summary.get("cash_free_value", 0.0)
+    frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
+    free_assets = balance_summary.get("assets_free_value", 0.0)
+
+    # Create data for the pie chart
+    pie_data = {
+        "Category": [
+            f"Frozen Cash ({cash_asset})",
+            f"Free Cash ({cash_asset})",
+            f"Frozen Assets ({cash_asset})",
+            f"Free Assets ({cash_asset})",
+        ],
+        "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
+    }
+
+    # Filter out zero values to avoid empty slices
+    df = pd.DataFrame(pie_data)
+    df = df[df["Value"] > 0]
+
+    if df.empty:
+        st.info("No assets data available for pie chart.")
+        return
+
+    # Create the pie chart with harmonized styling
+    fig = px.pie(df, names="Category", values="Value", hole=0.4)
+    fig.update_layout(
+        autosize=True,
+        height=500,
+        margin={"t": 40, "b": 40, "l": 40, "r": 40},
+        showlegend=True,
+    )
+
+    # Add value labels on the pie slices with harmonized styling
     fig.update_traces(
         textposition="inside",
         textinfo="percent+label",

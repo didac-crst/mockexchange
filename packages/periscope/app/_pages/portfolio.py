@@ -30,6 +30,7 @@ from app.services.api import get_balance, get_assets_overview
 from ._helpers import (
     _display_portfolio_details,
     _display_assets_pie_chart,
+    _display_assets_pie_chart_compact,
     _format_significant_float,
     advanced_filter_toggle,
 )
@@ -79,11 +80,13 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     # 2) Get assets overview data once to avoid duplicate API calls
     # ------------------------------------------------------------------
     assets_overview = get_assets_overview()
-    
+
     # ------------------------------------------------------------------
     # 3) Portfolio metrics (simple vs advanced)
     # ------------------------------------------------------------------
-    _display_portfolio_details(assets_overview=assets_overview, advanced_display=advanced_display)
+    _display_portfolio_details(
+        assets_overview=assets_overview, advanced_display=advanced_display
+    )
 
     # ------------------------------------------------------------------
     # 3) Build a numeric DataFrame with helper columns
@@ -108,18 +111,30 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
         # Append the "Other" slice as a synthetic row
         pie_df.loc[len(pie_df)] = {"asset": "Other", "value": other}
 
-    fig = px.pie(pie_df, names="asset", values="value", hole=0.4)
-    fig.update_layout(
-        autosize=True,  # fill container width
-        height=600,
-        margin={"t": 40, "b": 40, "l": 40, "r": 40},
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    # ------------------------------------------------------------------
+    # 4) Two pie charts side by side - harmonized styling
+    # ------------------------------------------------------------------
+    col1, col2 = st.columns(2)
 
-    # ------------------------------------------------------------------
-    # 4.5) Second pie chart - Asset distribution (frozen vs free)
-    # ------------------------------------------------------------------
-    _display_assets_pie_chart(assets_overview)
+    with col1:
+        st.subheader("Portfolio Distribution by Asset")
+        fig1 = px.pie(pie_df, names="asset", values="value", hole=0.4)
+        fig1.update_layout(
+            autosize=True,
+            height=500,
+            margin={"t": 40, "b": 40, "l": 40, "r": 40},
+            showlegend=True,
+        )
+        fig1.update_traces(
+            textposition="inside",
+            textinfo="percent+label",
+            hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
+        )
+        st.plotly_chart(fig1, use_container_width=True)
+
+    with col2:
+        st.subheader("Asset Distribution: Frozen vs Free")
+        _display_assets_pie_chart_compact(assets_overview)
 
     # ------------------------------------------------------------------
     # 5) Pretty table below the chart
