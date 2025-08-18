@@ -10,6 +10,36 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 ## [Unreleased]
 - (Add new entries under here in PRs)
 
+## [v0.1.2] - 2025-08-18
+
+### Added
+- **Release Branch Script**: Automated release branch creation with version calculation
+  - Automatic version bumping (patch, minor, major)
+  - Git validation and safety checks
+  - Dry-run mode and interactive usage
+  - Makefile integration with `make release-branch`
+  - Comprehensive error handling and user-friendly output
+
+### Changed
+- **Release Process**: Simplified to use Git tags instead of complex local scripts
+  - Removed `scripts/release.sh` and all references to it
+  - Updated CI to run on Git tags (`v*.*.*`) for release validation
+  - Streamlined workflow to `git tag -a vX.Y.Z && git push origin vX.Y.Z`
+  - Added GitHub Releases UI as recommended approach
+
+### Fixed
+- **Documentation**: Updated README badges (Python version 3.11+ → 3.12+)
+- **Documentation**: Removed outdated README.md.backup file
+- **Release Script**: Fixed version calculation bug that caused incorrect branch names
+- **Release Script**: Resolved output pollution issue in version detection
+
+### Documentation
+- **README**: Added "How we ship" and "Install from GitHub tags" sections
+- **README**: Added comprehensive release branch script documentation
+- **README**: Updated monorepo structure and development setup
+- **CHANGELOG**: Simplified to follow Keep a Changelog format
+- **PR Template**: Added comprehensive checklist for contributions
+
 ## [v0.1.1] - 2025-08-12
 
 ### Fixed

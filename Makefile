@@ -184,7 +184,7 @@ order-generator-status: ## Show order generator status
 	@cd examples/order-generator && ./manage.sh status
 
 # Version Info
-version ?= v0.3.0
+version ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 sha := $(shell git rev-parse --short HEAD)
 
 version: ## Show current version and available tags
@@ -199,6 +199,7 @@ version: ## Show current version and available tags
 	@echo "  git push origin vX.Y.Z"
 	@echo ""
 	@echo "To create a release branch:"
+	@echo "  make release-branch                  # Interactive menu"
 	@echo "  ./scripts/create-release-branch.sh [patch|minor|major]"
 	@echo "  ./scripts/create-release-branch.sh patch --dry-run  # Preview"
 
