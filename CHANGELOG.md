@@ -19,16 +19,11 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Removed direct environment variable loading in order_details.py
   - Now uses centralized configuration from config.py
   - Fixed connection errors when accessing order history
-- **Navigation UX**: Improved navigation when viewing order details
-  - Disabled main navigation radio when viewing order details (order_id parameter)
-  - Added three navigation buttons: "Performance", "Portfolio", "Order Book"
-  - Each button properly sets the page parameter for correct navigation
-  - Cleaner, more focused interface when viewing specific orders
-- **Navigation Design**: Enhanced main navigation with button-based interface
+- **Navigation Design**: Enhanced navigation with button-based interface
   - Replaced radio buttons with regular buttons for better visual design
   - Active page highlighted with secondary button style (disabled state)
-  - Inactive pages as clickable buttons with consistent width and indentation
-  - Improved user experience with clear visual indication of current page
+  - Disabled main navigation when viewing order details, replaced with back buttons
+  - Improved user experience with clear visual indication and consistent styling
 
 ## [v0.1.4] - 2025-08-18
 
