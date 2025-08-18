@@ -677,6 +677,15 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         st.info("No assets data available for pie chart.")
         return
 
+    # Define the exact order we want for the pie chart
+    desired_order = ["Free Cash", "Free Assets", "Frozen Assets", "Frozen Cash"]
+    
+    # Create a categorical type with the desired order
+    df["Category"] = pd.Categorical(df["Category"], categories=desired_order, ordered=True)
+    
+    # Sort by the categorical order
+    df = df.sort_values("Category")
+
     # Define custom colors for each category
     color_map = {
         "Free Cash": "#0061FF",  # blue
@@ -693,6 +702,7 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
         hole=0.4,
         color="Category",
         color_discrete_map=color_map,
+        category_orders={"Category": desired_order},
     )
 
     fig.update_layout(
