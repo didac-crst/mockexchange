@@ -240,8 +240,11 @@ cp .env.example .env
 
 ### 2. Start All Services
 ```bash
-# One command to start everything
+# Start all services in parallel (default)
 make start
+
+# Or start services in dependency order (recommended for first-time setup)
+make start-sequential
 ```
 
 **What this launches:**
@@ -257,7 +260,7 @@ make start
 - **📋 Logs**: `make logs`
 
 ### Alternative: Manual Service Management
-If you prefer to start services individually:
+If you prefer to start services individually or connect to external services:
 
 ```bash
 # Start services in order (recommended)
@@ -270,6 +273,12 @@ make start-periscope   # Dashboard
 make stop-engine       # Stop only the API
 make restart-oracle    # Restart price feed
 make logs-periscope    # View dashboard logs
+
+# Connect to external services (update .env first)
+# VALKEY_HOST=192.168.1.100
+# API_URL=http://192.168.1.101:8000
+make start-engine      # Engine connects to external Valkey
+make start-periscope   # Periscope connects to external Engine
 ```
 
 ### Development Setup
@@ -502,11 +511,14 @@ All environment variables are centralized in the root `.env` file. This eliminat
 cp .env.example .env
 ```
 
-**Note**: The `.env.example` is configured for local development. For Docker deployment, change `API_URL` from `http://localhost:8000` to `http://engine:8000`.
+**Note**: The `.env.example` is configured for Docker Compose. For external services, update:
+- `VALKEY_HOST` - Point to external Valkey/Redis server
+- `API_URL` - Point to external Engine API server
 
 ### Key Configuration Sections
 
 #### **Valkey (Database)**
+- `VALKEY_HOST` - Database host (default: `valkey` for Docker, use IP for external)
 - `VALKEY_PASSWORD` - Database authentication
 - `VALKEY_PORT` - Database port (default: 6379)
 
@@ -522,6 +534,7 @@ cp .env.example .env
 
 #### **Periscope (Dashboard)**
 - `PERISCOPE_PORT` - Dashboard port (default: 8501)
+- `API_URL` - Engine API URL (default: `http://engine:8000` for Docker, use IP for external)
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
 
