@@ -38,6 +38,7 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Added comprehensive Order Details page documentation
   - Standardized image widths to 800px for consistent display
   - Improved feature descriptions with more detailed explanations
+  - Corrected Performance page description to accurately reflect investment multiples and capital breakdown
 
 ## [v0.1.4] - 2025-08-18
 
