@@ -46,7 +46,7 @@ MAX_ORDERS_PER_BATCH = int(os.getenv("MAX_ORDERS_PER_BATCH", 3))
 MIN_SLEEP = float(os.getenv("MIN_SLEEP", 30))
 MAX_SLEEP = float(os.getenv("MAX_SLEEP", 60))
 
-NOMINTAL_TICKET_QUOTE = float(os.getenv("NOMINTAL_TICKET_QUOTE", 50.0))
+NOMINAL_TICKET_QUOTE = float(os.getenv("NOMINAL_TICKET_QUOTE", 50.0))
 FAST_SELL_TICKET_AMOUNT_RATIO = float(os.getenv("FAST_SELL_TICKET_AMOUNT_RATIO", 0.005))
 MIN_ORDER_QUOTE = float(os.getenv("MIN_ORDER_QUOTE", 1.0))
 MIN_BALANCE_CASH_QUOTE = float(os.getenv("MIN_BALANCE_CASH_QUOTE", 100.0))
@@ -172,9 +172,9 @@ def main() -> None:
                         # Skip if no free cash available
                         print(f"Skipping {symbol} buy order: no free cash available.")
                         continue
-                    elif cash_free > NOMINTAL_TICKET_QUOTE:
+                    elif cash_free > NOMINAL_TICKET_QUOTE:
                         # If we have enough free cash, use a nominal ticket quote
-                        ticket_amount_q = NOMINTAL_TICKET_QUOTE
+                        ticket_amount_q = NOMINAL_TICKET_QUOTE
                     else:
                         # If we don't have enough free cash, use everything we have
                         # minus a small buffer to avoid rejecting orders due to insufficient balance
@@ -196,9 +196,9 @@ def main() -> None:
                         # If it was only 1x, we would be selling the whole asset,
                         # only if we have exactly the fast ticket amount.
                         ticket_amount_q = fast_ticket_amount_q
-                    elif balance_free_asset_q > NOMINTAL_TICKET_QUOTE:
+                    elif balance_free_asset_q > NOMINAL_TICKET_QUOTE:
                         # If we have "a little bit" of free asset, use a nominal ticket quote.
-                        ticket_amount_q = NOMINTAL_TICKET_QUOTE
+                        ticket_amount_q = NOMINAL_TICKET_QUOTE
                     else:
                         # If we have "a very little bit" of free asset.
                         # We keep some buffer to avoid rejecting orders due to insufficient balance.

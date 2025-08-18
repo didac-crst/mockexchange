@@ -24,6 +24,15 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Active page highlighted with secondary button style (disabled state)
   - Disabled main navigation when viewing order details, replaced with back buttons
   - Improved user experience with clear visual indication and consistent styling
+- **Order Generator Commands**: Improved Makefile command structure
+  - Split `order-generator` into `order-generator-start-reset` and `order-generator-start`
+  - `order-generator` now shows help instead of running the command
+  - Updated `manage.sh` to support both `start` and `start --reset` commands
+  - Added warning messages for reset vs non-reset operations
+- **Order Generator Configuration**: Fixed environment variable typo
+  - Fixed typo in `NOMINTAL_TICKET_QUOTE` → `NOMINAL_TICKET_QUOTE`
+  - Order generator now correctly reads `NOMINAL_TICKET_QUOTE` from `.env`
+  - Fixed ticket amounts not respecting configuration values
 
 ## [v0.1.4] - 2025-08-18
 

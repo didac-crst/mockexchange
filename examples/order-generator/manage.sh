@@ -38,6 +38,7 @@ show_help() {
     echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
     echo "Commands:"
+    echo "  start              Start the order generator without reset (builds Docker)"
     echo "  start --reset      Start the order generator with reset (builds Docker)"
     echo "  restart            Restart the order generator (no rebuild)"
     echo "  restart --reset    Restart with reset (no rebuild)"
@@ -50,6 +51,7 @@ show_help() {
     echo "  --reset            Reset backend state (clears all data)"
     echo ""
     echo "Examples:"
+    echo "  $0 start           # Fresh start without reset (builds Docker)"
     echo "  $0 start --reset   # Fresh start with reset (builds Docker)"
     echo "  $0 restart         # Continue without reset (no rebuild)"
     echo "  $0 restart --reset # Continue with reset (no rebuild)"
@@ -112,6 +114,7 @@ start_generator() {
         # Start with reset environment variable
         RESET_PORTFOLIO=true docker compose up -d
     else
+        print_warning "Reset flag not detected. This will not clear backend state!"
         # Start without reset
         RESET_PORTFOLIO=false docker compose up -d
     fi
@@ -146,6 +149,7 @@ restart_generator() {
         # Start with reset environment variable
         RESET_PORTFOLIO=true docker compose up -d
     else
+        print_warning "Reset flag not detected. This will not clear backend state!"
         # Start without reset
         RESET_PORTFOLIO=false docker compose up -d
     fi
@@ -177,16 +181,11 @@ main() {
     
     case "$command" in
         start)
-            if [ "$option" != "--reset" ]; then
-                print_error "start requires --reset flag"
-                echo ""
-                print_warning "Use 'start --reset' for fresh start with reset"
-                print_warning "Use 'restart' to continue without reset"
-                echo ""
-                show_help
-                exit 1
+            local reset_flag="false"
+            if [ "$option" = "--reset" ]; then
+                reset_flag="true"
             fi
-            start_generator "true"
+            start_generator "$reset_flag"
             ;;
         stop)
             stop_generator
