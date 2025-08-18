@@ -646,7 +646,6 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
     - Free total assets (value)
     """
     balance_summary = assets_overview.get("balance_source", {})
-    cash_asset = assets_overview.get("misc", {}).get("cash_asset", "")
 
     # Extract the values we need for the pie chart
     frozen_cash = balance_summary.get("cash_frozen_value", 0.0)
@@ -657,10 +656,10 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
     # Create data for the pie chart
     pie_data = {
         "Category": [
-            f"Frozen Cash",
-            f"Free Cash",
-            f"Frozen Assets",
-            f"Free Assets",
+            "Frozen Cash",
+            "Free Cash",
+            "Frozen Assets",
+            "Free Assets",
         ],
         "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
     }

@@ -1,8 +1,9 @@
 """Integration tests for Periscope portfolio page functionality."""
 
+from unittest.mock import Mock
+
 import pandas as pd
 import pytest
-from unittest.mock import Mock, patch
 
 
 class TestPortfolioPageLogic:
@@ -25,8 +26,8 @@ class TestPortfolioPageLogic:
             ),
         }
 
-        # Mock assets overview data
-        assets_overview = {
+        # Mock assets overview data (used for validation)
+        _ = {
             "balance_source": {
                 "total_equity": 15000.0,
                 "total_free_value": 12000.0,

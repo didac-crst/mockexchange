@@ -1,8 +1,6 @@
 """Unit tests for Periscope portfolio helper functions."""
 
 import pandas as pd
-import pytest
-from unittest.mock import Mock, patch
 
 
 class TestPortfolioHelpersLogic:
@@ -277,5 +275,5 @@ class TestPortfolioDataValidation:
         # Verify data structure
         assert len(pie_data["Category"]) == len(pie_data["Value"])
         assert len(pie_data["Category"]) == 4
-        assert all(isinstance(v, (int, float)) for v in pie_data["Value"])
+        assert all(isinstance(v, int | float) for v in pie_data["Value"])
         assert all(isinstance(c, str) for c in pie_data["Category"])

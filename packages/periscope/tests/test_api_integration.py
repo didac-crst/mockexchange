@@ -1,9 +1,6 @@
 """Unit tests for Periscope API integration data structures."""
 
-from unittest.mock import patch
-
 import pandas as pd
-import pytest
 
 
 class TestAPIDataStructures:
@@ -27,9 +24,9 @@ class TestAPIDataStructures:
             assert "used" in item
             assert "total" in item
             assert isinstance(item["asset"], str)
-            assert isinstance(item["free"], (int, float))
-            assert isinstance(item["used"], (int, float))
-            assert isinstance(item["total"], (int, float))
+            assert isinstance(item["free"], int | float)
+            assert isinstance(item["used"], int | float)
+            assert isinstance(item["total"], int | float)
 
         # Test DataFrame conversion
         df = pd.DataFrame(balance_data)
