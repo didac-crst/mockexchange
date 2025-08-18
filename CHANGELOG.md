@@ -33,6 +33,11 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Fixed typo in `NOMINTAL_TICKET_QUOTE` → `NOMINAL_TICKET_QUOTE`
   - Order generator now correctly reads `NOMINAL_TICKET_QUOTE` from `.env`
   - Fixed ticket amounts not respecting configuration values
+- **Periscope Documentation**: Enhanced README with integrated screenshots
+  - Added new screenshots to each feature section for better visual context
+  - Added comprehensive Order Details page documentation
+  - Standardized image widths to 800px for consistent display
+  - Improved feature descriptions with more detailed explanations
 
 ## [v0.1.4] - 2025-08-18
 
