@@ -658,15 +658,15 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
     frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
     free_assets = balance_summary.get("assets_free_value", 0.0)
 
-    # Create data for the pie chart
+    # Create data for the pie chart in the desired order: free cash, free assets, frozen assets, frozen cash
     pie_data = {
         "Category": [
-            "Frozen Cash",
             "Free Cash",
-            "Frozen Assets",
             "Free Assets",
+            "Frozen Assets",
+            "Frozen Cash",
         ],
-        "Value": [frozen_cash, free_cash, frozen_assets, free_assets],
+        "Value": [free_cash, free_assets, frozen_assets, frozen_cash],
     }
 
     # Filter out zero values to avoid empty slices
