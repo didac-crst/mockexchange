@@ -10,7 +10,7 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 ## [Unreleased]
 - (Add new entries under here in PRs)
 
-## [v0.1.2] - 2024-12-19
+## [v0.1.2] - 2025-08-18
 
 ### Added
 - **Release Branch Script**: Automated release branch creation with version calculation
