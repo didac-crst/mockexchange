@@ -3,9 +3,14 @@
 All notable changes to MockExchange will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project uses tags (`vX.Y.Z`) as releases.
 
-## [0.1.1] - 2025-08-12
+Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a new release' UI. CI runs on tags to validate the release.
+
+## [Unreleased]
+- (Add new entries under here in PRs)
+
+## [v0.1.1] - 2025-08-12
 
 ### Fixed
 - **Documentation**: Updated README badges to accurately reflect current project state
@@ -15,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2025-08-12
+## [v0.1.0] - 2025-08-12
 
 ### Added
 - **MockX Engine**: Complete trading engine with order matching, portfolio tracking, and REST API
@@ -74,31 +79,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test assertion errors in integration tests
 - Environment variable handling across services
 
----
 
-## Versioning Strategy
-
-MockExchange uses **unified versioning** across all packages (Engine, Oracle, Periscope, Valkey) since they are typically deployed together.
-
-- **Major (x.0.0)**: Breaking changes, major features
-- **Minor (x.y.0)**: New features, enhancements
-- **Patch (x.y.z)**: Bug fixes, minor improvements
-
-## Release Process
-
-1. **Development**: Features developed on feature branches
-2. **Testing**: All tests must pass before release
-3. **Tagging**: Create annotated git tag with version
-4. **Docker**: Build and push versioned images
-5. **Deployment**: Deploy using versioned Docker images
-6. **Documentation**: Update changelog and release notes
-
-## Docker Image Tags
-
-Each release creates multiple Docker image tags for reproducibility:
-
-- `mockx-engine:0.1.0` - Version tag
-- `mockx-engine:0.1.0-abc1234` - Version + short SHA
-- `mockx-engine:latest` - Latest stable
-
-This ensures you can always deploy the exact code that was tested and tagged.

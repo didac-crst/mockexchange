@@ -183,51 +183,9 @@ order-generator-stop: ## Stop the order generator
 order-generator-status: ## Show order generator status
 	@cd examples/order-generator && ./manage.sh status
 
-# Release Management
+# Version Info
 version ?= v0.3.0
 sha := $(shell git rev-parse --short HEAD)
-docker_registry ?= didac
-
-tag: ## Create and push a git tag for release
-	@echo "Creating tag $(version)..."
-	@git tag -a $(version) -m "MockExchange $(version)"
-	@git push origin $(version)
-	@echo "✅ Tag $(version) created and pushed"
-
-tag-delete: ## Delete a git tag (use with caution)
-	@echo "Deleting tag $(version)..."
-	@git tag -d $(version)
-	@git push origin :refs/tags/$(version)
-	@echo "✅ Tag $(version) deleted"
-
-release-docker: ## Build Docker images for current version (local only)
-	@echo "Building Docker images for $(version)..."
-	@echo "Building mockx-engine..."
-	docker build -t mockx-engine:$(version) -t mockx-engine:$(version)-$(sha) -t mockx-engine:latest packages/engine
-	@echo "Building mockx-oracle..."
-	docker build -t mockx-oracle:$(version) -t mockx-oracle:$(version)-$(sha) -t mockx-oracle:latest packages/oracle
-	@echo "Building mockx-periscope..."
-	docker build -t mockx-periscope:$(version) -t mockx-periscope:$(version)-$(sha) -t mockx-periscope:latest packages/periscope
-	@echo "✅ All Docker images built locally for $(version)"
-
-release: test tag release-docker ## Complete release: unit tests, tag, and build Docker images
-	@echo "🎉 Release $(version) completed successfully!"
-	@echo "📋 Next steps:"
-	@echo "  1. Update CHANGELOG.md with release date"
-	@echo "  2. Deploy using: VERSION=$(version) docker-compose up -d"
-	@echo "  3. Monitor deployment and verify functionality"
-
-release-patch: ## Quick patch release (increment patch version)
-	@$(eval CURRENT_VERSION := $(shell git describe --tags --abbrev=0))
-	@$(eval NEW_VERSION := $(shell echo $(CURRENT_VERSION) | awk -F. '{print $$1"."$$2"."$$3+1}'))
-	@echo "Creating patch release: $(CURRENT_VERSION) → $(NEW_VERSION)"
-	@make release version=$(NEW_VERSION)
-
-release-minor: ## Minor release (increment minor version)
-	@$(eval CURRENT_VERSION := $(shell git describe --tags --abbrev=0))
-	@$(eval NEW_VERSION := $(shell echo $(CURRENT_VERSION) | awk -F. '{print $$1"."$$2+1".0"}'))
-	@echo "Creating minor release: $(CURRENT_VERSION) → $(NEW_VERSION)"
-	@make release version=$(NEW_VERSION)
 
 version: ## Show current version and available tags
 	@echo "Current version: $(version)"
@@ -236,7 +194,6 @@ version: ## Show current version and available tags
 	@echo "Recent tags:"
 	@git tag --sort=-version:refname | head -10
 	@echo ""
-	@echo "Usage:"
-	@echo "  make release version=v0.3.0     # Specific version"
-	@echo "  make release-patch              # Auto-increment patch"
-	@echo "  make release-minor              # Auto-increment minor"
+	@echo "To create a release:"
+	@echo "  git tag -a vX.Y.Z -m 'Release vX.Y.Z'"
+	@echo "  git push origin vX.Y.Z"

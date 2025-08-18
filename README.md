@@ -296,132 +296,56 @@ make logs-periscope    # Dashboard logs only
 # Check service status
 make status            # Show all service statuses
 
-## 🚀 Release Management
+## 🚀 How we ship
 
-MockExchange uses a comprehensive release management system with versioned Docker images and automated workflows. This ensures reproducible deployments and easy rollbacks.
+1. Create a feature branch, implement changes.
+2. Open a Pull Request (PR). CI runs tests and lint.
+3. When green, merge into `main`.
+4. **Create a tag** to release:
+   - From CLI:
+     ```bash
+     git checkout main && git pull --ff-only
+     git tag -a vX.Y.Z -m "MockExchange vX.Y.Z"
+     git push origin vX.Y.Z
+     ```
+   - Or from GitHub UI: **Releases** → *Draft a new release* → Tag `vX.Y.Z` → Publish.
 
-### **Quick Release Commands**
+CI will also run on the tag to validate the release commit.
 
-The release script (`./scripts/release.sh`) handles the complete release process:
+### Optional: stabilization branch
 
+If you need to freeze changes for QA while `main` moves on:
+- Create `release/X.Y.Z` from `main`,
+- cherry-pick fixes onto it,
+- tag from that branch (`vX.Y.Z`),
+- merge back into `main` after release.
+
+This is optional; default is tagging on `main`.
+
+## 📦 Install from GitHub tags
+
+You can install any service directly from a Git tag:
+
+**Engine**
 ```bash
-# Create a patch release (auto-increment patch version: 0.3.0 → 0.3.1)
-./scripts/release.sh -p
-
-# Create a minor release (auto-increment minor version: 0.3.0 → 0.4.0)  
-./scripts/release.sh -m
-
-# Create a major release (auto-increment major version: 0.3.0 → 1.0.0)
-./scripts/release.sh -M
-
-# Release specific version (e.g., for hotfixes)
-./scripts/release.sh v0.3.0
-
-# Dry run to see what would happen without making changes
-./scripts/release.sh --dry-run v0.3.0
-
-# Show help and available options
-./scripts/release.sh --help
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/engine"
 ```
 
-### **Makefile Release Commands**
-
-The Makefile provides convenient shortcuts for common release tasks:
-
+**Oracle**
 ```bash
-# Show current version and recent git tags
-make version
-
-# Create git tag for specific version
-make tag version=v0.3.0
-
-# Build and push Docker images for a version
-make release-docker version=v0.3.0
-
-# Complete release workflow (test + tag + docker)
-make release version=v0.3.0
-
-# Auto-increment versions (convenience commands)
-make release-patch    # 0.3.0 → 0.3.1
-make release-minor    # 0.3.0 → 0.4.0
-make release-major    # 0.3.0 → 1.0.0
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/oracle"
 ```
 
-### **Deploying Versioned Releases**
-
-Deploy specific versions to ensure consistency across environments:
-
+**Periscope**
 ```bash
-# Deploy specific version (after building with make release-docker)
-VERSION=v0.3.0 docker-compose up -d
-
-# Deploy latest (uses local images)
-docker-compose up -d
-
-# Build and deploy in one step
-make release-docker version=v0.3.0
-VERSION=v0.3.0 docker-compose up -d
-
-# Deploy with specific version and rebuild images
-VERSION=v0.3.0 docker-compose up -d --build
+pip install "git+https://github.com/didac-crst/mockexchange.git@vX.Y.Z#subdirectory=packages/periscope"
 ```
 
-### **Release Process**
-
-The release process follows these steps to ensure quality and reproducibility:
-
-1. **Development**: Features developed on feature branches with proper testing
-2. **Testing**: All tests must pass before release (`make test`)
-3. **Version Bump**: Update version in `pyproject.toml` and other config files
-4. **Tagging**: Create annotated git tag with version and release notes
-5. **Docker Build**: Build versioned Docker images for all services
-6. **Deployment**: Deploy using versioned Docker images for consistency
-7. **Documentation**: Update changelog and release notes
-8. **Verification**: Test deployed services to ensure they work correctly
-
-### **Docker Image Tags**
-
-Each release creates multiple Docker image tags for different use cases:
-
-- `mockx-engine:0.3.0` - **Version tag** (recommended for production)
-- `mockx-engine:0.3.0-abc1234` - **Version + short SHA** (for debugging specific builds)
-- `mockx-engine:latest` - **Latest stable** (for development)
-
-**Local images only** - no external registry required. Images are built and stored locally for simplicity.
-
-### **Release Workflow**
-
-Here's the typical workflow for creating a new release:
+Alternatively, clone at a tag and install with Poetry inside each package:
 
 ```bash
-# 1. Ensure all tests pass
-make test
-
-# 2. Create a patch release (most common)
-./scripts/release.sh -p
-
-# 3. Deploy the new version
-VERSION=$(cat pyproject.toml | grep version | cut -d'"' -f2) docker-compose up -d
-
-# 4. Verify deployment
-make status
-curl http://localhost:8000/health
-```
-
-### **Version Management**
-
-MockExchange follows [Semantic Versioning](https://semver.org/) (SemVer):
-
-- **MAJOR.MINOR.PATCH** format (e.g., `0.3.0`)
-- **PATCH** (0.3.0 → 0.3.1): Bug fixes and minor improvements
-- **MINOR** (0.3.0 → 0.4.0): New features, backward compatible
-- **MAJOR** (0.3.0 → 1.0.0): Breaking changes
-
-**Version files updated during release:**
-- `pyproject.toml` (root and package versions)
-- `packages/*/pyproject.toml` (individual package versions)
-- `CHANGELOG.md` (release notes)
-- Git tags (annotated with release notes)
+git clone --depth 1 --branch vX.Y.Z git@github.com:didac-crst/mockexchange.git
+cd mockexchange/packages/engine && poetry install
 ```
 
 ### Common Use Cases
