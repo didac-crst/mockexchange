@@ -15,6 +15,10 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Fixed API_URL loading from incorrect paths in Docker containers
   - Resolved 'localhost:8000' connection errors in order details page
   - All API calls now correctly use centralized configuration
+- **Order Details Page**: Fixed hardcoded API URL in order details page
+  - Removed direct environment variable loading in order_details.py
+  - Now uses centralized configuration from config.py
+  - Fixed connection errors when accessing order history
 
 ## [v0.1.4] - 2025-08-18
 
@@ -33,7 +37,7 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 
 ### Changed
 - **Docker Compose Configuration**: Updated for better flexibility
-  - Default version updated to 0.1.3
+  - Default version updated to 0.1.4
   - Removed hard dependencies between services
   - Enhanced environment variable support for external connections
   - Periscope API_URL now configurable for external engine connections
