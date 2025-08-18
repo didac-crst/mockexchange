@@ -53,8 +53,16 @@ See the [main README](../../README.md#-environment-configuration) for the comple
 
 ## Features
 
+### **Performance Page**
+<img src="./docs/img/page_performance.png" alt="Performance Dashboard" width="800">
+
+- **Trade Statistics** - Aggregated trading metrics and performance indicators
+- **Performance Charts** - Visual representation of trading activity over time
+- **Asset Performance** - Individual asset performance tracking and analysis
+- **Historical Data** - Comprehensive view of trading history and patterns
+
 ### **Portfolio Page**
-![Portfolio Dashboard](./docs/img/page_portfolio.png)
+<img src="./docs/img/page_portfolio.png" alt="Portfolio Dashboard" width="800">
 
 - **Asset Balances** - Free, used, and total balances for each asset
 - **Portfolio Value** - Total value in quote currency (USDT)
@@ -63,7 +71,7 @@ See the [main README](../../README.md#-environment-configuration) for the comple
 - **Real-time Updates** - Auto-refresh with configurable intervals
 
 ### **Order Book Page**
-![Order Book](./docs/img/page_order_book.png)
+<img src="./docs/img/page_order_book.png" alt="Order Book" width="800">
 
 - **Order List** - All orders with status, price, and execution details
 - **Filtering** - Filter by status, symbol, side, and time range
@@ -72,21 +80,13 @@ See the [main README](../../README.md#-environment-configuration) for the comple
 - **Interactive Navigation** - Seamless navigation between different views
 
 ### **Order Details Page**
-![Order Details](./docs/img/page_order_details.png)
+<img src="./docs/img/page_order_details.png" alt="Order Details" width="800">
 
 - **Complete Order Information** - Full order details including creation time, execution time, and status
 - **Order History** - Complete execution history with timestamps and prices
 - **Trade Breakdown** - Detailed view of all trades that fulfilled the order
 - **Navigation Integration** - Easy return to main views with contextual navigation buttons
 - **Real-time Data** - Live updates of order status and execution details
-
-### **Performance Page**
-![Performance Dashboard](./docs/img/page_performance.png)
-
-- **Trade Statistics** - Aggregated trading metrics and performance indicators
-- **Performance Charts** - Visual representation of trading activity over time
-- **Asset Performance** - Individual asset performance tracking and analysis
-- **Historical Data** - Comprehensive view of trading history and patterns
 
 ## Architecture
 
@@ -120,8 +120,6 @@ streamlit run app/main.py
 - **Styling** - Modify `app/_pages/_colors.py`
 - **Configuration** - Update `app/config.py`
 - **API Integration** - Extend `app/services/api.py`
-
-
 
 ## Dependencies
 
