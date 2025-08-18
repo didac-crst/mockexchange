@@ -26,4 +26,16 @@ def settings():
         "REFRESH_SECONDS": int(os.getenv("REFRESH_SECONDS", "60")),
         # 🆕 Which currency to express equity in
         "QUOTE_ASSET": os.getenv("QUOTE_ASSET", "USDT"),
+        # UI Configuration
+        "APP_TITLE": os.getenv("APP_TITLE", ""),
+        "LOGO_FILE": os.getenv("LOGO_FILE", ""),
+        "LOCAL_TZ": os.getenv("LOCAL_TZ", "UTC"),
+        # UI Settings
+        "UI_URL": os.getenv("UI_URL", "http://localhost:8501"),
+        "FRESH_WINDOW_S": int(os.getenv("FRESH_WINDOW_S", "300")),
+        "N_VISUAL_DEGRADATIONS": int(os.getenv("N_VISUAL_DEGRADATIONS", "12")),
+        "SLIDER_MIN": int(os.getenv("SLIDER_MIN", "10")),
+        "SLIDER_MAX": int(os.getenv("SLIDER_MAX", "1000")),
+        "SLIDER_STEP": int(os.getenv("SLIDER_STEP", "10")),
+        "SLIDER_DEFAULT": int(os.getenv("SLIDER_DEFAULT", "100")),
     }

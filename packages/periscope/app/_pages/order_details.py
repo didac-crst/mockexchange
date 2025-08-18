@@ -40,8 +40,9 @@ from ._helpers import (
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
-API_BASE = os.getenv("API_BASE", "http://localhost:8000")  # REST back‑end
+from app.config import settings
+
+API_BASE = settings()["API_URL"]  # REST back‑end
 
 # -----------------------------------------------------------------------------
 # Page renderer

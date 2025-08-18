@@ -38,10 +38,9 @@ from app.config import settings
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
-APP_TITLE = os.getenv("APP_TITLE", "")
-LOGO_FILE = os.getenv("LOGO_FILE", "")
-LOCAL_TZ_str = os.getenv("LOCAL_TZ", "UTC")  # e.g. "Europe/Berlin"
+APP_TITLE = settings().get("APP_TITLE", "")
+LOGO_FILE = settings().get("LOGO_FILE", "")
+LOCAL_TZ_str = settings().get("LOCAL_TZ", "UTC")  # e.g. "Europe/Berlin"
 
 # -----------------------------------------------------------------------------
 # 0) Global page configuration – must run before any Streamlit call
