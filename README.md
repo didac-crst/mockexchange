@@ -524,6 +524,11 @@ cp .env.example .env
 
 ### Key Configuration Sections
 
+#### **Global Configuration**
+- `VERSION` - MockExchange version
+- `TEST_ENV` - Test environment flag (enables API docs, disables auth)
+- `DEBUG` - Development mode flag
+
 #### **Valkey (Database)**
 - `VALKEY_HOST` - Database host (default: `valkey` for Docker, use IP for external)
 - `VALKEY_PASSWORD` - Database authentication
@@ -533,18 +538,44 @@ cp .env.example .env
 - `EXCHANGE` - Source exchange (binance, coinbase, etc.)
 - `SYMBOLS` - Trading pairs to monitor
 - `INTERVAL_SEC` - Price update frequency
+- `QUOTES` - Quote assets for discovery (comma-separated, e.g., "USDT,EUR")
+- `QUOTE` - Fallback quote asset if QUOTES is empty (default: USDT)
+- `DISCOVER_QUOTES` - Enable automatic market discovery (true/false)
+- `DISCOVER_LIMIT` - Maximum markets per quote asset (0 = unlimited)
 
 #### **Engine (API)**
 - `ENGINE_HOST` - API server host (default: `engine` for Docker, use IP for external)
 - `ENGINE_PORT` - API server port (default: 8000)
 - `COMMISSION` - Trading commission rate
 - `API_KEY` - Authentication key
+- `CASH_ASSET` - Default cash/quote asset for the system (default: USDT)
+- `TICK_LOOP_SEC` - Price-tick scanning interval in seconds (default: 10)
+- `PRUNE_EVERY_MIN` - How often to prune old data in minutes (default: 60)
+- `STALE_AFTER_H` - Data considered stale after hours (default: 24)
+- `EXPIRE_AFTER_H` - Data expires after hours (default: 2)
+- `SANITY_CHECK_EVERY_MIN` - Sanity check interval in minutes (default: 10)
+- `API_TIMEOUT_SEC` - API request timeout for CLI in seconds (default: 10)
+
+#### **Engine Order Processing**
+- `MIN_TIME_ANSWER_ORDER_MARKET` - Minimum delay before processing market orders in seconds (default: 1)
+- `MAX_TIME_ANSWER_ORDER_MARKET` - Maximum delay before processing market orders in seconds (default: 5)
+- `SIGMA_FILL_MARKET_ORDER` - Slippage simulation for market order fills (default: 0.1)
 
 #### **Periscope (Dashboard)**
 - `PERISCOPE_HOST` - Dashboard host (default: `localhost` for Docker, use IP for external)
 - `PERISCOPE_PORT` - Dashboard port (default: 8501)
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
+- `QUOTE_ASSET` - Quote asset for portfolio valuation (default: USDT)
+- `FRESH_WINDOW_S` - Fresh window for highlighting in seconds (default: 60)
+- `N_VISUAL_DEGRADATIONS` - Number of fade-out levels for visual feedback (default: 60)
+- `SLIDER_MIN` - Minimum value for order count slider (default: 10)
+- `SLIDER_MAX` - Maximum value for order count slider (default: 1000)
+- `SLIDER_STEP` - Step size for order count slider (default: 10)
+- `SLIDER_DEFAULT` - Default value for order count slider (default: 50)
+- `LOCAL_TZ` - Timezone for timestamps (default: Europe/Berlin)
+- `LOGO_FILE` - Logo file for dashboard (optional)
+- `UI_URL` - UI base URL for links (auto-constructed from HOST:PORT)
 
 ### Benefits of Centralized Configuration
 - ✅ **Single source of truth** - All config in one place

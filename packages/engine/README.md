@@ -59,6 +59,15 @@ The engine uses environment variables from the root `.env` file. Key variables i
 | `API_KEY`     | `dev-key`     | Authentication key for API requests     |
 | `COMMISSION`  | `0.00075`     | Trading fee rate (0.075%)               |
 | `CASH_ASSET`  | `USDT`        | Reference currency for PnL calculations |
+| `TICK_LOOP_SEC` | `10`        | Price-tick scanning interval (seconds)  |
+| `PRUNE_EVERY_MIN` | `60`      | How often to prune old data (minutes)   |
+| `STALE_AFTER_H` | `24`       | Data considered stale after (hours)     |
+| `EXPIRE_AFTER_H` | `2`      | Data expires after (hours)              |
+| `SANITY_CHECK_EVERY_MIN` | `10` | Sanity check interval (minutes)        |
+| `API_TIMEOUT_SEC` | `10`     | API request timeout for CLI (seconds)   |
+| `MIN_TIME_ANSWER_ORDER_MARKET` | `1` | Min delay before processing market orders (seconds) |
+| `MAX_TIME_ANSWER_ORDER_MARKET` | `5` | Max delay before processing market orders (seconds) |
+| `SIGMA_FILL_MARKET_ORDER` | `0.1` | Slippage simulation for market order fills |
 | `REDIS_URL`   | `redis://...` | Redis connection string                 |
 | `TEST_ENV`    | `false`       | Enable API docs and disable auth        |
 

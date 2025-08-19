@@ -46,6 +46,15 @@ The dashboard uses environment variables from the root `.env` file. Key variable
 | `REFRESH_SECONDS` | `60`                    | Auto-refresh interval        |
 | `QUOTE_ASSET`     | `USDT`                  | Portfolio valuation currency |
 | `APP_TITLE`       | `MockExchange`          | Dashboard title              |
+| `FRESH_WINDOW_S`  | `60`                    | Fresh window for highlighting (seconds) |
+| `N_VISUAL_DEGRADATIONS` | `60`            | Number of fade-out levels for visual feedback |
+| `SLIDER_MIN`      | `10`                    | Minimum value for order count slider |
+| `SLIDER_MAX`      | `1000`                  | Maximum value for order count slider |
+| `SLIDER_STEP`     | `10`                    | Step size for order count slider |
+| `SLIDER_DEFAULT`  | `50`                    | Default value for order count slider |
+| `LOCAL_TZ`        | `Europe/Berlin`         | Timezone for timestamps |
+| `LOGO_FILE`       | ``                      | Logo file for dashboard (optional) |
+| `UI_URL`          | `http://localhost:8501` | UI base URL for links |
 
 **Note**: For Docker deployment, `API_URL` should be `http://engine:8000`. For local development, use `http://localhost:8000`.
 
