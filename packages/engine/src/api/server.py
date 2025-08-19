@@ -166,6 +166,12 @@ prod_depends = [] if TEST_ENV else [Depends(verify_key)]
 # ───────────────────────────── FastAPI app ──────────────────────────── #
 @asynccontextmanager
 async def lifespan(app):
+    # Run expiration check on startup
+    expire_age = timedelta(seconds=EXPIRE_AFTER_SEC)
+    ENGINE.expire_orders_older_than(age=expire_age).get()
+
+    # Start background tasks
+    logger.info(f"Starting background tasks - TICK_LOOP_SEC: {REFRESH_S}s, PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC}s")
     tick_task = asyncio.create_task(tick_loop())
     prune_task = asyncio.create_task(prune_and_expire_loop())
     sanity_task = asyncio.create_task(sanity_loop())
@@ -435,11 +441,15 @@ def i_am_leader() -> bool:
     # returns True if lock acquired
     got = _r.set(LOCK_KEY, MY_ID, nx=True, ex=LOCK_TTL)
     if got:
+        logger.debug(f"Acquired leader lock: {MY_ID}")
         return True
     # already held? renew if it's me
-    if _r.get(LOCK_KEY) == MY_ID:
+    current_leader = _r.get(LOCK_KEY)
+    if current_leader == MY_ID:
         _r.expire(LOCK_KEY, LOCK_TTL)
+        logger.debug(f"Renewed leader lock: {MY_ID}")
         return True
+    logger.debug(f"Not leader. Current leader: {current_leader}, My ID: {MY_ID}")
     return False
 
 
@@ -449,10 +459,14 @@ async def tick_loop():
         start_time = time.time()
         try:
             if i_am_leader():
-                for t in ENGINE.tickers.get():
+                tickers = ENGINE.tickers.get()
+                logger.debug(f"Found {len(tickers)} tickers to process")
+                for t in tickers:
                     ENGINE.process_price_tick(t).get()
                 # run every REFRESH_S seconds, so we don't hammer Redis
-                logger.debug(f"Tick loop: {REFRESH_S} seconds")
+                logger.debug(f"Refreshed tickers data - processed {len(tickers)} tickers")
+            else:
+                logger.debug("Not the leader, skipping tick processing")
         except Exception as e:
             logger.exception("Error in tick_loop: %s", e)
             # If an error occurs, we log it and continue the loop
