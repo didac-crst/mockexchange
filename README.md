@@ -10,6 +10,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting: ruff](https://img.shields.io/badge/linting-ruff-red.svg)](https://github.com/astral-sh/ruff)
 [![Type checking: mypy](https://img.shields.io/badge/type%20checking-mypy-blue.svg)](https://mypy-lang.org/)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/didac-crst/mockexchange)
 
 **_Trade without fear, greed, or actual money — because every fake loss is a real step up._**
 
