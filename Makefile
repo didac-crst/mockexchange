@@ -49,8 +49,7 @@ test-integration-engine-fresh: restart-engine-no-cache test-integration-engine #
 
 lint: ## Run linting for all packages
 	poetry run ruff check .
-	# TODO: Fix MyPy type annotations
-	# poetry run mypy packages/engine/src --exclude examples/order-generator/scripts/conftest.py
+	poetry run mypy packages/engine/src --exclude examples/order-generator/scripts/conftest.py
 
 format: ## Format code
 	poetry run ruff format .

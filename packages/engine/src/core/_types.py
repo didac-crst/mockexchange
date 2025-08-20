@@ -75,7 +75,7 @@ class TradingPair:
     ask: float
     bid_volume: float
     ask_volume: float
-    info: str = None
+    info: str | None = None
 
     # (De)serialise ------------------------------------------------------
     def to_dict(self) -> dict[str, Any]:
@@ -201,7 +201,7 @@ class Order:
     history_count: int = 0  # next free index (not last!)
     _seed_history: bool = True
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Only seed history if requested and it's a fresh object (no history yet)
         if not self._seed_history or self.history:
             return
@@ -330,7 +330,7 @@ class Order:
             # It does not include the notion value, as it is not reserved for sell orders
             return max(self.reserved_fee_left, 0.0)
 
-    def squash_booking(self):
+    def squash_booking(self) -> None:
         # keep accountability: align booked_* to actual
         self.reserved_notion_left = 0.0
         self.reserved_fee_left = 0.0

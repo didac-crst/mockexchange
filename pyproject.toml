@@ -17,6 +17,9 @@ python = "^3.12"
 ruff = "^0.4"
 mypy = "^1.10"
 pre-commit = "^3.6"
+types-redis = "^4.6"
+types-requests = "^2.31"
+pandas-stubs = "^2.2"
 
 [tool.ruff]
 target-version = "py312"

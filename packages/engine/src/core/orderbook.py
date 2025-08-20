@@ -98,7 +98,8 @@ class OrderBook:
         else:  # iterable of str | OrderSide
             side_set = {s.value if isinstance(s, OrderSide) else s for s in side}
         # Only if all statuses are OPEN_STATUS, we can use the indexes
-        if all(s in OPEN_STATUS_STR for s in status):
+        use_indexes = all(s in OPEN_STATUS_STR for s in status)
+        if use_indexes:
             # Use secondary indexes
             if symbol:
                 ids = self.r.smembers(self.OPEN_SYM_KEY.format(sym=symbol))
@@ -114,10 +115,11 @@ class OrderBook:
                 Order.from_json(blob, include_history=include_history)
                 for _, blob in self.r.hscan_iter(self.HASH_KEY)
             ]
-            if symbol:  # Already fulfilled by if status in OPEN_STATUS if symbol is not None
-                orders = [o for o in orders if o.symbol == symbol]  # Symbol is a plain text
-        # Filter for both cases
-        # 1) side-filter
+            # Apply symbol filtering for legacy scan (only when not using indexes)
+            if symbol and not use_indexes:
+                orders = [o for o in orders if o.symbol == symbol]
+
+        # Apply side filtering
         if side_set is not None:
             orders = [
                 o
@@ -125,12 +127,13 @@ class OrderBook:
                 if (o.side.value if isinstance(o.side, OrderSide) else o.side) in side_set
             ]
 
-        # 2) status-filter
-        orders = [
-            o
-            for o in orders
-            if (o.status.value if isinstance(o.status, OrderState) else o.status) in status
-        ]
+        # Apply status filtering (only for legacy scan, index already filters for OPEN_STATUS)
+        if not use_indexes:
+            orders = [
+                o
+                for o in orders
+                if (o.status.value if isinstance(o.status, OrderState) else o.status) in status
+            ]
 
         # chronological order on update timestamp
         orders.sort(key=lambda o: o.ts_update, reverse=True)

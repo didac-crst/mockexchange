@@ -38,6 +38,7 @@ from .portfolio import Portfolio
 
 logging.getLogger("pykka").setLevel(logging.WARNING)
 
+
 # ────────────────────────────────────────────
 MIN_TIME = float(os.getenv("MIN_TIME_ANSWER_ORDER_MARKET", 0))
 MAX_TIME = float(os.getenv("MAX_TIME_ANSWER_ORDER_MARKET", 1))
@@ -72,10 +73,10 @@ class MarketActor(_BaseActor):
     def last_price(self, symbol: str) -> float:
         return self.market.last_price(symbol)
 
-    def fetch_ticker(self, symbol: str) -> dict | None:
+    def fetch_ticker(self, symbol: str) -> TradingPair | None:
         return self.market.fetch_ticker(symbol)
 
-    def set_last_price(self, *args, **kwargs):
+    def set_last_price(self, *args: Any, **kwargs: Any) -> None:
         return self.market.set_last_price(*args, **kwargs)
 
     @property
@@ -91,13 +92,13 @@ class PortfolioActor(_BaseActor):
     def get(self, asset: str) -> AssetBalance:
         return self.portfolio.get(asset)
 
-    def set(self, bal: AssetBalance):
+    def set(self, bal: AssetBalance) -> None:
         self.portfolio.set(bal)
 
-    def all(self):
+    def all(self) -> dict[str, AssetBalance]:
         return self.portfolio.all()
 
-    def clear(self):
+    def clear(self) -> None:
         self.portfolio.clear()
 
 
@@ -107,22 +108,22 @@ class OrderBookActor(_BaseActor):
         self.ob = OrderBook(self.redis)
 
     # CRUD
-    def add(self, o: Order):
+    def add(self, o: Order) -> None:
         self.ob.add(o)
 
-    def update(self, o: Order):
+    def update(self, o: Order) -> None:
         self.ob.update(o)
 
     def get(self, oid: str, include_history: bool = False) -> Order:
         return self.ob.get(oid, include_history=include_history)
 
-    def list(self, **kw) -> list[Order]:
+    def list(self, **kw: Any) -> list[Order]:
         return self.ob.list(**kw)
 
-    def remove(self, oid: str):
+    def remove(self, oid: str) -> None:
         self.ob.remove(oid)
 
-    def clear(self):
+    def clear(self) -> None:
         self.ob.clear()
 
 
@@ -438,14 +439,14 @@ class ExchangeEngineActor(_BaseActor):
         return {"filled_notion": filled_notion, "filled_fee": filled_fee}
 
     # ---------- consistency checks ------------------------------------ #
-    def check_consistency(self, eps: float = 1e-9):
+    def check_consistency(self, eps: float = 1e-9) -> dict[str, dict[str, float]]:
         """
         Compare what *should* be reserved (from open orders) with what's in portfolio.used.
         Returns a dict of mismatches.
         """
         open_orders = self.order_book.list(status=OPEN_STATUS).get()
 
-        expected = defaultdict(float)
+        expected: dict[str, float] = defaultdict(float)
         for o in open_orders:
             base, quote = o.symbol.split("/")
             if o.side is OrderSide.BUY:
@@ -475,14 +476,14 @@ class ExchangeEngineActor(_BaseActor):
 
     # ---------- public API  ------------------------------------------- #
     @property
-    def tickers(self):
-        return self.market.tickers.get()
+    def tickers(self) -> list[str]:
+        return self.market.tickers.get()  # type: ignore
 
     def fetch_ticker(self, symbol: str) -> TradingPair:
         tick = self.market.fetch_ticker(symbol).get()
         if tick is None:
             raise ValueError(f"Ticker {symbol} not available")
-        return tick
+        return tick  # type: ignore
 
     def fetch_balance(self, asset: str | None = None) -> dict[str, Any]:
         info = {k: info.to_dict() for k, info in self.portfolio.all().get().items()}
@@ -615,7 +616,7 @@ class ExchangeEngineActor(_BaseActor):
         return order.public_payload()
 
     # expose await-able helper
-    def create_order_async(self, **kw) -> pykka.Future:
+    def create_order_async(self, **kw: Any) -> pykka.Future:
         return self.create_order(**kw)  # caller will .get_async()
 
     def cancel_order(self, oid: str) -> dict[str, Any]:
