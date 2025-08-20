@@ -32,6 +32,15 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Improved type safety across core engine components and API layer
   - Enhanced IDE support and code quality through better type hints
   - Re-enabled MyPy in pre-commit hooks for ongoing type safety enforcement
+- **Valkey IP Configuration**: Added comprehensive external server support
+  - Created comprehensive `.env.example` with all environment variables
+  - Added Valkey IP configuration examples for external servers
+  - Documented `VALKEY_HOST` usage for remote Valkey instances
+  - Verified Engine and Oracle already use `VALKEY_HOST` correctly
+  - Enhanced environment variable documentation with IP examples
+  - Added examples for connecting to external Valkey/Redis servers
+  - Updated README with external Valkey server configuration
+  - System now supports local Docker Compose and external Valkey deployments
 
 - **Environment Variable Documentation**: Comprehensive documentation for all missing environment variables
   - **Main README.md**: Added complete documentation for all environment variables from `.env.example`
