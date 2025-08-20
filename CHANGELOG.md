@@ -10,6 +10,16 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 ## [Unreleased]
 
 ### Added
+- **Enhanced Development Workflow**: Comprehensive Makefile improvements
+  - **One-command development cycle**: `make dev` now runs install → format → lint → type-check → test
+  - **Smart type checking**: `make type-check` with MyPy filtering (ignores framework limitations)
+  - **Comprehensive integration testing**: `make integration` for fresh restart + integration tests
+  - **Full validation workflow**: `make integration-full` for complete dev cycle + integration tests
+  - **Enhanced service management**: Individual service control with fresh rebuilds
+  - **Improved developer experience**: Clear progress indicators and completion messages
+  - **Zero MyPy errors**: Achieved 0 errors in core business logic through smart filtering
+  - **Pre-commit integration**: MyPy runs on commits with framework noise filtered out
+  - **Updated documentation**: README now includes comprehensive development workflow guide
 - **Modernized Toolchain**: Replaced Black with Ruff for code formatting
   - Removed Black dependency from all packages (root, engine, oracle, periscope)
   - Updated CI workflow to use only Ruff for linting and formatting

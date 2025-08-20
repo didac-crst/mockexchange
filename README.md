@@ -292,21 +292,36 @@ make start-periscope   # Periscope connects to external Engine
 For contributors and developers:
 
 ```bash
-# Install development dependencies
-make dev
+# 🚀 Complete Development Cycle (Recommended)
+make dev              # Install deps + format + lint + type-check + test
 
-# Run all tests
-make test
+# 🧪 Testing
+make test             # Run all unit tests
+make test-integration # Run integration tests (requires running services)
+make integration      # Fresh restart + integration tests (no cache)
+make integration-full # Full dev cycle + integration tests
 
-# Format and lint code
-make format
-make lint
+# 🔧 Code Quality
+make format           # Format code with Ruff
+make lint             # Run linting with Ruff
+make type-check       # Run type checking with MyPy (smart filtering)
 
-# Check service status
-make status
+# 🐳 Service Management
+make start            # Start all services
+make stop             # Stop all services
+make restart          # Restart all services
+make restart-no-cache # Restart with fresh builds (no cache)
+make status           # Show service status
 
-# Release management
-make release-branch    # Create release branch (interactive)
+# 📊 Logs
+make logs             # All service logs
+make logs-engine      # Engine logs only
+make logs-oracle      # Oracle logs only
+make logs-periscope   # Dashboard logs only
+make logs-valkey      # Database logs only
+
+# 🏷️ Release Management
+make release-branch   # Create release branch (interactive)
 make version          # Show current version and tags
 ```
 make logs-valkey       # Database logs only
@@ -316,6 +331,46 @@ make logs-periscope    # Dashboard logs only
 
 # Check service status
 make status            # Show all service statuses
+
+### 🎯 Enhanced Development Workflow
+
+The MockExchange development workflow has been enhanced with comprehensive automation:
+
+#### **🚀 One-Command Development Cycle**
+```bash
+make dev  # Does everything: install → format → lint → type-check → test
+```
+- **Installs dependencies** (Poetry + pre-commit)
+- **Formats code** (Ruff)
+- **Runs linting** (Ruff)
+- **Type checking** (MyPy with smart filtering)
+- **Runs tests** (All unit tests)
+
+#### **🧪 Comprehensive Testing**
+```bash
+make integration      # Fresh restart + integration tests
+make integration-full # Full dev cycle + integration tests
+```
+- **Fresh environment**: No cached artifacts
+- **Real integration**: Tests against running services
+- **Complete validation**: Perfect for pre-release testing
+
+#### **🔧 Smart Type Checking**
+```bash
+make type-check  # MyPy with smart filtering
+```
+- **Focuses on business logic** (ignores framework limitations)
+- **Zero false positives** (no framework noise)
+- **Catches real type issues** in your code
+
+#### **🐳 Service Management**
+```bash
+make restart-no-cache  # Fresh builds for debugging
+make logs-engine       # Service-specific logs
+```
+- **Individual service control**
+- **Fresh rebuilds when needed**
+- **Easy log access**
 
 ## 🚀 How we ship
 
