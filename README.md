@@ -515,6 +515,9 @@ All environment variables are centralized in the root `.env` file. This eliminat
 ```bash
 # Copy the template and customize if needed
 cp .env.example .env
+
+# For external Valkey server, update VALKEY_HOST in .env:
+# VALKEY_HOST=192.168.1.100  # Replace with your Valkey server IP
 ```
 
 **Note**: The `.env.example` is configured for Docker Compose. For external services, update:

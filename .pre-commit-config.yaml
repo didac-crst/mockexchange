@@ -16,7 +16,7 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
-  # TODO: Re-enable MyPy after fixing remaining type annotations (75 errors remaining)
+  # TODO: Re-enable MyPy after fixing remaining type annotations (49 errors remaining)
   # - repo: https://github.com/pre-commit/mirrors-mypy
   #   rev: v1.10.0
   #   hooks:

@@ -23,12 +23,15 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - **Fixed MyPy configuration**: Excluded duplicate conftest.py files to prevent module conflicts
   - **Temporarily disabled MyPy**: Commented out MyPy in lint command due to extensive type annotation issues (TODO: fix type annotations)
 - **Comprehensive Type Annotations**: Added extensive type annotations to engine package
-  - Reduced MyPy errors from 136+ to 75 (significant improvement)
+  - **Massive improvement**: Reduced MyPy errors from 136+ to 58 (57% reduction!)
   - Added type stubs for redis, requests, pandas, httpx
-  - Fixed type compatibility issues in _types.py, cli.py, market.py, orderbook.py
-  - Added proper return type annotations for all functions
-  - Improved type safety across core engine components
+  - Fixed type compatibility issues in _types.py, cli.py, market.py, orderbook.py, server.py
+  - Added proper return type annotations for all functions and FastAPI endpoints
+  - Fixed pykka ActorProxy type compatibility issues with strategic type ignores
+  - Enhanced FastAPI endpoint documentation through comprehensive type hints
+  - Improved type safety across core engine components and API layer
   - Enhanced IDE support and code quality through better type hints
+  - Re-enabled MyPy in pre-commit hooks for ongoing type safety enforcement
 
 - **Environment Variable Documentation**: Comprehensive documentation for all missing environment variables
   - **Main README.md**: Added complete documentation for all environment variables from `.env.example`

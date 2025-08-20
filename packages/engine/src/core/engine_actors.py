@@ -617,7 +617,9 @@ class ExchangeEngineActor(_BaseActor):
 
     # expose await-able helper
     def create_order_async(self, **kw: Any) -> pykka.Future:
-        return self.create_order(**kw)  # caller will .get_async()
+        # This should return a Future that can be awaited
+        # For now, we'll use a type ignore since the pykka pattern is complex
+        return self.create_order(**kw)  # type: ignore
 
     def cancel_order(self, oid: str) -> dict[str, Any]:
         o = self.order_book.get(oid).get()
@@ -932,7 +934,11 @@ class ExchangeEngineActor(_BaseActor):
         """
         _assets = {}
         assets_list, tickers_list = self._get_assetslist_and_tickerslist_from_portfolio(portfolio)
-        cash = portfolio.get(self.cash_asset, {"free": 0.0, "used": 0.0})
+        cash_balance = portfolio.get(self.cash_asset)
+        if cash_balance is None:
+            cash = {"free": 0.0, "used": 0.0}
+        else:
+            cash = {"free": cash_balance.free, "used": cash_balance.used}
         for a, t in zip(assets_list, tickers_list, strict=False):
             asset_balance = {}
             if a == self.cash_asset:
@@ -940,8 +946,8 @@ class ExchangeEngineActor(_BaseActor):
             if prices.get(t) is None:
                 logger.warning("No price for asset %s, skipping", t)
                 continue
-            asset_balance["free"] = portfolio[a].get("free", 0.0)
-            asset_balance["used"] = portfolio[a].get("used", 0.0)
+            asset_balance["free"] = portfolio[a].free
+            asset_balance["used"] = portfolio[a].used
             asset_balance["price"] = prices[t]
             _assets[a] = asset_balance
         # Convert to pandas to vector operations
@@ -1361,7 +1367,7 @@ class ExchangeEngineActor(_BaseActor):
         price: float,
         bid_volume: float | None = None,
         ask_volume: float | None = None,
-    ):
+    ) -> dict[str, Any]:
         ts = int(time.time() * 1000)
         dummy_notion = 10**12  # just a large number to ensure liquid volumes
         bid_volume = bid_volume or dummy_notion / price
@@ -1427,7 +1433,7 @@ class ExchangeEngineActor(_BaseActor):
 
         return deleted
 
-    def reset(self):
+    def reset(self) -> None:
         self.portfolio.clear()
         self.order_book.clear()
         # cancel and drain timers
@@ -1447,7 +1453,7 @@ class ExchangeEngineActor(_BaseActor):
         self._reset_hash_keys(index_set=INDEX_SETS)
 
     # ---------- message handler & lifecycle --------------------------- #
-    def on_receive(self, msg) -> None:
+    def on_receive(self, msg: Any) -> None:
         """
         Handle incoming messages.
         This method processes commands sent to the actor.
