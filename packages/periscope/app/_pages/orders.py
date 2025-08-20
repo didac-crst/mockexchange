@@ -93,9 +93,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # ------------------------------------------------------------------
     filters_expander = st.expander("Filters", expanded=False)
     with filters_expander:
-        limit_toggle = st.checkbox(
-            "Fetch the whole order book", value=False, key="limit_toggle"
-        )
+        limit_toggle = st.checkbox("Fetch the whole order book", value=False, key="limit_toggle")
         # ``tail=None`` signals the API client to drop the limit.
         tail = (
             None
@@ -133,9 +131,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # 3) Display trade metrics (simple vs advanced)
     # ------------------------------------------------------------------
 
-    _display_trades_details(
-        summary_capital, trades_summary, cash_asset, df_raw, advanced_display
-    )
+    _display_trades_details(summary_capital, trades_summary, cash_asset, df_raw, advanced_display)
 
     # `df_copy` will be mutated for visual purposes; keep df_raw pristine.
     df_copy = df_raw.copy()
@@ -156,9 +152,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
         # Drop selections that disappeared in the new dataset.
         st.session_state[key] = [v for v in st.session_state[key] if v in options]
 
-    status_opts = sorted(
-        df_copy["status"].str.replace("_", " ").str.capitalize().unique()
-    )
+    status_opts = sorted(df_copy["status"].str.replace("_", " ").str.capitalize().unique())
     side_opts = sorted(df_copy["side"].str.upper().unique())
     type_opts = sorted(df_copy["type"].str.capitalize().unique())
     asset_opts = sorted(df_copy["Asset"].unique())
@@ -250,13 +244,9 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Friendly caption – how much data did we load vs display?
     if tail is not None:
-        st.caption(
-            f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from last {tail} orders"
-        )
+        st.caption(f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from last {tail} orders")
     else:
-        st.caption(
-            f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from the whole order book"
-        )
+        st.caption(f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from the whole order book")
 
     # ------------------------------------------------------------------
     # 6) Derive helper columns (latency, formatted quantities/prices…)
@@ -265,17 +255,12 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     ts_finish_num = pd.to_numeric(df["ts_finish"], errors="coerce")
 
     df["Exec. latency"] = (
-        (ts_finish_num - ts_create_num)
-        .div(1000)
-        .round(2)
-        .where(ts_finish_num.notna(), "")
+        (ts_finish_num - ts_create_num).div(1000).round(2).where(ts_finish_num.notna(), "")
     )
 
     # Human‑friendly quantity formatting (strip tiny rounding remainders)
     df["Req. Qty"] = df["amount"].map(lambda v: _format_significant_float(value=v))
-    df["Filled Qty"] = df["actual_filled"].apply(
-        lambda v: _format_significant_float(value=v)
-    )
+    df["Filled Qty"] = df["actual_filled"].apply(lambda v: _format_significant_float(value=v))
 
     # Append currency codes where applicable
     df["Limit price"] = df.apply(
@@ -289,21 +274,15 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Notional & fee prettifiers ------------------------------------------------
     df["Reserved notional"] = df.apply(
-        lambda r: _format_significant_float(
-            value=r.reserved_notion_left, unity=r.notion_currency
-        ),
+        lambda r: _format_significant_float(value=r.reserved_notion_left, unity=r.notion_currency),
         axis=1,
     )
     df["Actual notional"] = df.apply(
-        lambda r: _format_significant_float(
-            value=r.actual_notion, unity=r.notion_currency
-        ),
+        lambda r: _format_significant_float(value=r.actual_notion, unity=r.notion_currency),
         axis=1,
     )
     df["Reserved fee"] = df.apply(
-        lambda r: _format_significant_float(
-            value=r.reserved_fee_left, unity=r.fee_currency
-        ),
+        lambda r: _format_significant_float(value=r.reserved_fee_left, unity=r.fee_currency),
         axis=1,
     )
     df["Actual fee"] = df.apply(

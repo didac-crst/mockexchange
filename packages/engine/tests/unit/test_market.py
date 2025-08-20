@@ -144,9 +144,7 @@ class TestMarket(unittest.TestCase):
             "bidVolume": 1.5,
             "askVolume": 2.0,
         }
-        mock_redis.hset.assert_called_once_with(
-            "tickers:BTC/USDT", mapping=expected_mapping
-        )
+        mock_redis.hset.assert_called_once_with("tickers:BTC/USDT", mapping=expected_mapping)
 
     def test_set_last_price_no_symbol(self):
         """Test setting last price with no symbol raises error."""

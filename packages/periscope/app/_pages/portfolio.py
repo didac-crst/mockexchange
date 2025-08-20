@@ -83,9 +83,7 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     # ------------------------------------------------------------------
     # 3) Portfolio metrics (simple vs advanced)
     # ------------------------------------------------------------------
-    _display_portfolio_details(
-        assets_overview=assets_overview, advanced_display=advanced_display
-    )
+    _display_portfolio_details(assets_overview=assets_overview, advanced_display=advanced_display)
 
     # ------------------------------------------------------------------
     # 3) Build a numeric DataFrame with helper columns
@@ -141,9 +139,7 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     # ------------------------------------------------------------------
     # Helper lambdas to keep formatting one‑liners tidy
     fmt_amt = lambda x: _format_significant_float(x)  # noqa: E731
-    fmt_price = lambda x: _format_significant_float(
-        x, data["quote_asset"]
-    )  # noqa: E731
+    fmt_price = lambda x: _format_significant_float(x, data["quote_asset"])  # noqa: E731
     fmt_val = lambda x: _format_significant_float(x, data["quote_asset"])  # noqa: E731
     fmt_pct = lambda x: f"{x*100:,.2f}%"  # noqa: E731
 
@@ -177,9 +173,7 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
             "free": st.column_config.TextColumn("Free"),
             "used": st.column_config.TextColumn("In orders"),
             "total": st.column_config.TextColumn("Total"),
-            "quote_price": st.column_config.TextColumn(
-                f"Price ({data['quote_asset']})"
-            ),
+            "quote_price": st.column_config.TextColumn(f"Price ({data['quote_asset']})"),
             "value": st.column_config.TextColumn(f"Value ({data['quote_asset']})"),
             "share": st.column_config.TextColumn("Share (%)"),
         },

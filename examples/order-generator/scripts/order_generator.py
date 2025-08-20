@@ -202,15 +202,14 @@ def main() -> None:
                     else:
                         # If we have "a very little bit" of free asset.
                         # We keep some buffer to avoid rejecting orders due to insufficient balance.
-                        ticket_amount_q = (
-                            balance_free_asset_q - MIN_BALANCE_ASSETS_QUOTE
-                        )
+                        ticket_amount_q = balance_free_asset_q - MIN_BALANCE_ASSETS_QUOTE
                 # Calculate the amount to sell
                 if ticket_amount_q < MIN_ORDER_QUOTE:
                     # Skip if the ticket amount is below the minimum order quote
                     print(
                         f"Skipping {symbol} {side} order: "
-                        f"ticket amount {ticket_amount_q:.2f} is below minimum {MIN_ORDER_QUOTE:.2f}."
+                        f"ticket amount {ticket_amount_q:.2f} is below minimum "
+                        f"{MIN_ORDER_QUOTE:.2f}."
                     )
                     continue
                 # Calculate the amount to buy/sell
@@ -228,13 +227,9 @@ def main() -> None:
                 )
 
                 limit_price = order["limit_price"]
-                limit_price_str = (
-                    f"{px:>16,.4f}" if limit_price is not None else " " * 16
-                )
+                limit_price_str = f"{px:>16,.4f}" if limit_price is not None else " " * 16
                 timestamp = order["ts_create"] / 1000  # Convert from ms to seconds
-                datetime_str = time.strftime(
-                    "%d/%m %H:%M:%S", time.localtime(timestamp)
-                )
+                datetime_str = time.strftime("%d/%m %H:%M:%S", time.localtime(timestamp))
                 print(
                     f"{datetime_str} | "
                     f"Status: {order['status']:<10} | "

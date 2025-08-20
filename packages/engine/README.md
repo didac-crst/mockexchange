@@ -151,7 +151,6 @@ poetry run pytest src/tests/test_03_market_orders_property.py -v
 ### Code Quality
 ```bash
 # Format code
-poetry run black src/
 poetry run ruff check --fix src/
 
 # Type checking
@@ -176,4 +175,3 @@ poetry run mypy src/
 ## Examples
 
 See the [order generator example](../../examples/order-generator/) for a complete trading simulation.
-

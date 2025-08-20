@@ -107,37 +107,29 @@ class OrderBook:
             if not ids:
                 return []
             blobs = self.r.hmget(self.HASH_KEY, *ids)  # 1 round-trip
-            orders = [
-                Order.from_json(b, include_history=include_history) for b in blobs if b
-            ]
+            orders = [Order.from_json(b, include_history=include_history) for b in blobs if b]
         else:
             # Legacy full scan
             orders = [
                 Order.from_json(blob, include_history=include_history)
                 for _, blob in self.r.hscan_iter(self.HASH_KEY)
             ]
-            if (
-                symbol
-            ):  # Already fulfilled by if status in OPEN_STATUS if symbol is not None
-                orders = [
-                    o for o in orders if o.symbol == symbol
-                ]  # Symbol is a plain text
+            if symbol:  # Already fulfilled by if status in OPEN_STATUS if symbol is not None
+                orders = [o for o in orders if o.symbol == symbol]  # Symbol is a plain text
         # Filter for both cases
         # 1) side-filter
         if side_set is not None:
             orders = [
                 o
                 for o in orders
-                if (o.side.value if isinstance(o.side, OrderSide) else o.side)
-                in side_set
+                if (o.side.value if isinstance(o.side, OrderSide) else o.side) in side_set
             ]
 
         # 2) status-filter
         orders = [
             o
             for o in orders
-            if (o.status.value if isinstance(o.status, OrderState) else o.status)
-            in status
+            if (o.status.value if isinstance(o.status, OrderState) else o.status) in status
         ]
 
         # chronological order on update timestamp

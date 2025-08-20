@@ -7,8 +7,7 @@
 [![Tests](https://img.shields.io/badge/tests-available-green.svg)](https://github.com/didac-crst/mockexchange)
 [![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/didac-crst/mockexchange)
 [![Code Quality](https://img.shields.io/badge/code%20quality-maintained-blue.svg)](https://github.com/didac-crst/mockexchange)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Linting: ruff](https://img.shields.io/badge/linting-ruff-red.svg)](https://github.com/astral-sh/ruff)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-red.svg)](https://github.com/astral-sh/ruff)
 [![Type checking: mypy](https://img.shields.io/badge/type%20checking-mypy-blue.svg)](https://mypy-lang.org/)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/didac-crst/mockexchange)
 
@@ -77,89 +76,89 @@ This repository contains the full **MockExchange** paper-trading platform:
 
 ## 📜 Story
 
-> It was **2013**, and Bitcoin had just hit a jaw-dropping **$300**.  
-> Someone in our old engineering WhatsApp group brought it up.  
-> I asked innocently, *“What’s that?”*  
->  
-> The response came instantly, dripping with confidence:  
-> *“You’re too late — this bubble is about to burst…”*  
->  
+> It was **2013**, and Bitcoin had just hit a jaw-dropping **$300**.
+> Someone in our old engineering WhatsApp group brought it up.
+> I asked innocently, *“What’s that?”*
+>
+> The response came instantly, dripping with confidence:
+> *“You’re too late — this bubble is about to burst…”*
+>
 > Which, in hindsight, was probably the most confidently
 > wrong (and overly cautious) financial advice I’ve ever received.
 
-But something about it intrigued me. I didn’t fully understand it.  
-I didn’t even think it would work — and yet, I bought in.  
-Just **2/3 of a BTC**, about **180 €**, which, at the time, I mentally wrote off as *“money I’ll never see again.”*  
+But something about it intrigued me. I didn’t fully understand it.
+I didn’t even think it would work — and yet, I bought in.
+Just **2/3 of a BTC**, about **180 €**, which, at the time, I mentally wrote off as *“money I’ll never see again.”*
 Spoiler: it was the **best terrible financial decision** I’ve ever made.
 
-I held.  
-And held.  
+I held.
+And held.
 And held some more.
 
-Then came **2017** — the year of Lambos, moon memes, and FOMO-induced insomnia.  
+Then came **2017** — the year of Lambos, moon memes, and FOMO-induced insomnia.
 I began checking prices at night before bed, and again first thing in the morning —
 not for fun, but to confirm whether I was now rich… or still stuck working 9 to 5.
 
-This, of course, led me to the **classic rookie move**: diversification.  
-I dove into altcoins with names like **LTC**, **TROY**, and others I’ve repressed like a bad haircut from high school.  
+This, of course, led me to the **classic rookie move**: diversification.
+I dove into altcoins with names like **LTC**, **TROY**, and others I’ve repressed like a bad haircut from high school.
 Let’s just say: they didn’t go to the moon — they dug a tunnel.
 
-Decision after decision, I watched my gains **evaporate in slow motion**.  
+Decision after decision, I watched my gains **evaporate in slow motion**.
 Eventually, I realized I needed support — not from a financial advisor (they’d only
 remind me of my poor decisions), but from something more aligned with my goals — not theirs.
 
-**Something logical**.  
-Emotionless.  
-Free from fear and greed.  
-Unimpressed by sudden price spikes or Twitter hype.  
+**Something logical**.
+Emotionless.
+Free from fear and greed.
+Unimpressed by sudden price spikes or Twitter hype.
 A system that won’t panic sell or chase pumps.
 
-I wanted an intelligent system that could make decisions based on **data**, not **dopamine**.  
-Something that would just execute the plan, no matter how boring or unsexy that plan was.  
+I wanted an intelligent system that could make decisions based on **data**, not **dopamine**.
+Something that would just execute the plan, no matter how boring or unsexy that plan was.
 Something more disciplined than I’d ever been — able to stay locked on a single task for hours, without fatigue, distraction, or the urge to check the news.
 
 In short, I wanted to build a **trader with no feelings** —
 like a **psychopath**, but helpful.
 
-So in **2020**, full of optimism and free time, I enrolled in an **AI-for-trading** program.  
+So in **2020**, full of optimism and free time, I enrolled in an **AI-for-trading** program.
 I was ready to automate the pain away.
 
 Then… I became a dad.
 
 Suddenly, my trading ambitions were replaced with diapers, sleep deprivation,
-and learning the fine art of **negotiating with toddlers**.  
+and learning the fine art of **negotiating with toddlers**.
 Needless to say, the bot went on standby — alongside my hobbies, ambitions, and most adult-level reasoning.
 
-Fast forward to **2024**. The kids sleep (sometimes), and my curiosity roared back to life.  
-I decided it was time to build — **for real**.  
+Fast forward to **2024**. The kids sleep (sometimes), and my curiosity roared back to life.
+I decided it was time to build — **for real**.
 Not to get rich — but because this is what I do for fun:
 connect dots, explore computer science, study markets, and challenge my past self
 with fewer emotional trades and more intelligent systems.
 
-But ideas need hardware.  
-So I bought my first Raspberry Pi.  
-Because if I was going to burn time, I wasn’t about to burn kilowatts.  
-I needed something that could run 24/7 without turning my electricity bill into a second mortgage.  
-Resilient, quiet, efficient — like a monk with a TPU, ready to meditate on market patterns in silence for as long as it takes.  
+But ideas need hardware.
+So I bought my first Raspberry Pi.
+Because if I was going to burn time, I wasn’t about to burn kilowatts.
+I needed something that could run 24/7 without turning my electricity bill into a second mortgage.
+Resilient, quiet, efficient — like a monk with a TPU, ready to meditate on market patterns in silence for as long as it takes.
 It wasn’t much, but it was enough to get started.
 
-From there, the system began to grow — and spiral.  
+From there, the system began to grow — and spiral.
 Scraping prices in real time, keeping databases efficient, aggregating data, archiving old data,
-writing little scripts that somehow become immortal zombie processes needing to be killed by hand...  
+writing little scripts that somehow become immortal zombie processes needing to be killed by hand...
 I genuinely didn’t expect it to be so much.
 
-And yet — I like it.  
-This is how I relax: designing systems no one asked for, solving problems I created myself,  
+And yet — I like it.
+This is how I relax: designing systems no one asked for, solving problems I created myself,
 and picking up strange new skills in the process — the kind you never set out to learn, but somehow end up mastering.
 
-Which brings us to **2025**, and **MockExchange**:  
+Which brings us to **2025**, and **MockExchange**:
 a stateless, deterministic, no-risk spot-exchange emulator that speaks fluent **ccxt**,
 pretends it’s real, and stores the last price-tick, balance and order in **Valkey** (aka Redis) —
 instead of touching live markets — so you can test, dry-run, and debug your bot
 without risking a single satoshi.
 
-No more fear.  
-No more “should I have bought?” or “why did I sell?”  
+No more fear.
+No more “should I have bought?” or “why did I sell?”
 Just logic, fake orders, and enough tooling to safely build the thing
 that trades smarter than I did.
 
@@ -217,7 +216,7 @@ flowchart TB
 | **MockX Periscope** | `packages/periscope/` | Streamlit dashboard for portfolio and orders.     | [Periscope README](packages/periscope/README.md) |
 
 Related (external):
-- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  
+- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway
     Minimal ccxt-style Python client to interact with the Engine API (install via `pip` or `poetry`).
 
 ---
@@ -250,7 +249,7 @@ make start-sequential
 
 **What this launches:**
 - **MockX Valkey** (Redis-compatible database) on port 6379
-- **MockX Oracle** (price feed service) 
+- **MockX Oracle** (price feed service)
 - **MockX Engine** (trading API) on port 8000
 - **MockX Periscope** (dashboard) on port 8501
 
@@ -319,7 +318,7 @@ make status            # Show all service statuses
 3. When green, merge into `main`.
 4. **Create a release**:
    - **GitHub UI** (Recommended): **Releases** → *Draft a new release* → Tag `vX.Y.Z` → Publish
-   - **CLI**: 
+   - **CLI**:
      ```bash
      git checkout main && git pull --ff-only
      git tag -a vX.Y.Z -m "MockExchange vX.Y.Z"
@@ -337,12 +336,12 @@ For more control or when you need to freeze changes for QA/testing:
    ```bash
    # Interactive mode (recommended)
    make release-branch
-   
+
    # Direct mode
    ./scripts/create-release-branch.sh patch    # 0.1.0 → 0.1.1
    ./scripts/create-release-branch.sh minor    # 0.1.0 → 0.2.0
    ./scripts/create-release-branch.sh major    # 0.1.0 → 1.0.0
-   
+
        # Preview what would happen
     ./scripts/create-release-branch.sh patch --dry-run
     ```
@@ -643,5 +642,5 @@ mockexchange/
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-> **Don’t risk real money.**  
+> **Don’t risk real money.**
 > Spin up MockExchange, hammer it with tests, then hit live markets only when your algos are solid.

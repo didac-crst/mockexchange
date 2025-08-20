@@ -20,19 +20,17 @@ from __future__ import annotations
 # -----------------------------------------------------------------------------
 # Third-party imports
 # -----------------------------------------------------------------------------
-import os
 from datetime import UTC, datetime  #  ← add datetime import
 from pathlib import Path
 
 import streamlit as st
-from dotenv import load_dotenv
 from streamlit_autorefresh import st_autorefresh
 
 # -----------------------------------------------------------------------------
 # Local imports (after Streamlit initialisation)
 # -----------------------------------------------------------------------------
 from app._pages import order_details, orders, performance, portfolio
-from app._pages._helpers import TS_FMT, convert_to_local_time, update_page
+from app._pages._helpers import TS_FMT, convert_to_local_time
 from app.config import settings
 
 # -----------------------------------------------------------------------------
@@ -73,59 +71,77 @@ initial_page = params.get("page", "Performance")  # default to "Performance"
 if not oid:
     # Three-page app: Performance ↔ Portfolio ↔ Order Book
     st.sidebar.markdown("**Navigate:**")
-    
+
     # Create indentation using columns: 10% spacer + 80% buttons
     _1, col2, _3 = st.sidebar.columns([0.1, 0.8, 0.1])
-    
+
     with col2:
         # Determine which page is currently active
         current_page = initial_page
-        
+
         # Performance button with highlighting
         if current_page == "Performance":
-            st.button("Performance", key="nav_performance_active", use_container_width=True, disabled=True, type="secondary")
+            st.button(
+                "Performance",
+                key="nav_performance_active",
+                use_container_width=True,
+                disabled=True,
+                type="secondary",
+            )
         else:
             if st.button("Performance", key="nav_performance", use_container_width=True):
                 st.query_params["page"] = "Performance"
                 st.rerun()
-        
+
         # Portfolio button with highlighting
         if current_page == "Portfolio":
-            st.button("Portfolio", key="nav_portfolio_active", use_container_width=True, disabled=True, type="secondary")
+            st.button(
+                "Portfolio",
+                key="nav_portfolio_active",
+                use_container_width=True,
+                disabled=True,
+                type="secondary",
+            )
         else:
             if st.button("Portfolio", key="nav_portfolio", use_container_width=True):
                 st.query_params["page"] = "Portfolio"
                 st.rerun()
-        
+
         # Order Book button with highlighting
         if current_page == "Order Book":
-            st.button("Order Book", key="nav_orders_active", use_container_width=True, disabled=True, type="secondary")
+            st.button(
+                "Order Book",
+                key="nav_orders_active",
+                use_container_width=True,
+                disabled=True,
+                type="secondary",
+            )
         else:
             if st.button("Order Book", key="nav_orders", use_container_width=True):
                 st.query_params["page"] = "Order Book"
                 st.rerun()
-    
+
     page = current_page
 else:
     # Add navigation buttons to return to different pages
     st.sidebar.markdown("**Navigate back to:**")
-    
+
     # Create indentation using columns: 10% spacer + 80% buttons
     _1, col2, _3 = st.sidebar.columns([0.1, 0.8, 0.1])
-    
+
     with col2:
         if st.button("Performance", key="back_to_performance", use_container_width=True):
             # Navigate back to performance page
             st.query_params.clear()
             st.query_params["page"] = "Performance"
             st.rerun()
-        
+
         if st.button("Portfolio", key="back_to_portfolio", use_container_width=True):
             # Navigate back to portfolio page
             st.query_params.clear()
             st.query_params["page"] = "Portfolio"
             st.rerun()
-        
+
         if st.button("Order Book", key="back_to_orders", use_container_width=True):
             # Navigate back to order book page
             st.query_params.clear()

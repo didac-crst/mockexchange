@@ -323,9 +323,7 @@ class Order:
             # For buy orders, the residual quote is the sum of reserved notion and fee
             # This is the total value that was reserved for the order but not yet filled
             # It includes both the notion value and the fee that was reserved
-            return max(self.reserved_notion_left, 0.0) + max(
-                self.reserved_fee_left, 0.0
-            )
+            return max(self.reserved_notion_left, 0.0) + max(self.reserved_fee_left, 0.0)
         else:
             # For sell orders, the residual quote is the fee that was reserved
             # This is the fee that was reserved for the order but not yet paid

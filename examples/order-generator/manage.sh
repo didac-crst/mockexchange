@@ -100,15 +100,15 @@ check_engine() {
 # Function to start (always builds Docker)
 start_generator() {
     local reset_flag=$1
-    
+
     print_status "Starting order generator (building Docker)..."
     check_docker
     check_env
     check_engine
-    
+
     # Build and start
     docker compose build --no-cache
-    
+
     if [ "$reset_flag" = "true" ]; then
         print_warning "Reset flag detected. This will clear backend state!"
         # Start with reset environment variable
@@ -118,7 +118,7 @@ start_generator() {
         # Start without reset
         RESET_PORTFOLIO=false docker compose up -d
     fi
-    
+
     print_status "Order generator started"
     print_status "Container name: $CONTAINER_NAME"
     print_status "View logs with: $0 logs"
@@ -135,15 +135,15 @@ stop_generator() {
 # Function to restart (no rebuild)
 restart_generator() {
     local reset_flag=$1
-    
+
     print_status "Restarting order generator (no rebuild)..."
     check_docker
     check_env
     check_engine
-    
+
     # Stop first
     docker compose down
-    
+
     if [ "$reset_flag" = "true" ]; then
         print_warning "Reset flag detected. This will clear backend state!"
         # Start with reset environment variable
@@ -153,7 +153,7 @@ restart_generator() {
         # Start without reset
         RESET_PORTFOLIO=false docker compose up -d
     fi
-    
+
     print_status "Order generator restarted"
     print_status "View logs with: $0 logs"
     print_status "Check status with: $0 status"
@@ -178,7 +178,7 @@ show_status() {
 main() {
     local command="${1:-help}"
     local option="${2:-}"
-    
+
     case "$command" in
         start)
             local reset_flag="false"

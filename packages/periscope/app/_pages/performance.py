@@ -112,9 +112,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     dpi = (
         distributions / paid_in_capital if paid_in_capital > 0 else None
     )  # DPI = Distributions to Paid-In
-    tvpi = (
-        dpi + rvpi if None not in (dpi, rvpi) else None
-    )  # TVPI = Total Value to Paid-In
+    tvpi = dpi + rvpi if None not in (dpi, rvpi) else None  # TVPI = Total Value to Paid-In
     if net_investment > 0:
         _display_performance_details(
             equity=equity,
@@ -155,9 +153,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
         st.subheader("Capital Breakdown")
         fig2 = go.Figure()
 
-        gross_PL_color = (
-            CHART_COLORS["green"] if gross_earnings >= 0 else CHART_COLORS["red"]
-        )
+        gross_PL_color = CHART_COLORS["green"] if gross_earnings >= 0 else CHART_COLORS["red"]
         steps_fig2 = [
             # label                 y-value                     measure      colour
             ("Net Investment", net_investment, "absolute", CHART_COLORS["blue"]),

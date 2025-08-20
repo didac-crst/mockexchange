@@ -171,7 +171,9 @@ async def lifespan(app):
     ENGINE.expire_orders_older_than(age=expire_age).get()
 
     # Start background tasks
-    logger.info(f"Starting background tasks - TICK_LOOP_SEC: {REFRESH_S}s, PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC}s")
+    logger.info(
+        f"Starting background tasks - TICK_LOOP_SEC: {REFRESH_S}s, PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC}s"
+    )
     tick_task = asyncio.create_task(tick_loop())
     prune_task = asyncio.create_task(prune_and_expire_loop())
     sanity_task = asyncio.create_task(sanity_loop())
@@ -276,9 +278,7 @@ def list_orders(
     symbol: str | None = None,
     side: _TRADING_SIDES | None = Query(None),
     tail: int | None = None,
-    include_history: bool = Query(
-        False, description="Include order history in response"
-    ),
+    include_history: bool = Query(False, description="Include order history in response"),
 ):
     orders = _g(
         ENGINE.order_book.get().list(
@@ -299,9 +299,7 @@ def list_orders_simple(
     side: _TRADING_SIDES | None = Query(None),
     tail: int | None = None,
 ):
-    orders = _g(
-        ENGINE.order_book.get().list(status=status, symbol=symbol, side=side, tail=tail)
-    )
+    orders = _g(ENGINE.order_book.get().list(status=status, symbol=symbol, side=side, tail=tail))
     ids = [o.id for o in orders]
     return {"length": len(ids), "orders": ids}
 
@@ -309,9 +307,7 @@ def list_orders_simple(
 @app.get("/orders/{oid}", tags=["Orders"])
 def get_order(
     oid: str,
-    include_history: bool = Query(
-        False, description="Include order history in response"
-    ),
+    include_history: bool = Query(False, description="Include order history in response"),
 ):
     try:
         o = _g(ENGINE.order_book.get().get(oid, include_history=include_history))
@@ -356,7 +352,7 @@ def cancel(oid: str):
 # overview --------------------------------------------------------------- #
 @app.get("/overview/capital", tags=["Overview"])
 def get_summary_capital(
-    aggregation: bool = Query(True, description="Portfolio aggregated capital")
+    aggregation: bool = Query(True, description="Portfolio aggregated capital"),
 ):
     """
     Get a summary of all capital related amounts in the portfolio.
@@ -384,17 +380,13 @@ def get_summary_trades(
     side: _TRADING_SIDES | None = Query(None),
 ):
     # turn "BTC,ETH" → ["BTC", "ETH"]; keep None if nothing supplied
-    assets_list = (
-        [s.strip() for s in assets.split(",") if s.strip()] if assets else None
-    )
+    assets_list = [s.strip() for s in assets.split(",") if s.strip()] if assets else None
     sum_trades = _g(ENGINE.get_trade_stats(assets=assets_list, side=side))
     return sum_trades
 
 
 # admin ------------------------------------------------------------------ #
-@app.patch(
-    "/admin/tickers/{ticker:path}/price", tags=["Admin"], dependencies=prod_depends
-)
+@app.patch("/admin/tickers/{ticker:path}/price", tags=["Admin"], dependencies=prod_depends)
 def patch_ticker_price(ticker: str, body: ModifyTickerReq):
     data = _g(
         ENGINE.set_ticker(
@@ -480,9 +472,7 @@ async def prune_and_expire_loop():
     prune_age = timedelta(seconds=STALE_AFTER_SEC)
     expire_age = timedelta(seconds=EXPIRE_AFTER_SEC)
     while True:
-        logger.debug(
-            f"Prune and expire loop started - PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC} seconds"
-        )
+        logger.debug(f"Prune and expire loop started - PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC} seconds")
         try:
             if i_am_leader():
                 ENGINE.prune_orders_older_than(age=prune_age).get()

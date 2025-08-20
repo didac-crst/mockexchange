@@ -16,16 +16,16 @@ Only comments & docstrings were added – runtime logic is unchanged.
 
 from __future__ import annotations
 
-import os
-
 # Standard library -------------------------------------------------------------
-from pathlib import Path
-
 # Third‑party ------------------------------------------------------------------
 import pandas as pd
 import requests
 import streamlit as st
-from dotenv import load_dotenv
+
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+from app.config import settings
 
 from ._colors import _STATUS_LIGHT
 
@@ -34,13 +34,7 @@ from ._helpers import (
     _format_significant_float,
     convert_to_local_time,
     fmt_side_marker,
-    update_page,
 )
-
-# -----------------------------------------------------------------------------
-# Configuration
-# -----------------------------------------------------------------------------
-from app.config import settings
 
 API_BASE = settings()["API_URL"]  # REST back‑end
 
@@ -62,12 +56,8 @@ def render(order_id: str) -> None:  # noqa: D401
     # Formatting lambdas (local closures keep code below concise)
     # ------------------------------------------------------------------
     fmt = lambda v: _format_significant_float(v)  # noqa: E731
-    fmt_notion = lambda v: _format_significant_float(
-        v, data.get("notion_currency")
-    )  # noqa: E731
-    fmt_fee = lambda v: _format_significant_float(
-        v, data.get("fee_currency")
-    )  # noqa: E731
+    fmt_notion = lambda v: _format_significant_float(v, data.get("notion_currency"))  # noqa: E731
+    fmt_fee = lambda v: _format_significant_float(v, data.get("fee_currency"))  # noqa: E731
 
     # ------------------------------------------------------------------
     # Back navigation is now handled in main.py sidebar
@@ -87,10 +77,7 @@ def render(order_id: str) -> None:  # noqa: D401
 
     # In MockExchange errors come back as {"error": "..."} dict.
     if "error" in data:
-        st.info(
-            "No history found for order ID "
-            f"{order_id} – Probably it has been pruned."
-        )
+        st.info("No history found for order ID " f"{order_id} – Probably it has been pruned.")
         return
 
     # ------------------------------------------------------------------
@@ -108,8 +95,7 @@ def render(order_id: str) -> None:  # noqa: D401
 
     # Type info → show limit price inline when applicable
     type_info = (
-        f"{data.get('type').capitalize()} "
-        f"[{fmt_notion(data.get('limit_price', 0))}]"
+        f"{data.get('type').capitalize()} " f"[{fmt_notion(data.get('limit_price', 0))}]"
         if data.get("type") == "limit"
         else data.get("type").capitalize()
     )
@@ -121,9 +107,7 @@ def render(order_id: str) -> None:  # noqa: D401
     # Time‑stamps -------------------------------------------------------
     placed_ts = convert_to_local_time(data.get("ts_create"))
     updated_ts = convert_to_local_time(data.get("ts_update"))
-    executed_ts = (
-        convert_to_local_time(data.get("ts_finish")) if data.get("ts_finish") else None
-    )
+    executed_ts = convert_to_local_time(data.get("ts_finish")) if data.get("ts_finish") else None
 
     is_new = _status == "new"
     is_partial = "partially" in _status
@@ -201,9 +185,7 @@ def render(order_id: str) -> None:  # noqa: D401
             st.metric("Asset ▶ Remaining", fmt(remaining_amount))
 
     with col2:
-        actual_str = (
-            "Notional ▶ Actual paid" if is_buy else "Notional ▶ Actual received"
-        )
+        actual_str = "Notional ▶ Actual paid" if is_buy else "Notional ▶ Actual received"
         st.metric(actual_str, fmt_notion(actual_notion))
         if is_buy:
             st.metric("Notional ▶ Initial booked", fmt_notion(initial_notion))

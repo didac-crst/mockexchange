@@ -80,9 +80,7 @@ def advanced_filter_toggle() -> bool:
 
     # Render checkbox with current session state
     # Do NOT pass `value=` — let Streamlit use session_state["advanced_display"]
-    advanced_display = st.sidebar.checkbox(
-        "Display advanced details", key="advanced_display"
-    )
+    advanced_display = st.sidebar.checkbox("Display advanced details", key="advanced_display")
 
     # Only update query params if the user changes the toggle
     if advanced_display != (filter_advanced == "True"):
@@ -248,9 +246,7 @@ def _add_details_column(
     return df
 
 
-def _format_significant_float(
-    value: float | int | None, unity: str | None = None
-) -> str:
+def _format_significant_float(value: float | int | None, unity: str | None = None) -> str:
     """
     Format a float into a human-readable string with dynamic precision.
 
@@ -299,9 +295,7 @@ def _format_significant_float(
     return formatted
 
 
-fmt_side_marker = lambda side: {"BUY": "↗ BUY", "SELL": "↘ SELL"}[
-    side.upper()
-]  # noqa: E731
+fmt_side_marker = lambda side: {"BUY": "↗ BUY", "SELL": "↘ SELL"}[side.upper()]  # noqa: E731
 
 
 def get_tempo_avg_trade_summary(
@@ -313,11 +307,14 @@ def get_tempo_avg_trade_summary(
 
     start_time = df_raw["ts_update"].min() / 1000  # Convert to seconds
     timespan = time.time() - start_time  # in seconds
-    # When the order horizon is less than 1 hour, we prefer to calculate the timespan as the difference
-    # between the last order and the first order to avoid fluctuations in the average trade summary.
+    # When the order horizon is less than 1 hour, we prefer to calculate
+    # the timespan as the difference between the last order and the first
+    # order to avoid fluctuations in the average trade summary.
     if timespan < 3600:
         stop_time = df_raw["ts_update"].max() / 1000  # Convert to seconds
-        timespan = stop_time - start_time + 30  # Add 30 seconds to the timespan to avoid division by very small numbers
+        timespan = (
+            stop_time - start_time + 30
+        )  # Add 30 seconds to the timespan to avoid division by very small numbers
     # Executed orders
     df_filt = df_raw[["id", "side", "actual_notion", "actual_fee"]].copy()
     df_filt = df_filt[df_filt["actual_notion"] > 0]  # Filter out zero notional orders
@@ -338,9 +335,7 @@ def get_tempo_avg_trade_summary(
         .reset_index()
     )
     # Convert dataframe to dict for display
-    df_filt_agg = (
-        df_filt_agg.set_index("side") * 3600 / timespan
-    )  # convert to per-hour rate
+    df_filt_agg = df_filt_agg.set_index("side") * 3600 / timespan  # convert to per-hour rate
 
     if df_filt_agg["total_notional"].sum() < (equity / 10):
         # If the total notional is more than equity, convert to daily rate
@@ -349,9 +344,7 @@ def get_tempo_avg_trade_summary(
     else:
         period_agg = "h"
 
-    avg_trade_summary = df_filt_agg.to_dict(
-        orient="index"
-    )  # convert to dict for display
+    avg_trade_summary = df_filt_agg.to_dict(orient="index")  # convert to dict for display
     # Add a global summary entry
     avg_trade_summary["global"] = {}
     for metric in df_filt_agg.columns:
@@ -679,10 +672,10 @@ def _display_assets_pie_chart(assets_overview: dict) -> None:
 
     # Define the exact order we want for the pie chart
     desired_order = ["Free Cash", "Frozen Cash", "Frozen Assets", "Free Assets"]
-    
+
     # Create a categorical type with the desired order
     df["Category"] = pd.Categorical(df["Category"], categories=desired_order, ordered=True)
-    
+
     # Sort by the categorical order
     df = df.sort_values("Category")
 
@@ -760,9 +753,7 @@ def _display_performance_details(
     gross_roi_on_cost = (
         gross_earnings / net_investment if net_investment > 0 else None
     )  # before fees
-    net_roi_on_cost = (
-        net_earnings / net_investment if net_investment > 0 else None
-    )  # after fees
+    net_roi_on_cost = net_earnings / net_investment if net_investment > 0 else None  # after fees
     gross_roi_on_value = gross_earnings / equity if equity > 0 else None  # before fees
     net_roi_on_value = net_earnings / equity if equity > 0 else None  # after fees
 
@@ -969,22 +960,14 @@ def _display_trades_details(
     sell_paid_fees = trades_summary["SELL"]["fee"]
     global_paid_fees = trades_summary["TOTAL"]["fee"]
     avg_buy_price_order = buy_traded / buy_orders_count if buy_orders_count > 0 else 0
-    avg_sell_price_order = (
-        sell_traded / sell_orders_count if sell_orders_count > 0 else 0
-    )
+    avg_sell_price_order = sell_traded / sell_orders_count if sell_orders_count > 0 else 0
     avg_trade_price_order = global_traded / global_orders if global_orders > 0 else 0
     avg_buy_capital_churn_rate = avg_trade_summary["buy"]["total_notional"]
     avg_sell_capital_churn_rate = avg_trade_summary["sell"]["total_notional"]
     avg_global_capital_churn_rate = avg_trade_summary["global"]["total_notional"]
-    avg_buy_equity_churn_rate = (
-        100 * avg_buy_capital_churn_rate / equity if equity > 0 else 0
-    )
-    avg_sell_equity_churn_rate = (
-        100 * avg_sell_capital_churn_rate / equity if equity > 0 else 0
-    )
-    avg_global_equity_churn_rate = (
-        100 * avg_global_capital_churn_rate / equity if equity > 0 else 0
-    )
+    avg_buy_equity_churn_rate = 100 * avg_buy_capital_churn_rate / equity if equity > 0 else 0
+    avg_sell_equity_churn_rate = 100 * avg_sell_capital_churn_rate / equity if equity > 0 else 0
+    avg_global_equity_churn_rate = 100 * avg_global_capital_churn_rate / equity if equity > 0 else 0
     avg_buy_order_churn_rate = avg_trade_summary["buy"]["order_count"]
     avg_sell_order_churn_rate = avg_trade_summary["sell"]["order_count"]
     avg_global_order_churn_rate = avg_trade_summary["global"]["order_count"]
@@ -1252,9 +1235,7 @@ def tvpi_gauge(
     elif tvpi <= 8:
         max_axis = 10
     else:
-        max_axis = (
-            math.ceil((tvpi + 2) / 10) * 10
-        )  # Ensure the axis can accommodate the TVPI value
+        max_axis = math.ceil((tvpi + 2) / 10) * 10  # Ensure the axis can accommodate the TVPI value
     traces = []
     prev_hi = 0
 

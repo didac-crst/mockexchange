@@ -21,9 +21,7 @@ def deposit(client: Client, asset: str, amount: float = 100_000) -> None:
 
 def withdrawal(client: Client, asset: str, amount: float = 100_000) -> None:
     """Withdraw a specified amount of an asset from the backend."""
-    client.post(
-        f"/balance/{asset}/withdrawal", json={"amount": amount}
-    ).raise_for_status()
+    client.post(f"/balance/{asset}/withdrawal", json={"amount": amount}).raise_for_status()
 
 
 def edit_balance(client: Client, asset: str, free: float, used: float) -> None:
@@ -53,9 +51,7 @@ def get_ticker_price(client: Client, symbol: str) -> float:
 
 
 def patch_ticker_price(client: Client, symbol: str, price: float) -> None:
-    client.patch(
-        f"/admin/tickers/{symbol}/price", json={"price": price}
-    ).raise_for_status()
+    client.patch(f"/admin/tickers/{symbol}/price", json={"price": price}).raise_for_status()
 
 
 def place_order(client: Client, payload: dict[str, Any]) -> dict[str, Any]:
@@ -84,9 +80,7 @@ def cancel_order(client: Client, order_id: str) -> None:
 # ────────────────── concurrent order submit ────────────────── #
 
 
-def place_orders_parallel(
-    client: Client, payloads: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
+def place_orders_parallel(client: Client, payloads: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Fire POST /orders for every payload concurrently (one thread each).
     Returns the list of order-JSONs in the *same order* as `payloads`.

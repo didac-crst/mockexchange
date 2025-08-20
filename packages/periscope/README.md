@@ -137,4 +137,3 @@ streamlit run app/main.py
 - **Plotly** - Interactive visualizations
 - **Requests** - HTTP client for API calls
 - **Python-dotenv** - Environment variable management
-
