@@ -41,7 +41,10 @@ The dashboard uses environment variables from the root `.env` file. Key variable
 
 | Variable          | Default                 | Description                  |
 | ----------------- | ----------------------- | ---------------------------- |
-| `API_URL`         | `http://localhost:8000` | Engine API URL               |
+| `ENGINE_HOST`     | `engine`                | Engine host for API URL construction |
+| `ENGINE_PORT`     | `8000`                  | Engine port for API URL construction |
+| `PERISCOPE_HOST`  | `localhost`             | Dashboard host for UI URL construction |
+| `PERISCOPE_PORT`  | `8501`                  | Dashboard port for UI URL construction |
 | `API_KEY`         | `dev-key`               | Authentication key           |
 | `REFRESH_SECONDS` | `60`                    | Auto-refresh interval        |
 | `QUOTE_ASSET`     | `USDT`                  | Portfolio valuation currency |
@@ -54,9 +57,17 @@ The dashboard uses environment variables from the root `.env` file. Key variable
 | `SLIDER_DEFAULT`  | `50`                    | Default value for order count slider |
 | `LOCAL_TZ`        | `Europe/Berlin`         | Timezone for timestamps |
 | `LOGO_FILE`       | ``                      | Logo file for dashboard (optional) |
-| `UI_URL`          | `http://localhost:8501` | UI base URL for links |
 
-**Note**: For Docker deployment, `API_URL` should be `http://engine:8000`. For local development, use `http://localhost:8000`.
+**Note**: URLs are automatically constructed from HOST:PORT variables:
+- `API_URL = http://${ENGINE_HOST}:${ENGINE_PORT}`
+- `UI_URL = http://${PERISCOPE_HOST}:${PERISCOPE_PORT}`
+
+**Deployment Examples:**
+- **Docker**: `ENGINE_HOST=engine`, `PERISCOPE_HOST=localhost`
+- **External Engine**: `ENGINE_HOST=192.168.1.101`, `PERISCOPE_HOST=192.168.1.102`
+- **Local Dev**: `ENGINE_HOST=localhost`, `PERISCOPE_HOST=localhost`
+
+You can still override with `API_URL` and `UI_URL` environment variables if needed.
 
 See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
 

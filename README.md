@@ -202,6 +202,13 @@ flowchart TB
 
     oracle["MockX Oracle 🔮<br/>(ccxt → Redis)"] --> redis
     binance -->|ccxt| oracle
+
+    %% Color styling for important components
+    style engine fill:#1976d2,color:#ffffff
+    style periscope fill:#7b1fa2,color:#ffffff
+    style oracle fill:#388e3c,color:#ffffff
+    style redis fill:#f57c00,color:#ffffff
+    style gateway fill:#d32f2f,color:#ffffff
 ```
 
 ---
@@ -565,8 +572,10 @@ cp .env.example .env
 - `SIGMA_FILL_MARKET_ORDER` - Slippage simulation for market order fills (default: 0.1)
 
 #### **Periscope (Dashboard)**
-- `PERISCOPE_HOST` - Dashboard host (default: `localhost` for Docker, use IP for external)
-- `PERISCOPE_PORT` - Dashboard port (default: 8501)
+- `ENGINE_HOST` - Engine host for API URL construction (default: `engine` for Docker, use IP for external)
+- `ENGINE_PORT` - Engine port for API URL construction (default: 8000)
+- `PERISCOPE_HOST` - Dashboard host for UI URL construction (default: `localhost`)
+- `PERISCOPE_PORT` - Dashboard port for UI URL construction (default: 8501)
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
 - `QUOTE_ASSET` - Quote asset for portfolio valuation (default: USDT)
@@ -578,7 +587,6 @@ cp .env.example .env
 - `SLIDER_DEFAULT` - Default value for order count slider (default: 50)
 - `LOCAL_TZ` - Timezone for timestamps (default: Europe/Berlin)
 - `LOGO_FILE` - Logo file for dashboard (optional)
-- `UI_URL` - UI base URL for links (auto-constructed from HOST:PORT)
 
 ### Benefits of Centralized Configuration
 - ✅ **Single source of truth** - All config in one place
@@ -586,6 +594,7 @@ cp .env.example .env
 - ✅ **Easy customization** - Change once, applies everywhere
 - ✅ **Better security** - Centralized password management
 - ✅ **Simplified deployment** - One config file to manage
+
 - ✅ **Automatic URL construction** - API_URL and UI_URL built from HOST:PORT variables
 
 ### URL Construction

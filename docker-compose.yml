@@ -60,8 +60,15 @@ services:
     ports:
       - "${PERISCOPE_PORT}:8501"
     environment:
-      - API_URL=${API_URL:-http://engine:8000}
+      # URL construction variables (automatic)
+      - ENGINE_HOST=${ENGINE_HOST:-engine}
+      - ENGINE_PORT=${ENGINE_PORT:-8000}
+      - PERISCOPE_HOST=${PERISCOPE_HOST:-localhost}
+      - PERISCOPE_PORT=${PERISCOPE_PORT:-8501}
+      # Manual overrides (optional)
+      - API_URL=${API_URL}
       - UI_URL=${UI_URL}
+      # Other settings
       - APP_TITLE=${APP_TITLE}
       - LOGO_FILE=${LOGO_FILE}
       - API_KEY=${API_KEY}

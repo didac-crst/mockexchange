@@ -61,6 +61,13 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
   - Improved user experience with clear understanding of system configuration options
 
 ### Fixed
+- **Environment Variable Handling**: Robust empty string handling for URL construction
+  - Fixed issue where empty `API_URL` and `UI_URL` environment variables would break the application
+  - Enhanced config.py to properly handle empty strings by treating them as "not set"
+  - Added fallback logic: `api_url_env if api_url_env and api_url_env.strip() else f"http://{engine_host}:{engine_port}"`
+  - Now correctly constructs URLs automatically when override variables are empty
+  - Resolved Docker Compose warnings about empty environment variables
+  - Improved reliability of automatic URL construction from `ENGINE_HOST:ENGINE_PORT` and `PERISCOPE_HOST:PERISCOPE_PORT`
 - **Periscope Configuration**: Centralized environment variable loading
   - Updated config.py to load .env from multiple paths for Docker compatibility
   - Fixed API_URL loading from incorrect paths in Docker containers
