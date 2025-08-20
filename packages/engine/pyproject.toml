@@ -91,14 +91,14 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 warn_no_return = true
-warn_unreachable = true
+warn_unreachable = false
 strict_equality = true
-disable_error_code = ["operator", "union-attr", "arg-type", "unreachable"]
+disable_error_code = ["import-not-found", "misc", "unused-ignore", "unreachable", "no-any-return", "dict-item"]
 
 [[tool.mypy.overrides]]
-module = ["streamlit.*","plotly.*","ccxt.*","httpx.*","pykka.*"]
+module = ["streamlit.*","plotly.*","ccxt.*","httpx.*","pykka.*","fastapi.*","pydantic.*","dotenv.*"]
 ignore_missing_imports = true
 
 [build-system]

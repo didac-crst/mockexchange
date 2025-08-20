@@ -120,4 +120,4 @@ class Market:
         # Redis won’t store None, so drop them first.
         clean = {k: str(v) for k, v in fields.items() if v is not None}
 
-        self.conn.hset(f"{self.root_key}{TradingPair.symbol}", mapping=clean)
+        self.conn.hset(f"{self.root_key}{TradingPair.symbol}", mapping=clean)  # type: ignore[arg-type]

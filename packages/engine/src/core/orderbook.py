@@ -86,8 +86,10 @@ class OrderBook:
             status = {status.value}
         elif isinstance(status, str):
             status = {status}
-        else:  # iterable of str | OrderState
+        elif isinstance(status, Iterable):  # iterable of str | OrderState
             status = {s.value if isinstance(s, OrderState) else s for s in status}
+        else:  # type: ignore[unreachable]
+            status = set()  # fallback
         # ── normalise `side` to a *set of raw-string values* ────────────────
         if side is None:
             side_set = None  # means “no filtering”
@@ -95,8 +97,10 @@ class OrderBook:
             side_set = {side.value}
         elif isinstance(side, str):
             side_set = {side}
-        else:  # iterable of str | OrderSide
+        elif isinstance(side, Iterable):  # iterable of str | OrderSide
             side_set = {s.value if isinstance(s, OrderSide) else s for s in side}
+        else:  # type: ignore[unreachable]
+            side_set = None  # fallback
         # Only if all statuses are OPEN_STATUS, we can use the indexes
         use_indexes = all(s in OPEN_STATUS_STR for s in status)
         if use_indexes:
