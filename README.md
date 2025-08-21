@@ -669,7 +669,7 @@ cp .env.example .env
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
 - `QUOTE_ASSET` - Quote asset for portfolio valuation (default: USDT)
-- `FRESH_WINDOW_S` - Fresh window for highlighting in seconds (default: 300)
+- `FRESH_WINDOW_S` - Fresh window for highlighting in seconds (default: 60)
 - `N_VISUAL_DEGRADATIONS` - Number of fade-out levels for visual feedback (default: 60)
 - `SLIDER_MIN` - Minimum value for order count slider (default: 10)
 - `SLIDER_MAX` - Maximum value for order count slider (default: 1000)

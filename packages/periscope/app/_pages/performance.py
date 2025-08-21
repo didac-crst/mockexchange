@@ -41,7 +41,7 @@ from ._helpers import (
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 # How long a row stays "fresh" (seconds) → affects row colouring.
-FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 300))  # default 5 min
+FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 60))  # default 1 min
 
 
 # -----------------------------------------------------------------------------

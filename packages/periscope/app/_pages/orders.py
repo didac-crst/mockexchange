@@ -44,9 +44,9 @@ from ._helpers import (
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 # How long a row stays "fresh" (seconds) → affects row colouring.
-FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 300))  # default 5 min
+FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 60))  # default 1 min
 # Number of colour‑fade steps between "brand‑new" and "old" rows.
-N_VISUAL_DEGRADATIONS = int(os.getenv("N_VISUAL_DEGRADATIONS", 12))
+N_VISUAL_DEGRADATIONS = int(os.getenv("N_VISUAL_DEGRADATIONS", 60))
 
 # Slider defaults for the "tail" (how many recent orders to pull).
 SLIDER_MIN = int(os.getenv("SLIDER_MIN", 10))

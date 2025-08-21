@@ -54,8 +54,8 @@ def settings():
         "LOCAL_TZ": os.getenv("LOCAL_TZ", "UTC"),
         # UI Settings
         "UI_URL": ui_url,
-        "FRESH_WINDOW_S": int(os.getenv("FRESH_WINDOW_S", "300")),
-        "N_VISUAL_DEGRADATIONS": int(os.getenv("N_VISUAL_DEGRADATIONS", "12")),
+        "FRESH_WINDOW_S": int(os.getenv("FRESH_WINDOW_S", "60")),
+        "N_VISUAL_DEGRADATIONS": int(os.getenv("N_VISUAL_DEGRADATIONS", "60")),
         "SLIDER_MIN": int(os.getenv("SLIDER_MIN", "10")),
         "SLIDER_MAX": int(os.getenv("SLIDER_MAX", "1000")),
         "SLIDER_STEP": int(os.getenv("SLIDER_STEP", "10")),
