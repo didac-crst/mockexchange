@@ -21,6 +21,35 @@ def load_pr_comments(file_path: str) -> list[dict[str, Any]]:
         return json.load(f)
 
 
+def filter_latest_review(comments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Filter comments to only include the latest review."""
+    if not comments:
+        return comments
+
+    # Group comments by review ID
+    reviews: dict[int, list[dict[str, Any]]] = {}
+    for comment in comments:
+        review_id = comment.get("pull_request_review_id")
+        if review_id:
+            if review_id not in reviews:
+                reviews[review_id] = []
+            reviews[review_id].append(comment)
+
+    if not reviews:
+        return comments
+
+    # Find the latest review (highest review ID)
+    latest_review_id = max(reviews.keys())
+    latest_comments = reviews[latest_review_id]
+
+    print(f"📊 Found {len(reviews)} reviews:")
+    for review_id, review_comments in reviews.items():
+        print(f"   - Review {review_id}: {len(review_comments)} comments")
+    print(f"🎯 Using latest review {latest_review_id} with {len(latest_comments)} comments")
+
+    return latest_comments
+
+
 def analyze_comments(comments: list[dict[str, Any]]) -> dict[str, Any]:
     """Analyze PR comments and extract insights."""
     analysis: dict[str, Any] = {
@@ -134,14 +163,18 @@ Focus on actionable, specific recommendations.
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print("Usage: python scripts/analyze_pr_comments.py <comments_json_file>")
+    if len(sys.argv) < 2:
+        print("Usage: python scripts/analyze_pr_comments.py <comments_json_file> [--latest-only]")
         print(
             "Example: python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_123_comments.json"
+        )
+        print(
+            "Example: python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_123_comments.json --latest-only"
         )
         sys.exit(1)
 
     file_path = sys.argv[1]
+    latest_only = "--latest-only" in sys.argv
 
     if not Path(file_path).exists():
         print(f"Error: File {file_path} not found")
@@ -149,15 +182,24 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        # Load and analyze comments
+        # Load comments
         comments = load_pr_comments(file_path)
+
+        # Filter to latest review if requested
+        if latest_only:
+            comments = filter_latest_review(comments)
+            output_suffix = "_latest_review_llm_prompt.txt"
+        else:
+            output_suffix = "_llm_prompt.txt"
+
+        # Analyze comments
         analysis = analyze_comments(comments)
 
         # Generate LLM prompt
         prompt = generate_llm_prompt(comments, analysis)
 
         # Save prompt to file
-        output_file = file_path.replace(".json", "_llm_prompt.txt")
+        output_file = file_path.replace(".json", output_suffix)
         with open(output_file, "w") as f:
             f.write(prompt)
 
@@ -173,9 +215,11 @@ def main() -> None:
         print(f"   - {analysis['severity_levels']['high']} high priority items")
         print("")
         print(f"🤖 LLM prompt saved to: {output_file}")
-        print("💡 You can now feed this to your preferred LLM:")
-        print(f"   cat {output_file} | your-llm-tool")
-        print("   # or copy-paste the content into ChatGPT, Claude, etc.")
+        if latest_only:
+            print("🎯 Using latest review only (less confusion for LLM)")
+        else:
+            print("📋 Using all reviews (complete context)")
+        print("💡 Open the file in Cursor or copy-paste the content into Cursor's chat")
 
     except Exception as e:
         print(f"Error analyzing comments: {e}")

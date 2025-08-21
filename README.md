@@ -326,8 +326,10 @@ make version          # Show current version and tags
 
 # 🔗 GitHub PR Tools
 make export-pr-comments PR=123  # Export PR comments to JSON for LLM analysis
-make analyze-pr-comments PR=123 # Analyze comments and generate LLM prompt
-make export-and-analyze-pr PR=123 # Export and analyze in one command
+make analyze-pr-comments PR=123 # Analyze all comments and generate LLM prompt
+make analyze-pr-comments-latest PR=123 # Analyze only latest review (recommended)
+make export-and-analyze-pr PR=123 # Export and analyze all comments in one command
+make export-and-analyze-pr-latest PR=123 # Export and analyze latest review only (recommended)
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -379,11 +381,14 @@ make logs-engine       # Service-specific logs
 
 #### **🔗 GitHub PR Tools**
 ```bash
-make export-and-analyze-pr PR=123  # One-shot export and analysis
-make export-pr-comments PR=123     # Export PR comments to JSON
-make analyze-pr-comments PR=123    # Analyze and generate LLM prompt
+make export-and-analyze-pr-latest PR=123  # One-shot latest review analysis (recommended)
+make export-and-analyze-pr PR=123         # One-shot all reviews analysis
+make export-pr-comments PR=123            # Export PR comments to JSON
+make analyze-pr-comments-latest PR=123    # Analyze only latest review
+make analyze-pr-comments PR=123           # Analyze all reviews
 ```
 - **Export CodeRabbit comments** for AI analysis
+- **Latest review focus** - Avoid LLM confusion from multiple reviews
 - **Organized structure** in `scripts/github-pr-tools/`
 - **Cursor integration** ready for LLM analysis
 - **One-shot workflow** for quick analysis
@@ -394,11 +399,11 @@ make analyze-pr-comments PR=123    # Analyze and generate LLM prompt
 # Create scripts/.env with your GitHub token
 echo "GITHUB_TOKEN=your_github_token_here" > scripts/.env
 
-# One-shot export and analysis (recommended)
-make export-and-analyze-pr PR=123
+# One-shot latest review analysis (recommended - less confusion for LLM)
+make export-and-analyze-pr-latest PR=123
 
 # Use with Cursor
-# Open scripts/github-pr-tools/output/pr_123_comments_llm_prompt.txt in Cursor
+# Open scripts/github-pr-tools/output/pr_123_comments_latest_review_llm_prompt.txt in Cursor
 # Or copy-paste the content into Cursor's chat
 ```
 

@@ -34,10 +34,16 @@ This exports PR #123 comments to `output/pr_123_comments.json`.
 ### 3. Analyze Comments
 
 ```bash
+# Analyze all reviews (complete context)
 make analyze-pr-comments PR=123
+
+# Analyze only latest review (recommended - less confusion for LLM)
+make analyze-pr-comments-latest PR=123
 ```
 
-This generates a structured LLM prompt at `output/pr_123_comments_llm_prompt.txt`.
+This generates structured LLM prompts:
+- `output/pr_123_comments_llm_prompt.txt` (all reviews)
+- `output/pr_123_comments_latest_review_llm_prompt.txt` (latest review only)
 
 ### 4. Use with Cursor
 
@@ -60,7 +66,8 @@ python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/ou
 ## Output Files
 
 - **`pr_123_comments.json`**: Raw GitHub API response with all PR comments
-- **`pr_123_comments_llm_prompt.txt`**: Structured prompt ready for LLM analysis
+- **`pr_123_comments_llm_prompt.txt`**: Structured prompt with all reviews (complete context)
+- **`pr_123_comments_latest_review_llm_prompt.txt`**: Structured prompt with latest review only (recommended for LLM)
 
 ## Integration with Cursor
 

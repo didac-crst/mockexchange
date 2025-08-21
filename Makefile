@@ -191,8 +191,10 @@ examples: ## Show available examples
 	@echo ""
 	@echo "GitHub PR Tools:"
 	@echo "  make export-pr-comments PR=123    # Export PR comments to JSON"
-	@echo "  make analyze-pr-comments PR=123   # Analyze comments and generate LLM prompt"
-	@echo "  make export-and-analyze-pr PR=123 # Export and analyze in one command"
+	@echo "  make analyze-pr-comments PR=123   # Analyze all comments and generate LLM prompt"
+	@echo "  make analyze-pr-comments-latest PR=123 # Analyze only latest review"
+	@echo "  make export-and-analyze-pr PR=123 # Export and analyze all comments in one command"
+	@echo "  make export-and-analyze-pr-latest PR=123 # Export and analyze latest review only"
 	@echo ""
 	@echo "Manual usage:"
 	@echo "  cd examples/order-generator"
@@ -257,6 +259,14 @@ analyze-pr-comments: ## Analyze PR comments and generate LLM prompt (requires PR
 	@echo "Analyzing PR #$(PR) comments..."
 	@python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_$(PR)_comments.json
 
+analyze-pr-comments-latest: ## Analyze only the latest PR review (requires PR=<number>)
+	@if [ -z "$(PR)" ]; then \
+		echo "Error: PR number required. Usage: make analyze-pr-comments-latest PR=123"; \
+		exit 1; \
+	fi
+	@echo "Analyzing latest review for PR #$(PR)..."
+	@python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_$(PR)_comments.json --latest-only
+
 export-and-analyze-pr: ## Export and analyze PR comments in one command (requires PR=<number>)
 	@if [ -z "$(PR)" ]; then \
 		echo "Error: PR number required. Usage: make export-and-analyze-pr PR=123"; \
@@ -267,6 +277,17 @@ export-and-analyze-pr: ## Export and analyze PR comments in one command (require
 	@$(MAKE) analyze-pr-comments PR=$(PR)
 	@echo "✅ Complete! Files ready in scripts/github-pr-tools/output/"
 	@echo "💡 Open scripts/github-pr-tools/output/pr_$(PR)_comments_llm_prompt.txt in Cursor"
+
+export-and-analyze-pr-latest: ## Export and analyze latest PR review in one command (requires PR=<number>)
+	@if [ -z "$(PR)" ]; then \
+		echo "Error: PR number required. Usage: make export-and-analyze-pr-latest PR=123"; \
+		exit 1; \
+	fi
+	@echo "🚀 Exporting and analyzing latest review for PR #$(PR)..."
+	@$(MAKE) export-pr-comments PR=$(PR)
+	@$(MAKE) analyze-pr-comments-latest PR=$(PR)
+	@echo "✅ Complete! Files ready in scripts/github-pr-tools/output/"
+	@echo "💡 Open scripts/github-pr-tools/output/pr_$(PR)_comments_latest_review_llm_prompt.txt in Cursor"
 
 # Version Info
 version ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
