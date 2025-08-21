@@ -18,124 +18,44 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 - **Comprehensive Integration Testing**: Fresh restart + integration tests in single command
 
 ### Added
-- **Enhanced Development Workflow**: Comprehensive Makefile improvements
+- **Development Workflow & Toolchain**: Comprehensive improvements for developer experience
   - **One-command development cycle**: `make dev` now runs install → format → lint → type-check → test
   - **Smart type checking**: `make type-check` with MyPy filtering (ignores framework limitations)
   - **Comprehensive integration testing**: `make integration` for fresh restart + integration tests
-  - **Full validation workflow**: `make integration-full` for complete dev cycle + integration tests
+  - **Modernized toolchain**: Replaced Black with Ruff for faster, more comprehensive code formatting
   - **Enhanced service management**: Individual service control with fresh rebuilds
-  - **Improved developer experience**: Clear progress indicators and completion messages
   - **Zero MyPy errors**: Achieved 0 errors in core business logic through smart filtering
   - **Pre-commit integration**: MyPy runs on commits with framework noise filtered out
-  - **Updated documentation**: README now includes comprehensive development workflow guide
-- **Modernized Toolchain**: Replaced Black with Ruff for code formatting
-  - Removed Black dependency from all packages (root, engine, oracle, periscope)
-  - Updated CI workflow to use only Ruff for linting and formatting
-  - Updated pre-commit hooks to remove Black and use Ruff formatting
-  - Updated Makefile to use Ruff for both linting and formatting
-  - Updated documentation to reflect Ruff-only toolchain
-  - Improved development experience with faster, more comprehensive tooling
-  - **Enabled Ruff auto-formatting**: Added `[tool.ruff.format]` configuration for automatic code formatting
-  - **Optimized line length settings**: Set to 100 characters for modern readability while maintaining flexibility
-  - **Disabled E501 line length checking**: Following modern Python standards (used by FastAPI, Pydantic, Django)
-  - **Fixed MyPy configuration**: Excluded duplicate conftest.py files to prevent module conflicts
-- **Comprehensive Type Annotations**: Added extensive type annotations to engine package
-  - **Massive improvement**: Reduced MyPy errors from 136+ to 0 in core business logic (100% improvement!)
+- **Type Safety & Code Quality**: Massive improvements in type annotations and error handling
+  - **Comprehensive type annotations**: Reduced MyPy errors from 136+ to 0 in core business logic (100% improvement!)
   - **Smart filtering implemented**: MyPy now ignores framework limitations while catching real type issues
-  - Added type stubs for redis, requests, pandas, httpx
-  - Fixed type compatibility issues in _types.py, cli.py, market.py, orderbook.py, server.py
-  - Added proper return type annotations for all functions and FastAPI endpoints
-  - Fixed pykka ActorProxy type compatibility issues with strategic type ignores
-  - Enhanced FastAPI endpoint documentation through comprehensive type hints
-  - Improved type safety across core engine components and API layer
-  - Enhanced IDE support and code quality through better type hints
-  - **Pre-commit integration**: MyPy runs on commits with smart filtering (framework noise ignored)
-- **Valkey IP Configuration**: Added comprehensive external server support
-  - Created comprehensive `.env.example` with all environment variables
-  - Added Valkey IP configuration examples for external servers
-  - Documented `VALKEY_HOST` usage for remote Valkey instances
-  - Verified Engine and Oracle already use `VALKEY_HOST` correctly
-  - Enhanced environment variable documentation with IP examples
-  - Added examples for connecting to external Valkey/Redis servers
-  - Updated README with external Valkey server configuration
-  - System now supports local Docker Compose and external Valkey deployments
-
-- **Environment Variable Documentation**: Comprehensive documentation for all missing environment variables
-  - **Main README.md**: Added complete documentation for all environment variables from `.env.example`
-    - Engine API Configuration: `CASH_ASSET`, `TICK_LOOP_SEC`, `PRUNE_EVERY_MIN`, `STALE_AFTER_H`, `EXPIRE_AFTER_H`, `SANITY_CHECK_EVERY_MIN`, `API_TIMEOUT_SEC`
-    - Engine Order Processing: `MIN_TIME_ANSWER_ORDER_MARKET`, `MAX_TIME_ANSWER_ORDER_MARKET`, `SIGMA_FILL_MARKET_ORDER`
-    - Oracle Discovery: `QUOTES`, `QUOTE`, `DISCOVER_QUOTES`, `DISCOVER_LIMIT`
-    - Periscope UI Configuration: `QUOTE_ASSET`, `FRESH_WINDOW_S`, `N_VISUAL_DEGRADATIONS`, `SLIDER_MIN/MAX/STEP/DEFAULT`, `LOCAL_TZ`, `LOGO_FILE`, `UI_URL`
-    - Global Configuration: `VERSION`, `TEST_ENV`, `DEBUG`
-  - **Engine README.md**: Updated configuration table with all missing Engine variables
-    - Added order processing variables for realistic trading simulation
-    - Added API configuration variables for system performance tuning
-    - Added system maintenance variables for data management
-  - **Periscope README.md**: Updated configuration table with all missing UI variables
-    - Added visual feedback configuration for dashboard highlighting
-    - Added slider control configuration for order count management
-    - Added display settings for timezone and logo customization
-  - All environment variables now properly documented with descriptions, default values, and usage context
-  - Improved user experience with clear understanding of system configuration options
-- **GitHub PR Tools**: Added automated PR comment export and analysis for LLM integration
+  - **Type stubs added**: redis, requests, pandas, httpx for better type support
+  - **CanExecuteResult TypedDict**: Added proper return type for `can_execute` method
+  - **Portfolio type annotations**: Fixed `_get_summary_assets_balance` to use `Mapping[str, Mapping[str, float]]`
+  - **Consistent error handling**: Changed side fallback from `None` to `TypeError` in `orderbook.py` for fail-fast behavior
+  - **Generic method signatures**: Updated methods to accept generic `Mapping[str, Any]`
+- **Configuration & Documentation**: Comprehensive environment variable and deployment support
+  - **Valkey IP Configuration**: Added comprehensive external server support with `VALKEY_HOST` examples
+  - **Environment Variable Documentation**: Complete documentation for all missing environment variables
+  - **External deployment support**: System now supports local Docker Compose and external Valkey deployments
+  - **Documentation consistency**: Fixed `FRESH_WINDOW_S` default from 60 to 300 to match periscope config
+  - **Enhanced READMEs**: Updated all package READMEs with comprehensive configuration tables
+- **GitHub PR Tools**: Automated PR comment export and analysis for LLM integration
   - **Export PR comments**: `make export-pr-comments PR=123` exports GitHub PR comments to JSON
   - **Analyze comments**: `make analyze-pr-comments PR=123` generates structured LLM prompts
+  - **Latest review filtering**: New `--latest-only` flag to filter to most recent CodeRabbit review
+  - **Multiple review support**: Automatically detects and selects latest review from multiple reviews
+  - **Reduced LLM confusion**: Focused feedback prevents confusion from multiple review iterations
+  - **New Make commands**: `make analyze-pr-comments-latest` and `make export-and-analyze-pr-latest`
   - **CodeRabbit integration**: Specifically designed to export CodeRabbit AI review comments
-  - **LLM-ready format**: JSON output and structured prompts for AI agents
-  - **Automated analysis**: Categorizes comments by type, severity, and affected files
-  - **GitHub token support**: Secure token management via `scripts/.env` file
-  - **Documentation**: Comprehensive setup and usage guide in README
-  - **Enhanced workflow**: Streamlines the process of incorporating AI feedback into PRs
-
-### Fixed
-- **Environment Variable Handling**: Robust empty string handling for URL construction
-  - Fixed issue where empty `API_URL` and `UI_URL` environment variables would break the application
-  - Enhanced config.py to properly handle empty strings by treating them as "not set"
-  - Added fallback logic: `api_url_env if api_url_env and api_url_env.strip() else f"http://{engine_host}:{engine_port}"`
-  - Now correctly constructs URLs automatically when override variables are empty
-  - Resolved Docker Compose warnings about empty environment variables
-  - Improved reliability of automatic URL construction from `ENGINE_HOST:ENGINE_PORT` and `PERISCOPE_HOST:PERISCOPE_PORT`
-- **Periscope Configuration**: Centralized environment variable loading
-  - Updated config.py to load .env from multiple paths for Docker compatibility
-  - Fixed API_URL loading from incorrect paths in Docker containers
-  - Resolved 'localhost:8000' connection errors in order details page
-  - All API calls now correctly use centralized configuration
-- **Order Details Page**: Fixed hardcoded API URL in order details page
-  - Removed direct environment variable loading in order_details.py
-  - Now uses centralized configuration from config.py
-  - Fixed connection errors when accessing order history
-- **Navigation Design**: Enhanced navigation with button-based interface
-  - Replaced radio buttons with regular buttons for better visual design
-  - Active page highlighted with secondary button style (disabled state)
-- **Engine Overview Assets**: Fixed 500 error in `/overview/assets` endpoint
-  - Fixed `AttributeError: 'dict' object has no attribute 'free'` in portfolio data access
-  - Updated `_get_summary_assets_balance()` to handle dictionary data from `fetch_balance()`
-  - Added proper dictionary access with `.get()` method for `cash_balance` and `portfolio[a]`
-  - Added type ignore comments for MyPy compatibility
-  - Resolved portfolio page crash when accessing asset overview data
-  - Engine now correctly processes serialized `AssetBalance.to_dict()` data structure
-  - Disabled main navigation when viewing order details, replaced with back buttons
-  - Improved user experience with clear visual indication and consistent styling
-- **Order Generator Commands**: Improved Makefile command structure
-  - Split `order-generator` into `order-generator-start-reset` and `order-generator-start`
-  - `order-generator` now shows help instead of running the command
-  - Updated `manage.sh` to support both `start` and `start --reset` commands
-  - Added warning messages for reset vs non-reset operations
-- **Order Generator Configuration**: Fixed environment variable typo
-  - Fixed typo in `NOMINTAL_TICKET_QUOTE` → `NOMINAL_TICKET_QUOTE`
-  - Order generator now correctly reads `NOMINAL_TICKET_QUOTE` from `.env`
-  - Fixed ticket amounts not respecting configuration values
-- **Periscope Documentation**: Enhanced README with integrated screenshots
-  - Added new screenshots to each feature section for better visual context
-  - Added comprehensive Order Details page documentation
-  - Standardized image widths to 800px for consistent display
-  - Improved feature descriptions with more detailed explanations
-  - Corrected Performance page description to accurately reflect investment multiples and capital breakdown
-- **Periscope Performance**: Improved timespan calculation for trade summaries
-  - Enhanced timespan calculation for orders with horizon less than 1 hour
-  - Uses difference between last and first order instead of current time
-  - Adds 30-second buffer to avoid division by very small numbers
-  - Prevents fluctuations in average trade summary calculations
+  - **Better Cursor integration**: Optimized for focused, actionable feedback analysis
+- **Script Robustness**: Enhanced GitHub PR tools with better error handling and API integration
+  - **Strict mode**: Added `set -euo pipefail` to export script for better error detection
+  - **Output directory creation**: `mkdir -p` before writing files to prevent write failures
+  - **Enhanced GitHub API**: Added `X-GitHub-Api-Version: 2022-11-28` header and `per_page=100` parameter
+  - **Better curl options**: Changed from `curl -s` to `curl -sSf` for improved error reporting
+  - **Path corrections**: Fixed script usage examples and documentation to use correct paths
+  - **Environment file paths**: Updated .env documentation to match actual script behavior
 
 ## [v0.1.4] - 2025-08-18
 
