@@ -53,7 +53,7 @@ test-integration: ## Run integration tests only (requires running services)
 
 test-integration-fresh: restart-no-cache test-integration ## Run integration tests with fresh Docker builds (no cache)
 
-integration: restart-no-cache test-integration ## Restart services with no cache and run integration tests
+integration: restart-no-cache wait-for-services test-integration ## Restart services with no cache, wait for readiness, and run integration tests
 	@echo "Integration testing complete! ✨"
 
 test-integration-engine: ## Run engine integration tests only (requires running services)
@@ -61,7 +61,7 @@ test-integration-engine: ## Run engine integration tests only (requires running 
 
 test-integration-engine-fresh: restart-engine-no-cache test-integration-engine ## Run engine integration tests with fresh engine build (no cache)
 
-integration-engine: restart-engine-no-cache test-integration-engine ## Restart engine with no cache and run integration tests
+integration-engine: restart-engine-no-cache wait-for-engine test-integration-engine ## Restart engine with no cache, wait for readiness, and run integration tests
 	@echo "Engine integration testing complete! ✨"
 
 integration-full: dev integration ## Run full development cycle + integration tests with fresh builds
@@ -151,6 +151,23 @@ restart-no-cache: ## Restart all services with fresh Docker builds (no cache)
 	docker compose down
 	docker compose build --no-cache
 	docker compose up -d
+
+wait-for-services: ## Wait for all services to be ready
+	@echo "Waiting for services to be ready..."
+	@echo "Waiting for Valkey..."
+	@until docker compose exec -T valkey redis-cli ping > /dev/null 2>&1; do sleep 1; done
+	@echo "Waiting for Engine API..."
+	@until curl -s http://localhost:8000/health > /dev/null 2>&1; do sleep 1; done
+	@echo "Waiting for Oracle..."
+	@until curl -s http://localhost:8001 > /dev/null 2>&1; do sleep 1; done
+	@echo "Waiting for Periscope..."
+	@until curl -s http://localhost:8501 > /dev/null 2>&1; do sleep 1; done
+	@echo "All services are ready! ✨"
+
+wait-for-engine: ## Wait for engine service to be ready
+	@echo "Waiting for Engine API to be ready..."
+	@until curl -s http://localhost:8000/health > /dev/null 2>&1; do sleep 1; done
+	@echo "Engine is ready! ✨"
 
 restart-valkey-no-cache: ## Restart valkey service with fresh Docker build (no cache)
 	docker compose stop valkey
