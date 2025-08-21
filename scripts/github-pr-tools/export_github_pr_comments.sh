@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 #
 # Export all PR review comments from GitHub to a JSON file
 # Mainly used to export CodeRabbit's comments for a given PR
@@ -21,12 +22,15 @@ if [ $# -lt 1 ]; then
 fi
 
 PR_NUMBER=$1
-OUTPUT_FILE="$(dirname "$0")/output/pr_${PR_NUMBER}_comments.json"
+OUTPUT_DIR="$(dirname "$0")/output"
+mkdir -p "$OUTPUT_DIR"
+OUTPUT_FILE="$OUTPUT_DIR/pr_${PR_NUMBER}_comments.json"
 
-curl -s \
+curl -sSf \
   -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
   -H "Authorization: Bearer $GITHUB_TOKEN" \
-  "https://api.github.com/repos/didac-crst/mockexchange/pulls/$PR_NUMBER/comments" \
+  "https://api.github.com/repos/didac-crst/mockexchange/pulls/$PR_NUMBER/comments?per_page=100" \
   > "$OUTPUT_FILE"
 
 echo "✅ Exported PR #$PR_NUMBER comments to $OUTPUT_FILE"

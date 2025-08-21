@@ -99,8 +99,10 @@ class OrderBook:
             side_set = {side}
         elif isinstance(side, Iterable):  # iterable of str | OrderSide
             side_set = {s.value if isinstance(s, OrderSide) else s for s in side}
-        else:  # type: ignore[unreachable]
-            side_set = None  # fallback
+        else:
+            raise TypeError(
+                f"side must be str | OrderSide | Iterable[str|OrderSide] | None, got {type(side)!r}"
+            )
         # Use indexes only if caller asked exclusively for OPEN statuses and the set is non-empty
         use_indexes = bool(status) and all(s in OPEN_STATUS_STR for s in status)
         if use_indexes:

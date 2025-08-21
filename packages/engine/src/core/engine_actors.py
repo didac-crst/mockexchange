@@ -16,8 +16,9 @@ import random
 import threading
 import time
 from collections import defaultdict
+from collections.abc import Mapping
 from datetime import timedelta
-from typing import Any
+from typing import Any, TypedDict
 
 import pandas as pd
 import pykka
@@ -54,6 +55,12 @@ TRADES_INDEX_FEE = "trades:index:fee"
 
 DEPOSITS_INDEX = "deposits:index"
 WITHDRAWALS_INDEX = "withdrawals:index"
+
+
+# ---------- Type definitions ------------------------------------------------ #
+class CanExecuteResult(TypedDict):
+    ok: bool
+    reason: str | None
 
 
 # ---------- Domain actors ------------------------------------------------ #
@@ -870,7 +877,7 @@ class ExchangeEngineActor(_BaseActor):
     # ----- dry-run helper --------------------------------------------------- #
     def can_execute(
         self, *, symbol: str, side: OrderSide, amount: float, price: float | None = None
-    ) -> dict[str, bool | str]:
+    ) -> CanExecuteResult:
         """
         Check if an order can be executed without actually executing it.
         This checks if there are enough funds in the portfolio to execute the order.
@@ -888,7 +895,7 @@ class ExchangeEngineActor(_BaseActor):
             have = self.portfolio.get(base).get().free
             ok = have >= amount
             reason = None if ok else f"need {amount:.8f} {base}, have {have:.8f}"
-        return {"ok": ok, "reason": reason}  # type: ignore[dict-item,unused-ignore]
+        return {"ok": ok, "reason": reason}
 
     # ----- overview helpers --------------------------------------------- #
 
@@ -908,7 +915,7 @@ class ExchangeEngineActor(_BaseActor):
         return assetslist, trading_pairs
 
     def _get_assetslist_and_tickerslist_from_portfolio(
-        self, portfolio: dict[str, AssetBalance]
+        self, portfolio: Mapping[str, Any]
     ) -> tuple[list[str], list[str]]:
         """Get a list of assets and their tickers from the portfolio.
         This function extracts the assets from the portfolio, EXCLUDING the cash asset.
@@ -923,7 +930,7 @@ class ExchangeEngineActor(_BaseActor):
         return (assets_list, tickers_list)
 
     def _get_summary_assets_balance(
-        self, portfolio: dict[str, AssetBalance], prices: dict[str, float]
+        self, portfolio: Mapping[str, Mapping[str, float]], prices: Mapping[str, float]
     ) -> dict[str, float]:
         """Get a summary of the assets in the portfolio.
         This function calculates the total value of all assets in the portfolio.
@@ -939,8 +946,8 @@ class ExchangeEngineActor(_BaseActor):
         else:
             # cash_balance is a dict from AssetBalance.to_dict()
             cash = {
-                "free": cash_balance.get("free", 0.0),  # type: ignore[attr-defined]
-                "used": cash_balance.get("used", 0.0),  # type: ignore[attr-defined]
+                "free": cash_balance.get("free", 0.0),
+                "used": cash_balance.get("used", 0.0),
             }
         for a, t in zip(assets_list, tickers_list, strict=False):
             asset_balance = {}
@@ -950,8 +957,8 @@ class ExchangeEngineActor(_BaseActor):
                 logger.warning("No price for asset %s, skipping", t)
                 continue
             # portfolio[a] is a dict from AssetBalance.to_dict()
-            asset_balance["free"] = portfolio[a].get("free", 0.0)  # type: ignore[attr-defined]
-            asset_balance["used"] = portfolio[a].get("used", 0.0)  # type: ignore[attr-defined]
+            asset_balance["free"] = portfolio[a].get("free", 0.0)
+            asset_balance["used"] = portfolio[a].get("used", 0.0)
             asset_balance["price"] = prices[t]
             _assets[a] = asset_balance
         # Convert to pandas to vector operations
@@ -987,7 +994,7 @@ class ExchangeEngineActor(_BaseActor):
         balance_value["total_equity"] = (
             balance_value["cash_total_value"] + balance_value["assets_total_value"]
         )
-        return balance_value  # type: ignore[dict-item,unused-ignore]
+        return balance_value
 
     def _get_summary_assets_orders(
         self, open_orders: list[Order], prices: dict[str, float]

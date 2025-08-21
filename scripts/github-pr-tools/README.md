@@ -18,9 +18,9 @@ scripts/github-pr-tools/
 
 ### 1. Setup GitHub Token
 
-Create `scripts/.env` with your GitHub token:
+Create `scripts/github-pr-tools/.env` with your GitHub token:
 ```bash
-echo "GITHUB_TOKEN=your_github_token_here" > scripts/.env
+echo "GITHUB_TOKEN=your_github_token_here" > scripts/github-pr-tools/.env
 ```
 
 ### 2. Export PR Comments

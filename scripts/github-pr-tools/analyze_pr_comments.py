@@ -6,7 +6,7 @@ This script demonstrates how to use the JSON output from:
     make export-pr-comments PR=123
 
 Usage:
-    python scripts/analyze_pr_comments.py scripts/pr_123_comments.json
+    python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_123_comments.json
 """
 
 import json

@@ -396,8 +396,8 @@ make analyze-pr-comments PR=123           # Analyze all reviews
 
 **Setup:**
 ```bash
-# Create scripts/.env with your GitHub token
-echo "GITHUB_TOKEN=your_github_token_here" > scripts/.env
+# Create scripts/github-pr-tools/.env with your GitHub token
+echo "GITHUB_TOKEN=your_github_token_here" > scripts/github-pr-tools/.env
 
 # One-shot latest review analysis (recommended - less confusion for LLM)
 make export-and-analyze-pr-latest PR=123
@@ -669,7 +669,7 @@ cp .env.example .env
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
 - `QUOTE_ASSET` - Quote asset for portfolio valuation (default: USDT)
-- `FRESH_WINDOW_S` - Fresh window for highlighting in seconds (default: 60)
+- `FRESH_WINDOW_S` - Fresh window for highlighting in seconds (default: 300)
 - `N_VISUAL_DEGRADATIONS` - Number of fade-out levels for visual feedback (default: 60)
 - `SLIDER_MIN` - Minimum value for order count slider (default: 10)
 - `SLIDER_MAX` - Maximum value for order count slider (default: 1000)
