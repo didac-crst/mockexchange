@@ -189,6 +189,10 @@ examples: ## Show available examples
 	@echo "  make order-generator-stop         # Stop generator"
 	@echo "  make order-generator-status       # Check status"
 	@echo ""
+	@echo "GitHub PR Tools:"
+	@echo "  make export-pr-comments PR=123    # Export PR comments to JSON"
+	@echo "  make analyze-pr-comments PR=123   # Analyze comments and generate LLM prompt"
+	@echo ""
 	@echo "Manual usage:"
 	@echo "  cd examples/order-generator"
 	@echo "  ./manage.sh start --reset"
@@ -231,6 +235,26 @@ order-generator-stop: ## Stop the order generator
 
 order-generator-status: ## Show order generator status
 	@cd examples/order-generator && ./manage.sh status
+
+# GitHub PR Tools
+export-pr-comments: ## Export GitHub PR comments to JSON (requires PR=<number>)
+	@if [ -z "$(PR)" ]; then \
+		echo "Error: PR number required. Usage: make export-pr-comments PR=123"; \
+		exit 1; \
+	fi
+	@echo "Exporting PR #$(PR) comments..."
+	@chmod +x scripts/export_github_pr_comments.sh
+	@./scripts/export_github_pr_comments.sh $(PR)
+	@echo "✅ Comments exported to scripts/pr_$(PR)_comments.json"
+	@echo "💡 You can now feed this JSON to an LLM for analysis"
+
+analyze-pr-comments: ## Analyze PR comments and generate LLM prompt (requires PR=<number>)
+	@if [ -z "$(PR)" ]; then \
+		echo "Error: PR number required. Usage: make analyze-pr-comments PR=123"; \
+		exit 1; \
+	fi
+	@echo "Analyzing PR #$(PR) comments..."
+	@python scripts/analyze_pr_comments.py scripts/pr_$(PR)_comments.json
 
 # Version Info
 version ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")

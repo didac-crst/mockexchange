@@ -77,6 +77,15 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
     - Added display settings for timezone and logo customization
   - All environment variables now properly documented with descriptions, default values, and usage context
   - Improved user experience with clear understanding of system configuration options
+- **GitHub PR Tools**: Added automated PR comment export and analysis for LLM integration
+  - **Export PR comments**: `make export-pr-comments PR=123` exports GitHub PR comments to JSON
+  - **Analyze comments**: `make analyze-pr-comments PR=123` generates structured LLM prompts
+  - **CodeRabbit integration**: Specifically designed to export CodeRabbit AI review comments
+  - **LLM-ready format**: JSON output and structured prompts for AI agents
+  - **Automated analysis**: Categorizes comments by type, severity, and affected files
+  - **GitHub token support**: Secure token management via `scripts/.env` file
+  - **Documentation**: Comprehensive setup and usage guide in README
+  - **Enhanced workflow**: Streamlines the process of incorporating AI feedback into PRs
 
 ### Fixed
 - **Environment Variable Handling**: Robust empty string handling for URL construction

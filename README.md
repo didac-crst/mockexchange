@@ -323,6 +323,10 @@ make logs-valkey      # Database logs only
 # 🏷️ Release Management
 make release-branch   # Create release branch (interactive)
 make version          # Show current version and tags
+
+# 🔗 GitHub PR Tools
+make export-pr-comments PR=123  # Export PR comments to JSON for LLM analysis
+make analyze-pr-comments PR=123 # Analyze comments and generate LLM prompt
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -371,6 +375,30 @@ make logs-engine       # Service-specific logs
 - **Individual service control**
 - **Fresh rebuilds when needed**
 - **Easy log access**
+
+#### **🔗 GitHub PR Tools**
+```bash
+make export-pr-comments PR=123  # Export PR comments to JSON
+make analyze-pr-comments PR=123  # Analyze and generate LLM prompt
+```
+- **Export CodeRabbit comments** for AI analysis
+- **Feed to LLMs** for automated PR improvements
+- **JSON format** for easy processing
+- **Requires GitHub token** (set in `scripts/.env`)
+
+**Setup:**
+```bash
+# Create scripts/.env with your GitHub token
+echo "GITHUB_TOKEN=your_github_token_here" > scripts/.env
+
+# Export and analyze PR comments
+make export-pr-comments PR=123
+make analyze-pr-comments PR=123
+
+# Feed to LLM (example)
+cat scripts/pr_123_comments_llm_prompt.txt | your-llm-tool
+# or copy-paste the content into ChatGPT, Claude, etc.
+```
 
 ## 🚀 How we ship
 
