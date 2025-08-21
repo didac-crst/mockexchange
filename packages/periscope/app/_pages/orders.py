@@ -16,43 +16,34 @@ The code is intentionally verbose on comments to serve as a living
 reference for new contributors.
 """
 
-import os
-import time  # noqa: F401  # imported for completeness – not used directly yet
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
 
-from app.services.api import get_orders, get_overview_capital, get_trades_overview
-
-from ._colors import _row_style
-from ._helpers import (
+from .._pages._helpers import (
     _add_details_column,
     _display_trades_details,
     _format_significant_float,
+    _row_style,
     advanced_filter_toggle,
     convert_to_local_time,
     fmt_side_marker,
 )
+from ..config import settings
+from ..services.api import get_orders, get_overview_capital, get_trades_overview
 
-# -----------------------------------------------------------------------------
-# Configuration & constants
-# -----------------------------------------------------------------------------
-# Load environment variables from the project root .env so this file
-# can be executed standalone (e.g. `streamlit run src/.../orders.py`).
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Get settings once
+config = settings()
 
 # How long a row stays "fresh" (seconds) → affects row colouring.
-FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 60))  # default 1 min
+FRESH_WINDOW_S = config["FRESH_WINDOW_S"]
 # Number of colour‑fade steps between "brand‑new" and "old" rows.
-N_VISUAL_DEGRADATIONS = int(os.getenv("N_VISUAL_DEGRADATIONS", 60))
+N_VISUAL_DEGRADATIONS = config["N_VISUAL_DEGRADATIONS"]
 
 # Slider defaults for the "tail" (how many recent orders to pull).
-SLIDER_MIN = int(os.getenv("SLIDER_MIN", 10))
-SLIDER_MAX = int(os.getenv("SLIDER_MAX", 1000))
-SLIDER_STEP = int(os.getenv("SLIDER_STEP", 10))
-SLIDER_DEFAULT = int(os.getenv("SLIDER_DEFAULT", 100))
+SLIDER_MIN = config["SLIDER_MIN"]
+SLIDER_MAX = config["SLIDER_MAX"]
+SLIDER_STEP = config["SLIDER_STEP"]
+SLIDER_DEFAULT = config["SLIDER_DEFAULT"]
 
 
 # -----------------------------------------------------------------------------
@@ -111,7 +102,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # ------------------------------------------------------------------
     # 2) Fetch raw data from the API and pre‑process
     # ------------------------------------------------------------------
-    base = os.getenv("UI_URL", "http://localhost:8000")
+    base = config["UI_URL"]
     # ``_add_details_column`` injects the 🡒 Details link.
     df_raw = get_orders(tail=tail).pipe(_add_details_column, base_url=base)
     if df_raw.empty:

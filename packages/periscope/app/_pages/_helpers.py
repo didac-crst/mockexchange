@@ -21,10 +21,8 @@ from __future__ import annotations
 
 # Third-party -----------------------------------------------------------------
 import math
-import os
 import time
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Literal
 from zoneinfo import ZoneInfo  # Python 3.9+
 
@@ -32,12 +30,38 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from dotenv import load_dotenv
+
+from app.config import settings
 
 # Project ---------------------------------------------------------------------
 from app.services.api import get_assets_overview
 
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Get settings once
+config = settings()
+
+# Local timezone for display
+LOCAL_TZ_str = config["LOCAL_TZ"]  # e.g. "Europe/Berlin"
+LOCAL_TZ = ZoneInfo(LOCAL_TZ_str)  # ← now a tzinfo
+TS_FMT = "%d/%m %H:%M:%S"  # Timestamp format for human-readable dates
+ZERO_DISPLAY = "--"  # Default display for zero values
+_W = "⚠️"  # warning icon – reused inline for brevity
+CHART_COLORS = {
+    "red_dark": "#8B0000",
+    "red": "#C62828",
+    "orange": "#EF6C00",
+    "yellow": "#FFEB3B",
+    "lime": "#B4FF05",
+    "green": "#00DD0B",
+    "blue": "#0EC1FD",
+    "purple": "#9B00FB",
+}
+
+# Local lambdas for consistent formatting ---------------------------
+fmt_num = lambda v, warning=False: f"{v:,.0f}" if not warning else f"^{_W} {v:,.0f}"
+fmt_percent = lambda v, warning=False: f"{v:.2%}" if not warning else f"^{_W} {v:.2%}"
+fmt_cash = lambda v, cash_asset, warning=False: (
+    f"{v:,.2f} {cash_asset}" if not warning else f"^{_W} {v:,.2f} {cash_asset}"
+)
 
 
 # -----------------------------------------------------------------------------
@@ -91,29 +115,6 @@ def advanced_filter_toggle() -> bool:
 # -----------------------------------------------------------------------------
 # 1) Formatting helpers
 # -----------------------------------------------------------------------------
-
-LOCAL_TZ_str = os.getenv("LOCAL_TZ", "UTC")  # e.g. "Europe/Berlin"
-LOCAL_TZ = ZoneInfo(LOCAL_TZ_str)  # ← now a tzinfo
-TS_FMT = "%d/%m %H:%M:%S"  # Timestamp format for human-readable dates
-ZERO_DISPLAY = "--"  # Default display for zero values
-_W = "⚠️"  # warning icon – reused inline for brevity
-CHART_COLORS = {
-    "red_dark": "#8B0000",
-    "red": "#C62828",
-    "orange": "#EF6C00",
-    "yellow": "#FFEB3B",
-    "lime": "#B4FF05",
-    "green": "#00DD0B",
-    "blue": "#0EC1FD",
-    "purple": "#9B00FB",
-}
-
-# Local lambdas for consistent formatting ---------------------------
-fmt_num = lambda v, warning=False: f"{v:,.0f}" if not warning else f"^{_W} {v:,.0f}"
-fmt_percent = lambda v, warning=False: f"{v:.2%}" if not warning else f"^{_W} {v:.2%}"
-fmt_cash = lambda v, cash_asset, warning=False: (
-    f"{v:,.2f} {cash_asset}" if not warning else f"^{_W} {v:,.2f} {cash_asset}"
-)
 
 
 def _human_ts(ms: int | None) -> str:  # noqa: D401 – keep short description style
