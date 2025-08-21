@@ -16,8 +16,9 @@ import random
 import threading
 import time
 from collections import defaultdict
+from collections.abc import Mapping
 from datetime import timedelta
-from typing import Any
+from typing import Any, TypedDict
 
 import pandas as pd
 import pykka
@@ -38,6 +39,7 @@ from .portfolio import Portfolio
 
 logging.getLogger("pykka").setLevel(logging.WARNING)
 
+
 # ────────────────────────────────────────────
 MIN_TIME = float(os.getenv("MIN_TIME_ANSWER_ORDER_MARKET", 0))
 MAX_TIME = float(os.getenv("MAX_TIME_ANSWER_ORDER_MARKET", 1))
@@ -53,6 +55,12 @@ TRADES_INDEX_FEE = "trades:index:fee"
 
 DEPOSITS_INDEX = "deposits:index"
 WITHDRAWALS_INDEX = "withdrawals:index"
+
+
+# ---------- Type definitions ------------------------------------------------ #
+class CanExecuteResult(TypedDict):
+    ok: bool
+    reason: str | None
 
 
 # ---------- Domain actors ------------------------------------------------ #
@@ -72,10 +80,10 @@ class MarketActor(_BaseActor):
     def last_price(self, symbol: str) -> float:
         return self.market.last_price(symbol)
 
-    def fetch_ticker(self, symbol: str) -> dict | None:
+    def fetch_ticker(self, symbol: str) -> TradingPair | None:
         return self.market.fetch_ticker(symbol)
 
-    def set_last_price(self, *args, **kwargs):
+    def set_last_price(self, *args: Any, **kwargs: Any) -> None:
         return self.market.set_last_price(*args, **kwargs)
 
     @property
@@ -91,13 +99,13 @@ class PortfolioActor(_BaseActor):
     def get(self, asset: str) -> AssetBalance:
         return self.portfolio.get(asset)
 
-    def set(self, bal: AssetBalance):
+    def set(self, bal: AssetBalance) -> None:
         self.portfolio.set(bal)
 
-    def all(self):
+    def all(self) -> dict[str, AssetBalance]:
         return self.portfolio.all()
 
-    def clear(self):
+    def clear(self) -> None:
         self.portfolio.clear()
 
 
@@ -107,22 +115,22 @@ class OrderBookActor(_BaseActor):
         self.ob = OrderBook(self.redis)
 
     # CRUD
-    def add(self, o: Order):
+    def add(self, o: Order) -> None:
         self.ob.add(o)
 
-    def update(self, o: Order):
+    def update(self, o: Order) -> None:
         self.ob.update(o)
 
     def get(self, oid: str, include_history: bool = False) -> Order:
         return self.ob.get(oid, include_history=include_history)
 
-    def list(self, **kw) -> list[Order]:
+    def list(self, **kw: Any) -> list[Order]:
         return self.ob.list(**kw)
 
-    def remove(self, oid: str):
+    def remove(self, oid: str) -> None:
         self.ob.remove(oid)
 
-    def clear(self):
+    def clear(self) -> None:
         self.ob.clear()
 
 
@@ -151,9 +159,7 @@ class ExchangeEngineActor(_BaseActor):
     def _uid(self) -> str:
         ts = int(time.time())  # seconds
         raw = f"{int(ts*1000)}_{next(self._oid)}".encode()
-        hash = base64.urlsafe_b64encode(
-            hashlib.md5(raw).digest()
-        ).decode()  # Remove padding
+        hash = base64.urlsafe_b64encode(hashlib.md5(raw).digest()).decode()  # Remove padding
         hash = hash.replace("_", "").replace("-", "")[:6]
         oid = f"{ts:010d}_{hash}"
         return oid
@@ -217,11 +223,7 @@ class ExchangeEngineActor(_BaseActor):
             self._release(quote, o.residual_quote)
 
         # final order status
-        o.status = (
-            OrderState.REJECTED
-            if o.actual_filled == 0
-            else OrderState.PARTIALLY_REJECTED
-        )
+        o.status = OrderState.REJECTED if o.actual_filled == 0 else OrderState.PARTIALLY_REJECTED
         ts = int(time.time() * 1000)
         o.ts_update = o.ts_finish = ts
         o.comment = reason
@@ -290,9 +292,7 @@ class ExchangeEngineActor(_BaseActor):
         if (
             is_new
         ):  # In case the order is already partially filled, we do not increment the counters
-            pipe.hincrby(
-                count_valkey, quote, 1
-            )  # Number of trades for `base` in `quote`
+            pipe.hincrby(count_valkey, quote, 1)  # Number of trades for `base` in `quote`
         pipe.hincrbyfloat(amount_valkey, quote, amount)  # Bought `base` with `quote`
         pipe.hincrbyfloat(
             notional_valkey, quote, notional
@@ -446,14 +446,14 @@ class ExchangeEngineActor(_BaseActor):
         return {"filled_notion": filled_notion, "filled_fee": filled_fee}
 
     # ---------- consistency checks ------------------------------------ #
-    def check_consistency(self, eps: float = 1e-9):
+    def check_consistency(self, eps: float = 1e-9) -> dict[str, dict[str, float]]:
         """
         Compare what *should* be reserved (from open orders) with what's in portfolio.used.
         Returns a dict of mismatches.
         """
         open_orders = self.order_book.list(status=OPEN_STATUS).get()
 
-        expected = defaultdict(float)
+        expected: dict[str, float] = defaultdict(float)
         for o in open_orders:
             base, quote = o.symbol.split("/")
             if o.side is OrderSide.BUY:
@@ -483,14 +483,14 @@ class ExchangeEngineActor(_BaseActor):
 
     # ---------- public API  ------------------------------------------- #
     @property
-    def tickers(self):
-        return self.market.tickers.get()
+    def tickers(self) -> list[str]:
+        return self.market.tickers.get()  # type: ignore
 
     def fetch_ticker(self, symbol: str) -> TradingPair:
         tick = self.market.fetch_ticker(symbol).get()
         if tick is None:
             raise ValueError(f"Ticker {symbol} not available")
-        return tick
+        return tick  # type: ignore
 
     def fetch_balance(self, asset: str | None = None) -> dict[str, Any]:
         info = {k: info.to_dict() for k, info in self.portfolio.all().get().items()}
@@ -623,8 +623,9 @@ class ExchangeEngineActor(_BaseActor):
         return order.public_payload()
 
     # expose await-able helper
-    def create_order_async(self, **kw) -> pykka.Future:
-        return self.create_order(**kw)  # caller will .get_async()
+    def create_order_async(self, **kw: Any) -> dict[str, Any]:
+        # This method is called on an ActorProxy, so Pykka automatically wraps the return in a Future
+        return self.create_order(**kw)
 
     def cancel_order(self, oid: str) -> dict[str, Any]:
         o = self.order_book.get(oid).get()
@@ -640,11 +641,7 @@ class ExchangeEngineActor(_BaseActor):
             rq = o.residual_quote
             released_base = self._release(base, rb)
             released_quote = self._release(quote, rq)
-        o.status = (
-            OrderState.CANCELED
-            if o.actual_filled == 0
-            else OrderState.PARTIALLY_CANCELED
-        )
+        o.status = OrderState.CANCELED if o.actual_filled == 0 else OrderState.PARTIALLY_CANCELED
         ts = int(time.time() * 1000)
         o.ts_finish = o.ts_update = ts
         o.comment = "Order canceled by user"
@@ -677,10 +674,7 @@ class ExchangeEngineActor(_BaseActor):
         """
 
         o_fresh = self.order_book.get(o.id, include_history=False).get()
-        if (
-            o_fresh.status not in OPEN_STATUS
-            or o_fresh.actual_filled >= o_fresh.amount - 1e-12
-        ):
+        if o_fresh.status not in OPEN_STATUS or o_fresh.actual_filled >= o_fresh.amount - 1e-12:
             return
         o = o_fresh
         fillable = False
@@ -688,9 +682,7 @@ class ExchangeEngineActor(_BaseActor):
         order_is_new = o.status is OrderState.NEW
         # Simulate slippage
         total_amount_available = (
-            trading_pair.ask_volume
-            if o.side is OrderSide.BUY
-            else trading_pair.bid_volume
+            trading_pair.ask_volume if o.side is OrderSide.BUY else trading_pair.bid_volume
         )
         amount_available = self._slippage_simulate(total_amount_available, SIGMA_FILL)
         if amount_available < need_amount:
@@ -706,9 +698,9 @@ class ExchangeEngineActor(_BaseActor):
         elif o.type is OrderType.LIMIT:
             if o.limit_price is None:
                 raise ValueError("Limit orders must have a limit_price")
-            fillable = (
-                o.side is OrderSide.BUY and trading_pair.ask <= o.limit_price
-            ) or (o.side is OrderSide.SELL and trading_pair.bid >= o.limit_price)
+            fillable = (o.side is OrderSide.BUY and trading_pair.ask <= o.limit_price) or (
+                o.side is OrderSide.SELL and trading_pair.bid >= o.limit_price
+            )
         if not fillable:
             return
         base, quote = o.symbol.split("/")
@@ -771,9 +763,7 @@ class ExchangeEngineActor(_BaseActor):
 
         # shrink reservations
         if o.side is OrderSide.BUY:
-            o.reserved_notion_left = max(
-                o.reserved_notion_left - tx["filled_notion"], 0.0
-            )
+            o.reserved_notion_left = max(o.reserved_notion_left - tx["filled_notion"], 0.0)
             o.reserved_fee_left = max(o.reserved_fee_left - tx["filled_fee"], 0.0)
         else:
             # sell: only fee was reserved in quote, base reservation shrinks via residual_base
@@ -887,7 +877,7 @@ class ExchangeEngineActor(_BaseActor):
     # ----- dry-run helper --------------------------------------------------- #
     def can_execute(
         self, *, symbol: str, side: OrderSide, amount: float, price: float | None = None
-    ) -> dict[str, bool | str]:
+    ) -> CanExecuteResult:
         """
         Check if an order can be executed without actually executing it.
         This checks if there are enough funds in the portfolio to execute the order.
@@ -919,15 +909,13 @@ class ExchangeEngineActor(_BaseActor):
         """
         trading_pairs = self.market.tickers.get()
         if not trading_pairs:
-            logger.warning(
-                "No tradeable assets found in trading_pairs, returning empty lists"
-            )
+            logger.warning("No tradeable assets found in trading_pairs, returning empty lists")
             return [], []
         assetslist = [t.split("/")[0] for t in trading_pairs]
         return assetslist, trading_pairs
 
     def _get_assetslist_and_tickerslist_from_portfolio(
-        self, portfolio: dict[str, AssetBalance]
+        self, portfolio: Mapping[str, Any]
     ) -> tuple[list[str], list[str]]:
         """Get a list of assets and their tickers from the portfolio.
         This function extracts the assets from the portfolio, EXCLUDING the cash asset.
@@ -942,8 +930,8 @@ class ExchangeEngineActor(_BaseActor):
         return (assets_list, tickers_list)
 
     def _get_summary_assets_balance(
-        self, portfolio: dict[str, AssetBalance], prices: dict[str, float]
-    ) -> dict[str, dict[str, float]]:
+        self, portfolio: Mapping[str, Mapping[str, float]], prices: Mapping[str, float]
+    ) -> dict[str, float]:
         """Get a summary of the assets in the portfolio.
         This function calculates the total value of all assets in the portfolio.
         It returns a dict with the total value of each asset, including cash.
@@ -951,10 +939,16 @@ class ExchangeEngineActor(_BaseActor):
         If there are no assets in the portfolio, it returns a dict with all values set to 0.0.
         """
         _assets = {}
-        assets_list, tickers_list = self._get_assetslist_and_tickerslist_from_portfolio(
-            portfolio
-        )
-        cash = portfolio.get(self.cash_asset, {"free": 0.0, "used": 0.0})
+        assets_list, tickers_list = self._get_assetslist_and_tickerslist_from_portfolio(portfolio)
+        cash_balance = portfolio.get(self.cash_asset)
+        if cash_balance is None:
+            cash = {"free": 0.0, "used": 0.0}
+        else:
+            # cash_balance is a dict from AssetBalance.to_dict()
+            cash = {
+                "free": cash_balance.get("free", 0.0),
+                "used": cash_balance.get("used", 0.0),
+            }
         for a, t in zip(assets_list, tickers_list, strict=False):
             asset_balance = {}
             if a == self.cash_asset:
@@ -962,6 +956,7 @@ class ExchangeEngineActor(_BaseActor):
             if prices.get(t) is None:
                 logger.warning("No price for asset %s, skipping", t)
                 continue
+            # portfolio[a] is a dict from AssetBalance.to_dict()
             asset_balance["free"] = portfolio[a].get("free", 0.0)
             asset_balance["used"] = portfolio[a].get("used", 0.0)
             asset_balance["price"] = prices[t]
@@ -1003,7 +998,7 @@ class ExchangeEngineActor(_BaseActor):
 
     def _get_summary_assets_orders(
         self, open_orders: list[Order], prices: dict[str, float]
-    ) -> dict[str, dict[str, float]]:
+    ) -> dict[str, float]:
         """Get a summary of the frozen assets in open orders.
         This function calculates the total value of reserved assets and fees in open orders.
         It returns a dict with the total reserved value of assets and quotes, and the total frozen value.
@@ -1026,29 +1021,24 @@ class ExchangeEngineActor(_BaseActor):
             }
         open_orders_pd = pd.DataFrame([o.to_dict() for o in open_orders])
         open_orders_pd = open_orders_pd[RELEVANT_COLS]
-        open_orders_pd["price"] = open_orders_pd["symbol"].map(prices)
+        open_orders_pd["price"] = open_orders_pd["symbol"].map(prices)  # type: ignore[attr-defined]
         # We need to calculate the reserved assets, but this only makes sense for SELL orders.
         open_orders_pd["assets_frozen_value"] = 0.0
-        open_orders_pd.loc[
-            open_orders_pd["side"] == OrderSide.SELL, "assets_frozen_value"
-        ] = (
+        open_orders_pd.loc[open_orders_pd["side"] == OrderSide.SELL, "assets_frozen_value"] = (
             open_orders_pd["amount"] - open_orders_pd["actual_filled"]
-        ) * open_orders_pd[
-            "price"
-        ]
+        ) * open_orders_pd["price"]
         open_orders_pd["cash_frozen_value"] = (
             open_orders_pd["reserved_notion_left"] + open_orders_pd["reserved_fee_left"]
         )
         open_orders_pd = open_orders_pd[["assets_frozen_value", "cash_frozen_value"]]
-        open_orders_pd_summary = open_orders_pd.sum(numeric_only=True)
+        open_orders_pd_summary = open_orders_pd.sum(numeric_only=True)  # type: ignore[attr-defined]
         orders_frozen_value = open_orders_pd_summary.to_dict()
         orders_frozen_value["total_frozen_value"] = (
-            orders_frozen_value["assets_frozen_value"]
-            + orders_frozen_value["cash_frozen_value"]
+            orders_frozen_value["assets_frozen_value"] + orders_frozen_value["cash_frozen_value"]
         )
-        return orders_frozen_value
+        return orders_frozen_value  # type: ignore[dict-item,unused-ignore]
 
-    def get_summary_assets(self) -> dict[str, dict[str, float | str | bool]]:
+    def get_summary_assets(self) -> dict[str, Any]:
         """
         Get a summary of all value assets in the portfolio and frozen assets in open orders.
         """
@@ -1056,13 +1046,9 @@ class ExchangeEngineActor(_BaseActor):
         # only once. Therefore, we need to prepare the portfolio and orders first.
         # Portfolio data:
         portfolio = self.fetch_balance()
-        tickers_list_portfolio = self._get_assetslist_and_tickerslist_from_portfolio(
-            portfolio
-        )[1]
+        tickers_list_portfolio = self._get_assetslist_and_tickerslist_from_portfolio(portfolio)[1]
         # Get open orders and their tickers
-        open_orders = self.order_book.list(
-            status=OPEN_STATUS, include_history=False
-        ).get()
+        open_orders = self.order_book.list(status=OPEN_STATUS, include_history=False).get()
         tickers_list_orders = [o.symbol for o in open_orders]
         # My expectation is that all open orders tickers are also in the portfolio,
         # but I am not sure if this is always the case.
@@ -1080,16 +1066,16 @@ class ExchangeEngineActor(_BaseActor):
         for k in o_source.keys():
             o_val = o_source[k]
             b_val = b_source.get(k, 0.0)
-            if math.isclose(o_val, b_val, rel_tol=0.0, abs_tol=TOLERANCE):
+            if math.isclose(o_val, b_val, rel_tol=0.0, abs_tol=TOLERANCE):  # type: ignore[arg-type,unused-ignore]
                 _mismatch[k] = False
             else:
                 _mismatch[k] = True
 
-        output["misc"] = {
+        output["misc"] = {  # type: ignore[dict-item]
             "cash_asset": self.cash_asset,
             "mismatch": _mismatch,
         }
-        return output
+        return output  # type: ignore[return-value]
 
     def get_trade_stats(
         self,
@@ -1118,19 +1104,13 @@ class ExchangeEngineActor(_BaseActor):
             assets = [assets]
 
         # helper ────────────────────────────────────────────────────────────────
-        def _collect(
-            metric: str, _side: OrderSide, _assets: list[str] | None
-        ) -> dict[str, float]:
+        def _collect(metric: str, _side: OrderSide, _assets: list[str] | None) -> dict[str, float]:
             """
             Gather all hashes whose key matches:
                 trades:<_side>:*:<metric>
             """
             index_key = f"trades:index:{metric}"
-            keys = [
-                k
-                for k in self.redis.smembers(index_key)
-                if k.split(":")[1] == _side.value
-            ]
+            keys = [k for k in self.redis.smembers(index_key) if k.split(":")[1] == _side.value]
 
             pipe = self.redis.pipeline()
             base_list = []
@@ -1142,7 +1122,7 @@ class ExchangeEngineActor(_BaseActor):
                 pipe.hgetall(k)
             raw = pipe.execute() if keys else []
             raw_dict = {base: r for base, r in zip(base_list, raw, strict=False) if r}
-            return raw_dict
+            return raw_dict  # type: ignore[dict-item,unused-ignore]
 
         # 2️⃣ build the response -------------------------------------------------
         wanted_sides = [side] if side else (OrderSide.BUY, OrderSide.SELL)
@@ -1185,7 +1165,7 @@ class ExchangeEngineActor(_BaseActor):
             return []
         return list(assets)
 
-    def _get_investment_asset(self, asset: str) -> dict[str, float]:
+    def _get_investment_asset(self, asset: str) -> dict[str, Any]:
         """
         Get the investment and withdrawal accounts for a given asset.
         This function retrieves the deposit and withdrawal accounts for the specified asset.
@@ -1206,9 +1186,7 @@ class ExchangeEngineActor(_BaseActor):
         If the asset does not exist, it will return empty dicts for both accounts.
         """
         FLOAT_KEYS = ("asset_quantity", "ref_value")
-        fmt_investment = lambda d: {
-            k: float(v) if k in FLOAT_KEYS else v for k, v in d.items()
-        }
+        fmt_investment = lambda d: {k: float(v) if k in FLOAT_KEYS else v for k, v in d.items()}
         deposit_key = f"deposits:{asset}"
         withdrawal_key = f"withdrawals:{asset}"
         output = {}
@@ -1223,7 +1201,7 @@ class ExchangeEngineActor(_BaseActor):
             output["withdrawals"] = {}
         return output
 
-    def get_summary_capital(self, aggregation: bool = True) -> dict[str, float]:
+    def get_summary_capital(self, aggregation: bool = True) -> dict[str, Any]:
         """
         Get a summary of all capital related amounts in the portfolio.
         - Total equity in the portfolio (free + used)
@@ -1234,9 +1212,7 @@ class ExchangeEngineActor(_BaseActor):
         # BALANCE ----------------------------------------------------
         balance = self.fetch_balance()
         # Get the prices for all assets in the portfolio
-        assets_list, tickers_list = self._get_assetslist_and_tickerslist_from_portfolio(
-            balance
-        )
+        assets_list, tickers_list = self._get_assetslist_and_tickerslist_from_portfolio(balance)
         prices = {t: self.market.last_price(t).get() for t in tickers_list}
         for a, t in zip(assets_list, tickers_list, strict=False):
             _price = prices.get(t)
@@ -1262,8 +1238,8 @@ class ExchangeEngineActor(_BaseActor):
             for b in balance.values():
                 equity += b["value"]
             for invest in investment_accounts.values():
-                deposits += invest.get("deposits", {}).get("ref_value", 0.0)
-                withdrawals += invest.get("withdrawals", {}).get("ref_value", 0.0)
+                deposits += invest.get("deposits", {}).get("ref_value", 0.0)  # type: ignore[union-attr,call-overload]
+                withdrawals += invest.get("withdrawals", {}).get("ref_value", 0.0)  # type: ignore[union-attr,call-overload]
             # Prepare the output
             output = {
                 "equity": equity,
@@ -1280,9 +1256,7 @@ class ExchangeEngineActor(_BaseActor):
             }
 
     # ----- admin helpers ---------------------------------------------------- #
-    def set_balance(
-        self, asset: str, *, free: float = 0.0, used: float = 0.0
-    ) -> dict[str, float]:
+    def set_balance(self, asset: str, *, free: float = 0.0, used: float = 0.0) -> dict[str, float]:
         """
         Set the balance for a given asset.
         This function sets the free and used balance for the specified asset.
@@ -1307,16 +1281,15 @@ class ExchangeEngineActor(_BaseActor):
         # Check if the asset is tradeable
         # Exclude the cash asset from this check
         if asset != self.cash_asset:
-            tradeable_assets = (
-                self._get_tradeable_assetslist_tickerslist_from_current_market()[0]
-            )
+            tradeable_assets = self._get_tradeable_assetslist_tickerslist_from_current_market()[0]
             if asset not in tradeable_assets:
                 raise ValueError(f"Asset {asset} unknown or not tradeable")
         # Check if the free and used balances are valid
         if free < 0 or used < 0:
             raise ValueError("free/used must be ≥ 0")
         self.portfolio.set(AssetBalance(asset, free, used))
-        return self.portfolio.get(asset).get().to_dict()
+        balance = self.portfolio.get(asset).get()  # type: ignore[union-attr,no-any-return]
+        return balance.to_dict()  # type: ignore[no-any-return]
 
     def deposit_asset(self, asset: str, amount: float) -> dict[str, float]:
         """
@@ -1341,20 +1314,18 @@ class ExchangeEngineActor(_BaseActor):
         # Check if the asset is tradeable
         # Exclude the cash asset from this check
         if asset != self.cash_asset:
-            tradeable_assets = (
-                self._get_tradeable_assetslist_tickerslist_from_current_market()[0]
-            )
+            tradeable_assets = self._get_tradeable_assetslist_tickerslist_from_current_market()[0]
             if asset not in tradeable_assets:
                 raise ValueError(f"Asset {asset} unknown or not tradeable")
         # Check if the amount is valid
         if amount <= 0:
             raise ValueError("Amount must be > 0")
-        bal = self.portfolio.get(asset).get()
+        bal = self.portfolio.get(asset).get()  # type: ignore[union-attr,no-any-return]
         bal.free += amount
         self.portfolio.set(bal)
         self._update_deposit_account(asset, amount)
         # Return the updated balance
-        return bal.to_dict()
+        return bal.to_dict()  # type: ignore[no-any-return,unused-ignore]
 
     def withdrawal_asset(self, asset: str, amount: float) -> dict[str, float]:
         """
@@ -1380,15 +1351,13 @@ class ExchangeEngineActor(_BaseActor):
         # Check if the asset is tradeable
         # Exclude the cash asset from this check
         if asset != self.cash_asset:
-            tradeable_assets = (
-                self._get_tradeable_assetslist_tickerslist_from_current_market()[0]
-            )
+            tradeable_assets = self._get_tradeable_assetslist_tickerslist_from_current_market()[0]
             if asset not in tradeable_assets:
                 raise ValueError(f"Asset {asset} unknown or not tradeable")
         # Try to get the balance of the asset
         # If the asset does not exist, create a temporal new balance with 0.0
         try:
-            bal = self.portfolio.get(asset).get()
+            bal = self.portfolio.get(asset).get()  # type: ignore[union-attr,no-any-return]
         except KeyError:
             bal = AssetBalance(asset, 0.0, 0.0)
         # Check if the amount is valid and if there is enough balance
@@ -1402,7 +1371,7 @@ class ExchangeEngineActor(_BaseActor):
         self.portfolio.set(bal)
         self._update_withdrawal_account(asset, amount)
         # Return the updated balance
-        return bal.to_dict()
+        return bal.to_dict()  # type: ignore[no-any-return,unused-ignore]
 
     def set_ticker(
         self,
@@ -1410,7 +1379,7 @@ class ExchangeEngineActor(_BaseActor):
         price: float,
         bid_volume: float | None = None,
         ask_volume: float | None = None,
-    ):
+    ) -> dict[str, Any]:
         ts = int(time.time() * 1000)
         dummy_notion = 10**12  # just a large number to ensure liquid volumes
         bid_volume = bid_volume or dummy_notion / price
@@ -1433,7 +1402,7 @@ class ExchangeEngineActor(_BaseActor):
         ).get()  # we still wait here to ensure the write has finished
 
         # 2️⃣ read the now‑current ticker snapshot and hand it back
-        return self.market.fetch_ticker(symbol).get().to_dict()
+        return self.market.fetch_ticker(symbol).get().to_dict()  # type: ignore[no-any-return,unused-ignore]
 
     # ------------- reset helpers -------------------------------------------- #
     ############################################################################
@@ -1462,9 +1431,7 @@ class ExchangeEngineActor(_BaseActor):
         index_members: list[set[str]] = pipe.execute()
 
         # Flatten to a list of hash-keys; keep only non-empty strings
-        hash_keys: list[str] = [
-            k for member_set in index_members for k in member_set if k
-        ]
+        hash_keys: list[str] = [k for member_set in index_members for k in member_set if k]
 
         # 2️⃣ also purge the index sets themselves ------------------------------
         keys_to_delete = hash_keys + list(index_set)
@@ -1478,7 +1445,7 @@ class ExchangeEngineActor(_BaseActor):
 
         return deleted
 
-    def reset(self):
+    def reset(self) -> None:
         self.portfolio.clear()
         self.order_book.clear()
         # cancel and drain timers
@@ -1495,10 +1462,10 @@ class ExchangeEngineActor(_BaseActor):
             WITHDRAWALS_INDEX,
         )
         # Reset all hash keys in the index sets
-        self._reset_hash_keys(index_set=INDEX_SETS)
+        self._reset_hash_keys(index_set=list(INDEX_SETS))  # type: ignore[arg-type,unused-ignore]
 
     # ---------- message handler & lifecycle --------------------------- #
-    def on_receive(self, msg) -> None:
+    def on_receive(self, msg: Any) -> None:
         """
         Handle incoming messages.
         This method processes commands sent to the actor.

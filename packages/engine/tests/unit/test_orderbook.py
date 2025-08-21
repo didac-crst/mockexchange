@@ -64,9 +64,7 @@ class TestOrderBook(unittest.TestCase):
     def test_get_order(self):
         """Test getting an order from the orderbook."""
         mock_redis = Mock()
-        mock_redis.hget.return_value = (
-            '{"id": "order123", "symbol": "BTC/USDT", "status": "open"}'
-        )
+        mock_redis.hget.return_value = '{"id": "order123", "symbol": "BTC/USDT", "status": "open"}'
 
         orderbook = OrderBook(mock_redis)
 
@@ -116,9 +114,7 @@ class TestOrderBook(unittest.TestCase):
     def test_remove_order(self):
         """Test removing an order from the orderbook."""
         mock_redis = Mock()
-        mock_redis.hget.return_value = (
-            '{"id": "order123", "symbol": "BTC/USDT", "status": "open"}'
-        )
+        mock_redis.hget.return_value = '{"id": "order123", "symbol": "BTC/USDT", "status": "open"}'
         mock_pipeline = Mock()
         mock_redis.pipeline.return_value = mock_pipeline
 

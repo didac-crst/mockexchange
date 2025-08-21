@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mockexchange-suite"
-version = "0.1.0"
+version = "0.1.5"
 description = "Complete paper-trading platform with engine, periscope, and oracle"
 authors = ["Didac <didac.crst@gmail.com>"]
 readme = "README.md"
@@ -14,41 +14,32 @@ package-mode = false
 python = "^3.12"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.3"
 ruff = "^0.4"
 mypy = "^1.10"
 pre-commit = "^3.6"
-
-[tool.black]
-line-length = 88
-target-version = ['py312']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
+types-redis = "^4.6"
+types-requests = "^2.31"
+pandas-stubs = "^2.2"
 
 [tool.ruff]
 target-version = "py312"
-line-length = 88
+line-length = 100
 
 [tool.ruff.lint]
 select = ["E","W","F","I","B","C4","UP"]
 ignore = [
-  "E501",  # line too long, handled by black
+  "E501",  # line too long (handled by formatter when possible)
   "B008",  # do not perform function calls in argument defaults
   "C901",  # too complex
   "E731",  # lambda assigned to name (refactor later)
   "UP040", # TypeAlias -> `type` keyword (refactor later)
 ]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]

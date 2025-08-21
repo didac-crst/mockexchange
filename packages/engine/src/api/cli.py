@@ -50,25 +50,25 @@ client = httpx.Client(base_url=API_URL, headers=HEADERS, timeout=TIMEOUT)
 # ───────────────────────────── Helpers ──────────────────────────────── #
 
 
-def _get(path: str, **params):
+def _get(path: str, **params: Any) -> Any:
     r = client.get(path, params={k: v for k, v in params.items() if v is not None})
     _raise_for_status(r)
     return r.json()
 
 
-def _post(path: str, payload: dict[str, Any] | None = None):
+def _post(path: str, payload: dict[str, Any] | None = None) -> Any:
     r = client.post(path, json=payload or {})
     _raise_for_status(r)
     return r.json()
 
 
-def _patch(path: str, payload: dict[str, Any]):
+def _patch(path: str, payload: dict[str, Any]) -> Any:
     r = client.patch(path, json=payload)
     _raise_for_status(r)
     return r.json()
 
 
-def _delete(path: str):
+def _delete(path: str) -> Any:
     r = client.delete(path)
     _raise_for_status(r)
     return r.json()
@@ -84,7 +84,7 @@ def _raise_for_status(r: httpx.Response) -> None:
     sys.exit(f"HTTP {r.status_code}: {detail}")
 
 
-def pp(obj: Any):
+def pp(obj: Any) -> None:
     print(json.dumps(obj, indent=2, sort_keys=True))
 
 
@@ -170,7 +170,7 @@ def build_parser() -> argparse.ArgumentParser:
 # ───────────────────────────── dispatch ────────────────────────────── #
 
 
-def main():  # noqa: C901 – big matcher is fine here
+def main() -> None:  # noqa: C901 – big matcher is fine here
     args = build_parser().parse_args()
 
     match args.cmd:

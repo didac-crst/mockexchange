@@ -14,7 +14,7 @@ services:
 
   # MockX Oracle - price feed service
   oracle:
-    image: mockx-oracle:${VERSION:-0.1.0}
+    image: mockx-oracle:${VERSION:-0.1.5}
     build:
       context: ./packages/oracle
       dockerfile: Dockerfile
@@ -26,15 +26,13 @@ services:
       - VALKEY_PORT=${VALKEY_PORT}
       - VALKEY_PASSWORD=${VALKEY_PASSWORD}
       - INTERVAL_SEC=${INTERVAL_SEC}
-    depends_on:
-      - valkey
     restart: unless-stopped
     env_file:
       - .env
 
   # MockX Engine - core trading engine
   engine:
-    image: mockx-engine:${VERSION:-0.1.0}
+    image: mockx-engine:${VERSION:-0.1.5}
     build:
       context: ./packages/engine
       dockerfile: Dockerfile
@@ -48,16 +46,13 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - COMMISSION=${COMMISSION}
       - API_KEY=${API_KEY}
-    depends_on:
-      - valkey
-      - oracle
     restart: unless-stopped
     env_file:
       - .env
 
   # MockX Periscope - dashboard
   periscope:
-    image: mockx-periscope:${VERSION:-0.1.0}
+    image: mockx-periscope:${VERSION:-0.1.5}
     build:
       context: ./packages/periscope
       dockerfile: Dockerfile
@@ -65,8 +60,15 @@ services:
     ports:
       - "${PERISCOPE_PORT}:8501"
     environment:
-      - API_URL=http://engine:8000
+      # URL construction variables (automatic)
+      - ENGINE_HOST=${ENGINE_HOST:-engine}
+      - ENGINE_PORT=${ENGINE_PORT:-8000}
+      - PERISCOPE_HOST=${PERISCOPE_HOST:-localhost}
+      - PERISCOPE_PORT=${PERISCOPE_PORT:-8501}
+      # Manual overrides (optional)
+      - API_URL=${API_URL}
       - UI_URL=${UI_URL}
+      # Other settings
       - APP_TITLE=${APP_TITLE}
       - LOGO_FILE=${LOGO_FILE}
       - API_KEY=${API_KEY}
@@ -79,8 +81,6 @@ services:
       - SLIDER_STEP=${SLIDER_STEP}
       - SLIDER_DEFAULT=${SLIDER_DEFAULT}
       - LOCAL_TZ=${LOCAL_TZ}
-    depends_on:
-      - engine
     restart: unless-stopped
     env_file:
       - .env

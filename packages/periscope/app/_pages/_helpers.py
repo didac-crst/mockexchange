@@ -12,29 +12,56 @@ The module groups three kinds of helpers:
    balance-vs-orderbook summary from the API and shows it as Streamlit
    metrics, highlighting mismatches with a warning icon.
 
-Only **docstrings and comments** have been added; no functional changes.
+This module contains shared formatting, metric rendering helpers, and chart utilities.
+Recent updates added assets pie-chart helpers and extended `_display_portfolio_details`
+to accept an optional `assets_overview` payload to avoid duplicate API calls.
 """
 
 from __future__ import annotations
 
 # Third-party -----------------------------------------------------------------
 import math
-import os
 import time
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Literal
 from zoneinfo import ZoneInfo  # Python 3.9+
 
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from dotenv import load_dotenv
+
+from ..config import settings
 
 # Project ---------------------------------------------------------------------
-from app.services.api import get_assets_overview
+from ..services.api import get_assets_overview
 
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Get settings once
+config = settings()
+
+# Local timezone for display
+LOCAL_TZ_str = config["LOCAL_TZ"]  # e.g. "Europe/Berlin"
+LOCAL_TZ = ZoneInfo(LOCAL_TZ_str)  # ← now a tzinfo
+TS_FMT = "%d/%m %H:%M:%S"  # Timestamp format for human-readable dates
+ZERO_DISPLAY = "--"  # Default display for zero values
+_W = "⚠️"  # warning icon – reused inline for brevity
+CHART_COLORS = {
+    "red_dark": "#8B0000",
+    "red": "#C62828",
+    "orange": "#EF6C00",
+    "yellow": "#FFEB3B",
+    "lime": "#B4FF05",
+    "green": "#00DD0B",
+    "blue": "#0EC1FD",
+    "purple": "#9B00FB",
+}
+
+# Local lambdas for consistent formatting ---------------------------
+fmt_num = lambda v, warning=False: f"{v:,.0f}" if not warning else f"{_W} {v:,.0f}"
+fmt_percent = lambda v, warning=False: f"{v:.2%}" if not warning else f"{_W} {v:.2%}"
+fmt_cash = lambda v, cash_asset, warning=False: (
+    f"{v:,.2f} {cash_asset}" if not warning else f"{_W} {v:,.2f} {cash_asset}"
+)
 
 
 # -----------------------------------------------------------------------------
@@ -77,9 +104,7 @@ def advanced_filter_toggle() -> bool:
 
     # Render checkbox with current session state
     # Do NOT pass `value=` — let Streamlit use session_state["advanced_display"]
-    advanced_display = st.sidebar.checkbox(
-        "Display advanced details", key="advanced_display"
-    )
+    advanced_display = st.sidebar.checkbox("Display advanced details", key="advanced_display")
 
     # Only update query params if the user changes the toggle
     if advanced_display != (filter_advanced == "True"):
@@ -90,29 +115,6 @@ def advanced_filter_toggle() -> bool:
 # -----------------------------------------------------------------------------
 # 1) Formatting helpers
 # -----------------------------------------------------------------------------
-
-LOCAL_TZ_str = os.getenv("LOCAL_TZ", "UTC")  # e.g. "Europe/Berlin"
-LOCAL_TZ = ZoneInfo(LOCAL_TZ_str)  # ← now a tzinfo
-TS_FMT = "%d/%m %H:%M:%S"  # Timestamp format for human-readable dates
-ZERO_DISPLAY = "--"  # Default display for zero values
-_W = "⚠️"  # warning icon – reused inline for brevity
-CHART_COLORS = {
-    "red_dark": "#8B0000",
-    "red": "#C62828",
-    "orange": "#EF6C00",
-    "yellow": "#FFEB3B",
-    "lime": "#B4FF05",
-    "green": "#00DD0B",
-    "blue": "#0EC1FD",
-    "purple": "#9B00FB",
-}
-
-# Local lambdas for consistent formatting ---------------------------
-fmt_num = lambda v, warning=False: f"{v:,.0f}" if not warning else f"^{_W} {v:,.0f}"
-fmt_percent = lambda v, warning=False: f"{v:.2%}" if not warning else f"^{_W} {v:.2%}"
-fmt_cash = lambda v, cash_asset, warning=False: (
-    f"{v:,.2f} {cash_asset}" if not warning else f"^{_W} {v:,.2f} {cash_asset}"
-)
 
 
 def _human_ts(ms: int | None) -> str:  # noqa: D401 – keep short description style
@@ -245,9 +247,7 @@ def _add_details_column(
     return df
 
 
-def _format_significant_float(
-    value: float | int | None, unity: str | None = None
-) -> str:
+def _format_significant_float(value: float | int | None, unity: str | None = None) -> str:
     """
     Format a float into a human-readable string with dynamic precision.
 
@@ -296,9 +296,7 @@ def _format_significant_float(
     return formatted
 
 
-fmt_side_marker = lambda side: {"BUY": "↗ BUY", "SELL": "↘ SELL"}[
-    side.upper()
-]  # noqa: E731
+fmt_side_marker = lambda side: {"BUY": "↗ BUY", "SELL": "↘ SELL"}[side.upper()]  # noqa: E731
 
 
 def get_tempo_avg_trade_summary(
@@ -310,6 +308,14 @@ def get_tempo_avg_trade_summary(
 
     start_time = df_raw["ts_update"].min() / 1000  # Convert to seconds
     timespan = time.time() - start_time  # in seconds
+    # When the order horizon is less than 1 hour, we prefer to calculate
+    # the timespan as the difference between the last order and the first
+    # order to avoid fluctuations in the average trade summary.
+    if timespan < 3600:
+        stop_time = df_raw["ts_update"].max() / 1000  # Convert to seconds
+        timespan = (
+            stop_time - start_time + 30
+        )  # Add 30 seconds to the timespan to avoid division by very small numbers
     # Executed orders
     df_filt = df_raw[["id", "side", "actual_notion", "actual_fee"]].copy()
     df_filt = df_filt[df_filt["actual_notion"] > 0]  # Filter out zero notional orders
@@ -330,9 +336,7 @@ def get_tempo_avg_trade_summary(
         .reset_index()
     )
     # Convert dataframe to dict for display
-    df_filt_agg = (
-        df_filt_agg.set_index("side") * 3600 / timespan
-    )  # convert to per-hour rate
+    df_filt_agg = df_filt_agg.set_index("side") * 3600 / timespan  # convert to per-hour rate
 
     if df_filt_agg["total_notional"].sum() < (equity / 10):
         # If the total notional is more than equity, convert to daily rate
@@ -341,9 +345,7 @@ def get_tempo_avg_trade_summary(
     else:
         period_agg = "h"
 
-    avg_trade_summary = df_filt_agg.to_dict(
-        orient="index"
-    )  # convert to dict for display
+    avg_trade_summary = df_filt_agg.to_dict(orient="index")  # convert to dict for display
     # Add a global summary entry
     avg_trade_summary["global"] = {}
     for metric in df_filt_agg.columns:
@@ -484,16 +486,21 @@ def show_metrics_bulk(column, specs: list[dict]) -> None:
 # -----------------------------------------------------------------------------
 
 
-def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa: D401
+def _display_portfolio_details(
+    assets_overview: dict | None = None, advanced_display: bool = False
+) -> None:  # noqa: D401
     """Show an advanced *equity vs frozen* breakdown in three metric columns.
 
-    Fetches the combined summary from ``/overview/assets`` (via
+    Uses the provided assets overview data or fetches it from ``/overview/assets`` (via
     ``get_assets_overview``), then prints a grid of **st.metric** widgets
     comparing *portfolio* vs *order-book* numbers.  Any mismatch is
     flagged with a warning icon (⚠️) in front of the figure.
     """
 
-    summary = get_assets_overview()
+    if assets_overview is None:
+        summary = get_assets_overview()
+    else:
+        summary = assets_overview
     misc = summary.get("misc", {})
     cash_asset = misc.get("cash_asset", "")
     mismatch = misc.get("mismatch", {})  # dict[field -> bool]
@@ -527,7 +534,7 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
                 "label": "Equity ▶ Frozen",
                 "value": balance_summary["total_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["total_frozen_value"],
+                "incomplete": mismatch.get("total_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
             },
@@ -535,7 +542,7 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
                 "label": "Equity ▶ Frozen [Order book]",
                 "value": orders_summary["total_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["total_frozen_value"],
+                "incomplete": mismatch.get("total_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
                 "incomplete_display": True,
@@ -561,7 +568,7 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
                 "label": "Cash Equivalents ▶ Frozen",
                 "value": balance_summary["cash_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["cash_frozen_value"],
+                "incomplete": mismatch.get("cash_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
             },
@@ -569,7 +576,7 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
                 "label": "Cash Equivalents ▶ Frozen [Order book]",
                 "value": orders_summary["cash_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["cash_frozen_value"],
+                "incomplete": mismatch.get("cash_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
                 "incomplete_display": True,
@@ -595,7 +602,7 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
                 "label": "Volatile Assets ▶ Frozen",
                 "value": balance_summary["assets_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["assets_frozen_value"],
+                "incomplete": mismatch.get("assets_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
             },
@@ -603,7 +610,7 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
                 "label": "Volatile Assets ▶ Frozen [Order book]",
                 "value": orders_summary["assets_frozen_value"],
                 "unit": cash_asset,
-                "incomplete": mismatch["assets_frozen_value"],
+                "incomplete": mismatch.get("assets_frozen_value", False),
                 "delta_fmt": "raw",
                 "delta_color_rule": "off",
                 "incomplete_display": True,
@@ -626,6 +633,87 @@ def _display_portfolio_details(advanced_display: bool = False) -> None:  # noqa:
             },
         ]
         show_metrics_bulk(c1, specs1)
+
+
+def _display_assets_pie_chart(assets_overview: dict) -> None:
+    """Display a pie chart showing frozen vs free cash and assets values.
+
+    Creates a pie chart showing the distribution of:
+    - Frozen cash (orange)
+    - Free cash (blue)
+    - Frozen total assets (light orange)
+    - Free total assets (light blue)
+    """
+    balance_summary = assets_overview.get("balance_source", {})
+
+    # Extract the values we need for the pie chart
+    frozen_cash = balance_summary.get("cash_frozen_value", 0.0)
+    free_cash = balance_summary.get("cash_free_value", 0.0)
+    frozen_assets = balance_summary.get("assets_frozen_value", 0.0)
+    free_assets = balance_summary.get("assets_free_value", 0.0)
+
+    # Create data for the pie chart in the desired order: free cash, free assets, frozen assets, frozen cash
+    pie_data = {
+        "Category": [
+            "Free Cash",
+            "Free Assets",
+            "Frozen Assets",
+            "Frozen Cash",
+        ],
+        "Value": [free_cash, free_assets, frozen_assets, frozen_cash],
+    }
+
+    # Filter out zero values to avoid empty slices
+    df = pd.DataFrame(pie_data)
+    df = df[df["Value"] > 0]
+
+    if df.empty:
+        st.info("No assets data available for pie chart.")
+        return
+
+    # Define the exact order we want for the pie chart
+    desired_order = ["Free Cash", "Frozen Cash", "Frozen Assets", "Free Assets"]
+
+    # Create a categorical type with the desired order
+    df["Category"] = pd.Categorical(df["Category"], categories=desired_order, ordered=True)
+
+    # Sort by the categorical order
+    df = df.sort_values("Category")
+
+    # Define custom colors for each category
+    color_map = {
+        "Free Cash": "#0061FF",  # blue
+        "Frozen Cash": "#EF6C00",  # orange
+        "Free Assets": "#0EC1FD",  # light blue
+        "Frozen Assets": "#FFB347",  # light orange
+    }
+
+    # Create the pie chart with custom colors
+    fig = px.pie(
+        df,
+        names="Category",
+        values="Value",
+        hole=0.4,
+        color="Category",
+        color_discrete_map=color_map,
+        category_orders={"Category": desired_order},
+    )
+
+    fig.update_layout(
+        autosize=True,
+        height=400,  # Reduced height for mobile
+        margin={"t": 40, "b": 40, "l": 40, "r": 40},
+        showlegend=True,
+    )
+
+    # Add value labels on the pie slices
+    fig.update_traces(
+        textposition="inside",
+        textinfo="percent+label",
+        hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
+    )
+
+    st.plotly_chart(fig, use_container_width=True, height=400)
 
 
 # -----------------------------------------------------------------------------
@@ -666,9 +754,7 @@ def _display_performance_details(
     gross_roi_on_cost = (
         gross_earnings / net_investment if net_investment > 0 else None
     )  # before fees
-    net_roi_on_cost = (
-        net_earnings / net_investment if net_investment > 0 else None
-    )  # after fees
+    net_roi_on_cost = net_earnings / net_investment if net_investment > 0 else None  # after fees
     gross_roi_on_value = gross_earnings / equity if equity > 0 else None  # before fees
     net_roi_on_value = net_earnings / equity if equity > 0 else None  # after fees
 
@@ -875,22 +961,14 @@ def _display_trades_details(
     sell_paid_fees = trades_summary["SELL"]["fee"]
     global_paid_fees = trades_summary["TOTAL"]["fee"]
     avg_buy_price_order = buy_traded / buy_orders_count if buy_orders_count > 0 else 0
-    avg_sell_price_order = (
-        sell_traded / sell_orders_count if sell_orders_count > 0 else 0
-    )
+    avg_sell_price_order = sell_traded / sell_orders_count if sell_orders_count > 0 else 0
     avg_trade_price_order = global_traded / global_orders if global_orders > 0 else 0
     avg_buy_capital_churn_rate = avg_trade_summary["buy"]["total_notional"]
     avg_sell_capital_churn_rate = avg_trade_summary["sell"]["total_notional"]
     avg_global_capital_churn_rate = avg_trade_summary["global"]["total_notional"]
-    avg_buy_equity_churn_rate = (
-        100 * avg_buy_capital_churn_rate / equity if equity > 0 else 0
-    )
-    avg_sell_equity_churn_rate = (
-        100 * avg_sell_capital_churn_rate / equity if equity > 0 else 0
-    )
-    avg_global_equity_churn_rate = (
-        100 * avg_global_capital_churn_rate / equity if equity > 0 else 0
-    )
+    avg_buy_equity_churn_rate = 100 * avg_buy_capital_churn_rate / equity if equity > 0 else 0
+    avg_sell_equity_churn_rate = 100 * avg_sell_capital_churn_rate / equity if equity > 0 else 0
+    avg_global_equity_churn_rate = 100 * avg_global_capital_churn_rate / equity if equity > 0 else 0
     avg_buy_order_churn_rate = avg_trade_summary["buy"]["order_count"]
     avg_sell_order_churn_rate = avg_trade_summary["sell"]["order_count"]
     avg_global_order_churn_rate = avg_trade_summary["global"]["order_count"]
@@ -1158,9 +1236,7 @@ def tvpi_gauge(
     elif tvpi <= 8:
         max_axis = 10
     else:
-        max_axis = (
-            math.ceil((tvpi + 2) / 10) * 10
-        )  # Ensure the axis can accommodate the TVPI value
+        max_axis = math.ceil((tvpi + 2) / 10) * 10  # Ensure the axis can accommodate the TVPI value
     traces = []
     prev_hi = 0
 

@@ -25,9 +25,10 @@ import plotly.express as px
 import streamlit as st
 
 # First‑party / project --------------------------------------------------------
-from app.services.api import get_balance
+from app.services.api import get_assets_overview, get_balance
 
 from ._helpers import (
+    _display_assets_pie_chart,
     _display_portfolio_details,
     _format_significant_float,
     advanced_filter_toggle,
@@ -75,9 +76,14 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
     advanced_display = advanced_filter_toggle()
 
     # ------------------------------------------------------------------
-    # 2) Portfolio metrics (simple vs advanced)
+    # 2) Get assets overview data once to avoid duplicate API calls
     # ------------------------------------------------------------------
-    _display_portfolio_details(advanced_display=advanced_display)
+    assets_overview = get_assets_overview()
+
+    # ------------------------------------------------------------------
+    # 3) Portfolio metrics (simple vs advanced)
+    # ------------------------------------------------------------------
+    _display_portfolio_details(assets_overview=assets_overview, advanced_display=advanced_display)
 
     # ------------------------------------------------------------------
     # 3) Build a numeric DataFrame with helper columns
@@ -102,22 +108,38 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
         # Append the "Other" slice as a synthetic row
         pie_df.loc[len(pie_df)] = {"asset": "Other", "value": other}
 
-    fig = px.pie(pie_df, names="asset", values="value", hole=0.4)
-    fig.update_layout(
-        autosize=True,  # fill container width
-        height=600,
-        margin={"t": 40, "b": 40, "l": 40, "r": 40},
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    # ------------------------------------------------------------------
+    # 4) Two pie charts side by side - harmonized styling
+    # ------------------------------------------------------------------
+    # Use responsive columns for better mobile display
+    col1, col2 = st.columns([1, 1], gap="medium")
+
+    with col1:
+        st.subheader("Portfolio Distribution by Asset")
+        fig1 = px.pie(pie_df, names="asset", values="value", hole=0.4)
+        fig1.update_layout(
+            autosize=True,
+            height=400,  # Reduced height for mobile
+            margin={"t": 40, "b": 40, "l": 40, "r": 40},
+            showlegend=True,
+        )
+        fig1.update_traces(
+            textposition="inside",
+            textinfo="percent+label",
+            hovertemplate="<b>%{label}</b><br>Value: %{value:,.2f}<br>Share: %{percent}<extra></extra>",
+        )
+        st.plotly_chart(fig1, use_container_width=True, height=400)
+
+    with col2:
+        st.subheader("Asset Distribution: Frozen vs Free")
+        _display_assets_pie_chart(assets_overview)
 
     # ------------------------------------------------------------------
     # 5) Pretty table below the chart
     # ------------------------------------------------------------------
     # Helper lambdas to keep formatting one‑liners tidy
     fmt_amt = lambda x: _format_significant_float(x)  # noqa: E731
-    fmt_price = lambda x: _format_significant_float(
-        x, data["quote_asset"]
-    )  # noqa: E731
+    fmt_price = lambda x: _format_significant_float(x, data["quote_asset"])  # noqa: E731
     fmt_val = lambda x: _format_significant_float(x, data["quote_asset"])  # noqa: E731
     fmt_pct = lambda x: f"{x*100:,.2f}%"  # noqa: E731
 
@@ -151,9 +173,7 @@ def render() -> None:  # noqa: D401 – imperative mood is fine
             "free": st.column_config.TextColumn("Free"),
             "used": st.column_config.TextColumn("In orders"),
             "total": st.column_config.TextColumn("Total"),
-            "quote_price": st.column_config.TextColumn(
-                f"Price ({data['quote_asset']})"
-            ),
+            "quote_price": st.column_config.TextColumn(f"Price ({data['quote_asset']})"),
             "value": st.column_config.TextColumn(f"Value ({data['quote_asset']})"),
             "share": st.column_config.TextColumn("Share (%)"),
         },

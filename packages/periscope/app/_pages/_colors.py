@@ -131,8 +131,7 @@ def _create_color_rows_degradation(
 
     # Foreground palettes -------------------------------------------------
     fg: dict[int, dict[str, str]] = {
-        lvl: {k: contrast_text_color(c) for k, c in pal.items()}
-        for lvl, pal in bg.items()
+        lvl: {k: contrast_text_color(c) for k, c in pal.items()} for lvl, pal in bg.items()
     }
     return bg, fg
 

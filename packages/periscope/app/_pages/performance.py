@@ -16,32 +16,23 @@ The code is intentionally verbose on comments to serve as a living
 reference for new contributors.
 """
 
-import os
-import time  # noqa: F401  # imported for completeness – not used directly yet
-from pathlib import Path
-
 import plotly.graph_objects as go
 import streamlit as st
-from dotenv import load_dotenv
 
-from app.services.api import get_overview_capital, get_trades_overview
-
-from ._helpers import (
+from .._pages._helpers import (
     CHART_COLORS,
     _display_performance_details,
     advanced_filter_toggle,
     tvpi_gauge,
 )
+from ..config import settings
+from ..services.api import get_overview_capital, get_trades_overview
 
-# -----------------------------------------------------------------------------
-# Configuration & constants
-# -----------------------------------------------------------------------------
-# Load environment variables from the project root .env so this file
-# can be executed standalone (e.g. `streamlit run src/.../orders.py`).
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Get settings once
+config = settings()
 
 # How long a row stays "fresh" (seconds) → affects row colouring.
-FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 300))  # default 5 min
+FRESH_WINDOW_S = config["FRESH_WINDOW_S"]
 
 
 # -----------------------------------------------------------------------------
@@ -112,9 +103,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     dpi = (
         distributions / paid_in_capital if paid_in_capital > 0 else None
     )  # DPI = Distributions to Paid-In
-    tvpi = (
-        dpi + rvpi if None not in (dpi, rvpi) else None
-    )  # TVPI = Total Value to Paid-In
+    tvpi = dpi + rvpi if None not in (dpi, rvpi) else None  # TVPI = Total Value to Paid-In
     if net_investment > 0:
         _display_performance_details(
             equity=equity,
@@ -155,9 +144,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
         st.subheader("Capital Breakdown")
         fig2 = go.Figure()
 
-        gross_PL_color = (
-            CHART_COLORS["green"] if gross_earnings >= 0 else CHART_COLORS["red"]
-        )
+        gross_PL_color = CHART_COLORS["green"] if gross_earnings >= 0 else CHART_COLORS["red"]
         steps_fig2 = [
             # label                 y-value                     measure      colour
             ("Net Investment", net_investment, "absolute", CHART_COLORS["blue"]),

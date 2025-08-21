@@ -38,6 +38,7 @@ show_help() {
     echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
     echo "Commands:"
+    echo "  start              Start the order generator without reset (builds Docker)"
     echo "  start --reset      Start the order generator with reset (builds Docker)"
     echo "  restart            Restart the order generator (no rebuild)"
     echo "  restart --reset    Restart with reset (no rebuild)"
@@ -50,6 +51,7 @@ show_help() {
     echo "  --reset            Reset backend state (clears all data)"
     echo ""
     echo "Examples:"
+    echo "  $0 start           # Fresh start without reset (builds Docker)"
     echo "  $0 start --reset   # Fresh start with reset (builds Docker)"
     echo "  $0 restart         # Continue without reset (no rebuild)"
     echo "  $0 restart --reset # Continue with reset (no rebuild)"
@@ -98,24 +100,25 @@ check_engine() {
 # Function to start (always builds Docker)
 start_generator() {
     local reset_flag=$1
-    
+
     print_status "Starting order generator (building Docker)..."
     check_docker
     check_env
     check_engine
-    
+
     # Build and start
-    docker-compose build --no-cache
-    
+    docker compose build --no-cache
+
     if [ "$reset_flag" = "true" ]; then
         print_warning "Reset flag detected. This will clear backend state!"
         # Start with reset environment variable
-        RESET_PORTFOLIO=true docker-compose up -d
+        RESET_PORTFOLIO=true docker compose up -d
     else
+        print_warning "Reset flag not detected. This will not clear backend state!"
         # Start without reset
-        RESET_PORTFOLIO=false docker-compose up -d
+        RESET_PORTFOLIO=false docker compose up -d
     fi
-    
+
     print_status "Order generator started"
     print_status "Container name: $CONTAINER_NAME"
     print_status "View logs with: $0 logs"
@@ -125,31 +128,32 @@ start_generator() {
 # Function to stop
 stop_generator() {
     print_status "Stopping order generator..."
-    docker-compose down
+    docker compose down
     print_status "Order generator stopped"
 }
 
 # Function to restart (no rebuild)
 restart_generator() {
     local reset_flag=$1
-    
+
     print_status "Restarting order generator (no rebuild)..."
     check_docker
     check_env
     check_engine
-    
+
     # Stop first
-    docker-compose down
-    
+    docker compose down
+
     if [ "$reset_flag" = "true" ]; then
         print_warning "Reset flag detected. This will clear backend state!"
         # Start with reset environment variable
-        RESET_PORTFOLIO=true docker-compose up -d
+        RESET_PORTFOLIO=true docker compose up -d
     else
+        print_warning "Reset flag not detected. This will not clear backend state!"
         # Start without reset
-        RESET_PORTFOLIO=false docker-compose up -d
+        RESET_PORTFOLIO=false docker compose up -d
     fi
-    
+
     print_status "Order generator restarted"
     print_status "View logs with: $0 logs"
     print_status "Check status with: $0 status"
@@ -164,7 +168,7 @@ show_logs() {
 # Function to show status
 show_status() {
     print_status "Order generator status:"
-    docker-compose ps
+    docker compose ps
     echo ""
     print_status "Container logs (last 10 lines):"
     docker logs --tail=10 $CONTAINER_NAME 2>/dev/null || print_warning "Container not running"
@@ -174,19 +178,14 @@ show_status() {
 main() {
     local command="${1:-help}"
     local option="${2:-}"
-    
+
     case "$command" in
         start)
-            if [ "$option" != "--reset" ]; then
-                print_error "start requires --reset flag"
-                echo ""
-                print_warning "Use 'start --reset' for fresh start with reset"
-                print_warning "Use 'restart' to continue without reset"
-                echo ""
-                show_help
-                exit 1
+            local reset_flag="false"
+            if [ "$option" = "--reset" ]; then
+                reset_flag="true"
             fi
-            start_generator "true"
+            start_generator "$reset_flag"
             ;;
         stop)
             stop_generator

@@ -165,9 +165,7 @@ def discover_symbols_for_quotes(
                 seen.add(s)
                 cnt += 1
                 if _has_limit and cnt >= limit_per_quote:
-                    log.debug(
-                        "Reached limit of %d symbols for quote=%s", limit_per_quote, q
-                    )
+                    log.debug("Reached limit of %d symbols for quote=%s", limit_per_quote, q)
                     break
         log.info("Discovered %d symbols for quote=%s", cnt, q)
     log.info("Total discovered symbols: %d", len(results))
@@ -179,9 +177,7 @@ def is_valid_price(price: float) -> bool:
     return price > 0.0
 
 
-def write_tickers(
-    r: "redis.Redis", root: str, items: Iterable[tuple[str, dict]]
-) -> None:
+def write_tickers(r: "redis.Redis", root: str, items: Iterable[tuple[str, dict]]) -> None:
     """Write a batch of (symbol, ticker_dict) pairs into Valkey under f'{root}{symbol}'."""
     skipped_count = 0
     written_count = 0
@@ -194,9 +190,7 @@ def write_tickers(
             r.hset(f"{root}{sym}", mapping=payload)
             written_count += 1
         else:
-            log.debug(
-                "Skipping %s: price is not positive (%.6f)", sym, payload["price"]
-            )
+            log.debug("Skipping %s: price is not positive (%.6f)", sym, payload["price"])
             skipped_count += 1
 
     if skipped_count > 0:

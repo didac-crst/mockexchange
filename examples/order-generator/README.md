@@ -18,7 +18,7 @@ make start-engine    # API server
 
 ## Contents
 
-- `manage.sh`  
+- `manage.sh`
 Unified script to manage the order generator (start, stop, logs, status).
 - **Dockerfile**: Slim Python 3.12 image, installs dependencies, sets working directory.
 - **docker-compose.yml**: Defines `order-generator` service with host networking and resource limits.
