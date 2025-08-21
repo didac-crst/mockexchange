@@ -938,7 +938,11 @@ class ExchangeEngineActor(_BaseActor):
         if cash_balance is None:
             cash = {"free": 0.0, "used": 0.0}
         else:
-            cash = {"free": cash_balance.free, "used": cash_balance.used}
+            # cash_balance is a dict from AssetBalance.to_dict()
+            cash = {
+                "free": cash_balance.get("free", 0.0),  # type: ignore[attr-defined]
+                "used": cash_balance.get("used", 0.0),  # type: ignore[attr-defined]
+            }
         for a, t in zip(assets_list, tickers_list, strict=False):
             asset_balance = {}
             if a == self.cash_asset:
@@ -946,8 +950,9 @@ class ExchangeEngineActor(_BaseActor):
             if prices.get(t) is None:
                 logger.warning("No price for asset %s, skipping", t)
                 continue
-            asset_balance["free"] = portfolio[a].free
-            asset_balance["used"] = portfolio[a].used
+            # portfolio[a] is a dict from AssetBalance.to_dict()
+            asset_balance["free"] = portfolio[a].get("free", 0.0)  # type: ignore[attr-defined]
+            asset_balance["used"] = portfolio[a].get("used", 0.0)  # type: ignore[attr-defined]
             asset_balance["price"] = prices[t]
             _assets[a] = asset_balance
         # Convert to pandas to vector operations
