@@ -7,9 +7,9 @@
 [![Tests](https://img.shields.io/badge/tests-available-green.svg)](https://github.com/didac-crst/mockexchange)
 [![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/didac-crst/mockexchange)
 [![Code Quality](https://img.shields.io/badge/code%20quality-maintained-blue.svg)](https://github.com/didac-crst/mockexchange)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Linting: ruff](https://img.shields.io/badge/linting-ruff-red.svg)](https://github.com/astral-sh/ruff)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-red.svg)](https://github.com/astral-sh/ruff)
 [![Type checking: mypy](https://img.shields.io/badge/type%20checking-mypy-blue.svg)](https://mypy-lang.org/)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/didac-crst/mockexchange)
 
 **_Trade without fear, greed, or actual money — because every fake loss is a real step up._**
 
@@ -76,89 +76,89 @@ This repository contains the full **MockExchange** paper-trading platform:
 
 ## 📜 Story
 
-> It was **2013**, and Bitcoin had just hit a jaw-dropping **$300**.  
-> Someone in our old engineering WhatsApp group brought it up.  
-> I asked innocently, *“What’s that?”*  
->  
-> The response came instantly, dripping with confidence:  
-> *“You’re too late — this bubble is about to burst…”*  
->  
+> It was **2013**, and Bitcoin had just hit a jaw-dropping **$300**.
+> Someone in our old engineering WhatsApp group brought it up.
+> I asked innocently, *“What’s that?”*
+>
+> The response came instantly, dripping with confidence:
+> *“You’re too late — this bubble is about to burst…”*
+>
 > Which, in hindsight, was probably the most confidently
 > wrong (and overly cautious) financial advice I’ve ever received.
 
-But something about it intrigued me. I didn’t fully understand it.  
-I didn’t even think it would work — and yet, I bought in.  
-Just **2/3 of a BTC**, about **180 €**, which, at the time, I mentally wrote off as *“money I’ll never see again.”*  
+But something about it intrigued me. I didn’t fully understand it.
+I didn’t even think it would work — and yet, I bought in.
+Just **2/3 of a BTC**, about **180 €**, which, at the time, I mentally wrote off as *“money I’ll never see again.”*
 Spoiler: it was the **best terrible financial decision** I’ve ever made.
 
-I held.  
-And held.  
+I held.
+And held.
 And held some more.
 
-Then came **2017** — the year of Lambos, moon memes, and FOMO-induced insomnia.  
+Then came **2017** — the year of Lambos, moon memes, and FOMO-induced insomnia.
 I began checking prices at night before bed, and again first thing in the morning —
 not for fun, but to confirm whether I was now rich… or still stuck working 9 to 5.
 
-This, of course, led me to the **classic rookie move**: diversification.  
-I dove into altcoins with names like **LTC**, **TROY**, and others I’ve repressed like a bad haircut from high school.  
+This, of course, led me to the **classic rookie move**: diversification.
+I dove into altcoins with names like **LTC**, **TROY**, and others I’ve repressed like a bad haircut from high school.
 Let’s just say: they didn’t go to the moon — they dug a tunnel.
 
-Decision after decision, I watched my gains **evaporate in slow motion**.  
+Decision after decision, I watched my gains **evaporate in slow motion**.
 Eventually, I realized I needed support — not from a financial advisor (they’d only
 remind me of my poor decisions), but from something more aligned with my goals — not theirs.
 
-**Something logical**.  
-Emotionless.  
-Free from fear and greed.  
-Unimpressed by sudden price spikes or Twitter hype.  
+**Something logical**.
+Emotionless.
+Free from fear and greed.
+Unimpressed by sudden price spikes or Twitter hype.
 A system that won’t panic sell or chase pumps.
 
-I wanted an intelligent system that could make decisions based on **data**, not **dopamine**.  
-Something that would just execute the plan, no matter how boring or unsexy that plan was.  
+I wanted an intelligent system that could make decisions based on **data**, not **dopamine**.
+Something that would just execute the plan, no matter how boring or unsexy that plan was.
 Something more disciplined than I’d ever been — able to stay locked on a single task for hours, without fatigue, distraction, or the urge to check the news.
 
 In short, I wanted to build a **trader with no feelings** —
 like a **psychopath**, but helpful.
 
-So in **2020**, full of optimism and free time, I enrolled in an **AI-for-trading** program.  
+So in **2020**, full of optimism and free time, I enrolled in an **AI-for-trading** program.
 I was ready to automate the pain away.
 
 Then… I became a dad.
 
 Suddenly, my trading ambitions were replaced with diapers, sleep deprivation,
-and learning the fine art of **negotiating with toddlers**.  
+and learning the fine art of **negotiating with toddlers**.
 Needless to say, the bot went on standby — alongside my hobbies, ambitions, and most adult-level reasoning.
 
-Fast forward to **2024**. The kids sleep (sometimes), and my curiosity roared back to life.  
-I decided it was time to build — **for real**.  
+Fast forward to **2024**. The kids sleep (sometimes), and my curiosity roared back to life.
+I decided it was time to build — **for real**.
 Not to get rich — but because this is what I do for fun:
 connect dots, explore computer science, study markets, and challenge my past self
 with fewer emotional trades and more intelligent systems.
 
-But ideas need hardware.  
-So I bought my first Raspberry Pi.  
-Because if I was going to burn time, I wasn’t about to burn kilowatts.  
-I needed something that could run 24/7 without turning my electricity bill into a second mortgage.  
-Resilient, quiet, efficient — like a monk with a TPU, ready to meditate on market patterns in silence for as long as it takes.  
+But ideas need hardware.
+So I bought my first Raspberry Pi.
+Because if I was going to burn time, I wasn’t about to burn kilowatts.
+I needed something that could run 24/7 without turning my electricity bill into a second mortgage.
+Resilient, quiet, efficient — like a monk with a TPU, ready to meditate on market patterns in silence for as long as it takes.
 It wasn’t much, but it was enough to get started.
 
-From there, the system began to grow — and spiral.  
+From there, the system began to grow — and spiral.
 Scraping prices in real time, keeping databases efficient, aggregating data, archiving old data,
-writing little scripts that somehow become immortal zombie processes needing to be killed by hand...  
+writing little scripts that somehow become immortal zombie processes needing to be killed by hand...
 I genuinely didn’t expect it to be so much.
 
-And yet — I like it.  
-This is how I relax: designing systems no one asked for, solving problems I created myself,  
+And yet — I like it.
+This is how I relax: designing systems no one asked for, solving problems I created myself,
 and picking up strange new skills in the process — the kind you never set out to learn, but somehow end up mastering.
 
-Which brings us to **2025**, and **MockExchange**:  
+Which brings us to **2025**, and **MockExchange**:
 a stateless, deterministic, no-risk spot-exchange emulator that speaks fluent **ccxt**,
 pretends it’s real, and stores the last price-tick, balance and order in **Valkey** (aka Redis) —
 instead of touching live markets — so you can test, dry-run, and debug your bot
 without risking a single satoshi.
 
-No more fear.  
-No more “should I have bought?” or “why did I sell?”  
+No more fear.
+No more “should I have bought?” or “why did I sell?”
 Just logic, fake orders, and enough tooling to safely build the thing
 that trades smarter than I did.
 
@@ -202,6 +202,13 @@ flowchart TB
 
     oracle["MockX Oracle 🔮<br/>(ccxt → Redis)"] --> redis
     binance -->|ccxt| oracle
+
+    %% Color styling for important components
+    style engine fill:#1976d2,color:#ffffff
+    style periscope fill:#7b1fa2,color:#ffffff
+    style oracle fill:#388e3c,color:#ffffff
+    style redis fill:#f57c00,color:#ffffff
+    style gateway fill:#d32f2f,color:#ffffff
 ```
 
 ---
@@ -216,7 +223,7 @@ flowchart TB
 | **MockX Periscope** | `packages/periscope/` | Streamlit dashboard for portfolio and orders.     | [Periscope README](packages/periscope/README.md) |
 
 Related (external):
-- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway  
+- **MockX Gateway** – https://github.com/didac-crst/mockexchange-gateway
     Minimal ccxt-style Python client to interact with the Engine API (install via `pip` or `poetry`).
 
 ---
@@ -249,7 +256,7 @@ make start-sequential
 
 **What this launches:**
 - **MockX Valkey** (Redis-compatible database) on port 6379
-- **MockX Oracle** (price feed service) 
+- **MockX Oracle** (price feed service)
 - **MockX Engine** (trading API) on port 8000
 - **MockX Periscope** (dashboard) on port 8501
 
@@ -285,22 +292,44 @@ make start-periscope   # Periscope connects to external Engine
 For contributors and developers:
 
 ```bash
-# Install development dependencies
-make dev
+# 🚀 Complete Development Cycle (Recommended)
+make dev              # Install deps + format + lint + type-check + test
 
-# Run all tests
-make test
+# 🧪 Testing
+make test             # Run all unit tests
+make test-integration # Run integration tests (requires running services)
+make integration      # Fresh restart + integration tests (no cache)
+make integration-full # Full dev cycle + integration tests
 
-# Format and lint code
-make format
-make lint
+# 🔧 Code Quality
+make format           # Format code with Ruff
+make lint             # Run linting with Ruff
+make type-check       # Run type checking with MyPy (smart filtering)
 
-# Check service status
-make status
+# 🐳 Service Management
+make start            # Start all services
+make stop             # Stop all services
+make restart          # Restart all services
+make restart-no-cache # Restart with fresh builds (no cache)
+make status           # Show service status
 
-# Release management
-make release-branch    # Create release branch (interactive)
+# 📊 Logs
+make logs             # All service logs
+make logs-engine      # Engine logs only
+make logs-oracle      # Oracle logs only
+make logs-periscope   # Dashboard logs only
+make logs-valkey      # Database logs only
+
+# 🏷️ Release Management
+make release-branch   # Create release branch (interactive)
 make version          # Show current version and tags
+
+# 🔗 GitHub PR Tools
+make export-pr-comments PR=123  # Export PR comments to JSON for LLM analysis
+make analyze-pr-comments PR=123 # Analyze all comments and generate LLM prompt
+make analyze-pr-comments-latest PR=123 # Analyze only latest review (recommended)
+make export-and-analyze-pr PR=123 # Export and analyze all comments in one command
+make export-and-analyze-pr-latest PR=123 # Export and analyze latest review only (recommended)
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -310,6 +339,74 @@ make logs-periscope    # Dashboard logs only
 # Check service status
 make status            # Show all service statuses
 
+### 🎯 Enhanced Development Workflow
+
+The MockExchange development workflow has been enhanced with comprehensive automation:
+
+#### **🚀 One-Command Development Cycle**
+```bash
+make dev  # Does everything: install → format → lint → type-check → test
+```
+- **Installs dependencies** (Poetry + pre-commit)
+- **Formats code** (Ruff)
+- **Runs linting** (Ruff)
+- **Type checking** (MyPy with smart filtering)
+- **Runs tests** (All unit tests)
+
+#### **🧪 Comprehensive Testing**
+```bash
+make integration      # Fresh restart + integration tests
+make integration-full # Full dev cycle + integration tests
+```
+- **Fresh environment**: No cached artifacts
+- **Real integration**: Tests against running services
+- **Complete validation**: Perfect for pre-release testing
+
+#### **🔧 Smart Type Checking**
+```bash
+make type-check  # MyPy with smart filtering
+```
+- **Focuses on business logic** (ignores framework limitations)
+- **Zero false positives** (no framework noise)
+- **Catches real type issues** in your code
+
+#### **🐳 Service Management**
+```bash
+make restart-no-cache  # Fresh builds for debugging
+make logs-engine       # Service-specific logs
+```
+- **Individual service control**
+- **Fresh rebuilds when needed**
+- **Easy log access**
+
+#### **🔗 GitHub PR Tools**
+```bash
+make export-and-analyze-pr-latest PR=123  # One-shot latest review analysis (recommended)
+make export-and-analyze-pr PR=123         # One-shot all reviews analysis
+make export-pr-comments PR=123            # Export PR comments to JSON
+make analyze-pr-comments-latest PR=123    # Analyze only latest review
+make analyze-pr-comments PR=123           # Analyze all reviews
+```
+- **Export CodeRabbit comments** for AI analysis
+- **Latest review focus** - Avoid LLM confusion from multiple reviews
+- **Organized structure** in `scripts/github-pr-tools/`
+- **Cursor integration** ready for LLM analysis
+- **One-shot workflow** for quick analysis
+- **Requires GitHub token** (set in `scripts/github-pr-tools/.env`)
+
+**Setup:**
+```bash
+# Create scripts/github-pr-tools/.env with your GitHub token
+echo "GITHUB_TOKEN=your_github_token_here" > scripts/github-pr-tools/.env
+
+# One-shot latest review analysis (recommended - less confusion for LLM)
+make export-and-analyze-pr-latest PR=123
+
+# Use with Cursor
+# Open scripts/github-pr-tools/output/pr_123_comments_latest_review_llm_prompt.txt in Cursor
+# Or copy-paste the content into Cursor's chat
+```
+
 ## 🚀 How we ship
 
 ### Standard Workflow (Recommended)
@@ -318,7 +415,7 @@ make status            # Show all service statuses
 3. When green, merge into `main`.
 4. **Create a release**:
    - **GitHub UI** (Recommended): **Releases** → *Draft a new release* → Tag `vX.Y.Z` → Publish
-   - **CLI**: 
+   - **CLI**:
      ```bash
      git checkout main && git pull --ff-only
      git tag -a vX.Y.Z -m "MockExchange vX.Y.Z"
@@ -336,12 +433,12 @@ For more control or when you need to freeze changes for QA/testing:
    ```bash
    # Interactive mode (recommended)
    make release-branch
-   
+
    # Direct mode
    ./scripts/create-release-branch.sh patch    # 0.1.0 → 0.1.1
    ./scripts/create-release-branch.sh minor    # 0.1.0 → 0.2.0
    ./scripts/create-release-branch.sh major    # 0.1.0 → 1.0.0
-   
+
        # Preview what would happen
     ./scripts/create-release-branch.sh patch --dry-run
     ```
@@ -466,8 +563,14 @@ A Dockerized tool that generates random orders to test your MockExchange instanc
 # Show available examples
 make examples
 
-# Start the order generator (fresh start with reset)
+# Show order generator help
 make order-generator
+
+# Start the order generator (fresh start with reset)
+make order-generator-start-reset
+
+# Start the order generator (start without reset)
+make order-generator-start
 
 # Continue without reset
 make order-generator-restart
@@ -509,6 +612,9 @@ All environment variables are centralized in the root `.env` file. This eliminat
 ```bash
 # Copy the template and customize if needed
 cp .env.example .env
+
+# For external Valkey server, update VALKEY_HOST in .env:
+# VALKEY_HOST=192.168.1.100  # Replace with your Valkey server IP
 ```
 
 **Note**: The `.env.example` is configured for Docker Compose. For external services, update:
@@ -517,6 +623,11 @@ cp .env.example .env
 - `PERISCOPE_HOST` - Point to external Periscope dashboard server
 
 ### Key Configuration Sections
+
+#### **Global Configuration**
+- `VERSION` - MockExchange version
+- `TEST_ENV` - Test environment flag (enables API docs, disables auth)
+- `DEBUG` - Development mode flag
 
 #### **Valkey (Database)**
 - `VALKEY_HOST` - Database host (default: `valkey` for Docker, use IP for external)
@@ -527,18 +638,45 @@ cp .env.example .env
 - `EXCHANGE` - Source exchange (binance, coinbase, etc.)
 - `SYMBOLS` - Trading pairs to monitor
 - `INTERVAL_SEC` - Price update frequency
+- `QUOTES` - Quote assets for discovery (comma-separated, e.g., "USDT,EUR")
+- `QUOTE` - Fallback quote asset if QUOTES is empty (default: USDT)
+- `DISCOVER_QUOTES` - Enable automatic market discovery (true/false)
+- `DISCOVER_LIMIT` - Maximum markets per quote asset (0 = unlimited)
 
 #### **Engine (API)**
 - `ENGINE_HOST` - API server host (default: `engine` for Docker, use IP for external)
 - `ENGINE_PORT` - API server port (default: 8000)
 - `COMMISSION` - Trading commission rate
 - `API_KEY` - Authentication key
+- `CASH_ASSET` - Default cash/quote asset for the system (default: USDT)
+- `TICK_LOOP_SEC` - Price-tick scanning interval in seconds (default: 10)
+- `PRUNE_EVERY_MIN` - How often to prune old data in minutes (default: 60)
+- `STALE_AFTER_H` - Data considered stale after hours (default: 24)
+- `EXPIRE_AFTER_H` - Data expires after hours (default: 2)
+- `SANITY_CHECK_EVERY_MIN` - Sanity check interval in minutes (default: 10)
+- `API_TIMEOUT_SEC` - API request timeout for CLI in seconds (default: 10)
+
+#### **Engine Order Processing**
+- `MIN_TIME_ANSWER_ORDER_MARKET` - Minimum delay before processing market orders in seconds (default: 1)
+- `MAX_TIME_ANSWER_ORDER_MARKET` - Maximum delay before processing market orders in seconds (default: 5)
+- `SIGMA_FILL_MARKET_ORDER` - Slippage simulation for market order fills (default: 0.1)
 
 #### **Periscope (Dashboard)**
-- `PERISCOPE_HOST` - Dashboard host (default: `localhost` for Docker, use IP for external)
-- `PERISCOPE_PORT` - Dashboard port (default: 8501)
+- `ENGINE_HOST` - Engine host for API URL construction (default: `engine` for Docker, use IP for external)
+- `ENGINE_PORT` - Engine port for API URL construction (default: 8000)
+- `PERISCOPE_HOST` - Dashboard host for UI URL construction (default: `localhost`)
+- `PERISCOPE_PORT` - Dashboard port for UI URL construction (default: 8501)
 - `APP_TITLE` - Dashboard title
 - `REFRESH_SECONDS` - Auto-refresh interval
+- `QUOTE_ASSET` - Quote asset for portfolio valuation (default: USDT)
+- `FRESH_WINDOW_S` - Fresh window for highlighting in seconds (default: 60)
+- `N_VISUAL_DEGRADATIONS` - Number of fade-out levels for visual feedback (default: 60)
+- `SLIDER_MIN` - Minimum value for order count slider (default: 10)
+- `SLIDER_MAX` - Maximum value for order count slider (default: 1000)
+- `SLIDER_STEP` - Step size for order count slider (default: 10)
+- `SLIDER_DEFAULT` - Default value for order count slider (default: 50)
+- `LOCAL_TZ` - Timezone for timestamps (default: Europe/Berlin)
+- `LOGO_FILE` - Logo file for dashboard (optional)
 
 ### Benefits of Centralized Configuration
 - ✅ **Single source of truth** - All config in one place
@@ -546,6 +684,7 @@ cp .env.example .env
 - ✅ **Easy customization** - Change once, applies everywhere
 - ✅ **Better security** - Centralized password management
 - ✅ **Simplified deployment** - One config file to manage
+
 - ✅ **Automatic URL construction** - API_URL and UI_URL built from HOST:PORT variables
 
 ### URL Construction
@@ -605,5 +744,5 @@ mockexchange/
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-> **Don’t risk real money.**  
+> **Don’t risk real money.**
 > Spin up MockExchange, hammer it with tests, then hit live markets only when your algos are solid.

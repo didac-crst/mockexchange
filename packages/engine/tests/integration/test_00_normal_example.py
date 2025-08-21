@@ -137,9 +137,7 @@ def test_normal_example(client):
         # to slightly below market for limit orders (to avoid immediate fill).
         t_type = random.choice(TRADING_TYPES)
         if t_type == "limit":
-            limit_price = (
-                get_ticker_price(client, symbol) * 0.9995
-            )  # slightly below market
+            limit_price = get_ticker_price(client, symbol) * 0.9995  # slightly below market
         else:
             limit_price = None
 

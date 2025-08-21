@@ -16,18 +16,11 @@ The code is intentionally verbose on comments to serve as a living
 reference for new contributors.
 """
 
-import os
-import time  # noqa: F401  # imported for completeness – not used directly yet
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
 
-from app.services.api import get_orders, get_overview_capital, get_trades_overview
-
-from ._colors import _row_style
-from ._helpers import (
+from .._pages._colors import _row_style
+from .._pages._helpers import (
     _add_details_column,
     _display_trades_details,
     _format_significant_float,
@@ -35,24 +28,22 @@ from ._helpers import (
     convert_to_local_time,
     fmt_side_marker,
 )
+from ..config import settings
+from ..services.api import get_orders, get_overview_capital, get_trades_overview
 
-# -----------------------------------------------------------------------------
-# Configuration & constants
-# -----------------------------------------------------------------------------
-# Load environment variables from the project root .env so this file
-# can be executed standalone (e.g. `streamlit run src/.../orders.py`).
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Get settings once
+config = settings()
 
 # How long a row stays "fresh" (seconds) → affects row colouring.
-FRESH_WINDOW_S = int(os.getenv("FRESH_WINDOW_S", 300))  # default 5 min
+FRESH_WINDOW_S = config["FRESH_WINDOW_S"]
 # Number of colour‑fade steps between "brand‑new" and "old" rows.
-N_VISUAL_DEGRADATIONS = int(os.getenv("N_VISUAL_DEGRADATIONS", 12))
+N_VISUAL_DEGRADATIONS = config["N_VISUAL_DEGRADATIONS"]
 
 # Slider defaults for the "tail" (how many recent orders to pull).
-SLIDER_MIN = int(os.getenv("SLIDER_MIN", 10))
-SLIDER_MAX = int(os.getenv("SLIDER_MAX", 1000))
-SLIDER_STEP = int(os.getenv("SLIDER_STEP", 10))
-SLIDER_DEFAULT = int(os.getenv("SLIDER_DEFAULT", 100))
+SLIDER_MIN = config["SLIDER_MIN"]
+SLIDER_MAX = config["SLIDER_MAX"]
+SLIDER_STEP = config["SLIDER_STEP"]
+SLIDER_DEFAULT = config["SLIDER_DEFAULT"]
 
 
 # -----------------------------------------------------------------------------
@@ -93,9 +84,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # ------------------------------------------------------------------
     filters_expander = st.expander("Filters", expanded=False)
     with filters_expander:
-        limit_toggle = st.checkbox(
-            "Fetch the whole order book", value=False, key="limit_toggle"
-        )
+        limit_toggle = st.checkbox("Fetch the whole order book", value=False, key="limit_toggle")
         # ``tail=None`` signals the API client to drop the limit.
         tail = (
             None
@@ -113,7 +102,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # ------------------------------------------------------------------
     # 2) Fetch raw data from the API and pre‑process
     # ------------------------------------------------------------------
-    base = os.getenv("UI_URL", "http://localhost:8000")
+    base = config["UI_URL"]
     # ``_add_details_column`` injects the 🡒 Details link.
     df_raw = get_orders(tail=tail).pipe(_add_details_column, base_url=base)
     if df_raw.empty:
@@ -133,9 +122,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     # 3) Display trade metrics (simple vs advanced)
     # ------------------------------------------------------------------
 
-    _display_trades_details(
-        summary_capital, trades_summary, cash_asset, df_raw, advanced_display
-    )
+    _display_trades_details(summary_capital, trades_summary, cash_asset, df_raw, advanced_display)
 
     # `df_copy` will be mutated for visual purposes; keep df_raw pristine.
     df_copy = df_raw.copy()
@@ -156,9 +143,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
         # Drop selections that disappeared in the new dataset.
         st.session_state[key] = [v for v in st.session_state[key] if v in options]
 
-    status_opts = sorted(
-        df_copy["status"].str.replace("_", " ").str.capitalize().unique()
-    )
+    status_opts = sorted(df_copy["status"].str.replace("_", " ").str.capitalize().unique())
     side_opts = sorted(df_copy["side"].str.upper().unique())
     type_opts = sorted(df_copy["type"].str.capitalize().unique())
     asset_opts = sorted(df_copy["Asset"].unique())
@@ -250,13 +235,9 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Friendly caption – how much data did we load vs display?
     if tail is not None:
-        st.caption(
-            f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from last {tail} orders"
-        )
+        st.caption(f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from last {tail} orders")
     else:
-        st.caption(
-            f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from the whole order book"
-        )
+        st.caption(f"🧾 Loaded {len(df_raw)} rows (showing {len(df)}) from the whole order book")
 
     # ------------------------------------------------------------------
     # 6) Derive helper columns (latency, formatted quantities/prices…)
@@ -264,18 +245,11 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     ts_create_num = pd.to_numeric(df["ts_create"], errors="coerce")
     ts_finish_num = pd.to_numeric(df["ts_finish"], errors="coerce")
 
-    df["Exec. latency"] = (
-        (ts_finish_num - ts_create_num)
-        .div(1000)
-        .round(2)
-        .where(ts_finish_num.notna(), "")
-    )
+    df["Exec. latency"] = (ts_finish_num - ts_create_num).div(1000).where(ts_finish_num.notna())
 
     # Human‑friendly quantity formatting (strip tiny rounding remainders)
     df["Req. Qty"] = df["amount"].map(lambda v: _format_significant_float(value=v))
-    df["Filled Qty"] = df["actual_filled"].apply(
-        lambda v: _format_significant_float(value=v)
-    )
+    df["Filled Qty"] = df["actual_filled"].apply(lambda v: _format_significant_float(value=v))
 
     # Append currency codes where applicable
     df["Limit price"] = df.apply(
@@ -289,21 +263,15 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Notional & fee prettifiers ------------------------------------------------
     df["Reserved notional"] = df.apply(
-        lambda r: _format_significant_float(
-            value=r.reserved_notion_left, unity=r.notion_currency
-        ),
+        lambda r: _format_significant_float(value=r.reserved_notion_left, unity=r.notion_currency),
         axis=1,
     )
     df["Actual notional"] = df.apply(
-        lambda r: _format_significant_float(
-            value=r.actual_notion, unity=r.notion_currency
-        ),
+        lambda r: _format_significant_float(value=r.actual_notion, unity=r.notion_currency),
         axis=1,
     )
     df["Reserved fee"] = df.apply(
-        lambda r: _format_significant_float(
-            value=r.reserved_fee_left, unity=r.fee_currency
-        ),
+        lambda r: _format_significant_float(value=r.reserved_fee_left, unity=r.fee_currency),
         axis=1,
     )
     df["Actual fee"] = df.apply(
@@ -313,9 +281,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Normalise naming for the final view --------------------------------------
     df["Order ID"] = df["id"].astype(str)
-    df["Exec. latency"] = df["Exec. latency"].apply(
-        lambda v: f"{v:,.2f} s" if isinstance(v, int | float) else ""
-    )
+    df["Exec. latency"] = df["Exec. latency"].apply(lambda v: f"{v:,.2f} s" if pd.notna(v) else "")
     df["Side"] = df["side"].map(fmt_side_marker)
     df["Type"] = df["type"].str.capitalize()
     df["Status"] = df["status"].str.replace("_", " ").str.capitalize()

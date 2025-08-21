@@ -62,9 +62,7 @@ def _prices_for_assets(assets: list[str]) -> dict[str, float]:  # noqa: D401
     # Quote asset always maps to 1.0 so downstream math is simpler
     price_map.setdefault(QUOTE, 1.0)
 
-    price_asset_map = {
-        symbol.split("/")[0]: value for symbol, value in price_map.items()
-    }
+    price_asset_map = {symbol.split("/")[0]: value for symbol, value in price_map.items()}
 
     return price_asset_map
 
@@ -114,9 +112,7 @@ def get_overview_capital() -> dict:
     # Ensure all expected keys are present
     expected_keys = {"equity", "deposits", "withdrawals", "profit_loss"}
     if not expected_keys.issubset(res.keys()):
-        raise KeyError(
-            f"Missing keys in /overview/capital response: {expected_keys - res.keys()}"
-        )
+        raise KeyError(f"Missing keys in /overview/capital response: {expected_keys - res.keys()}")
 
     return res
 
@@ -133,7 +129,9 @@ def get_prices(tickers: list[str]) -> dict[str, float]:
         """Find the price field regardless of CCXT vs simplified schema."""
         if "last" in d:  # standard CCXT ticker
             return float(d["last"])
-        if "info" in d and "price" in d["info"]:
+        if "price" in d:  # MockExchange engine format
+            return float(d["price"])
+        if "info" in d and isinstance(d["info"], dict) and "price" in d["info"]:
             return float(d["info"]["price"])
         return None  # unknown format → caller will skip
 

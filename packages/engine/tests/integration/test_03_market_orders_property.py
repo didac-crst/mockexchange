@@ -79,9 +79,7 @@ def _wait_until_settled(client, *, timeout_s: float = 3.0) -> None:
 
     t0 = time.time()
     while time.time() - t0 < timeout_s:
-        still_open = [
-            o for o in client.get("/orders").json() if o["status"] in OPEN_STATES
-        ]
+        still_open = [o for o in client.get("/orders").json() if o["status"] in OPEN_STATES]
         if not still_open:
             return  # ✅ fully settled
         time.sleep(ENGINE_SETTLE_WAIT)
@@ -107,9 +105,7 @@ def _wait_until_settled(client, *, timeout_s: float = 3.0) -> None:
     ),
     amount_factor=st.floats(min_value=0.1, max_value=1.0),
 )
-def test_market_order_flow_property(
-    funded_client, sides: list[str], amount_factor: float
-) -> None:  # noqa: E501
+def test_market_order_flow_property(funded_client, sides: list[str], amount_factor: float) -> None:  # noqa: E501
     """Main property-based test function.
 
     Steps per Hypothesis *example*

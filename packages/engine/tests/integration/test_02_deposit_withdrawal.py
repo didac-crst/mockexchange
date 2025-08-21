@@ -75,9 +75,7 @@ def test_funding(client):
 
             # Convert quote to base units (unless asset == MAIN_ASSET)
             price = (
-                1.0
-                if asset == MAIN_ASSET
-                else get_ticker_price(client, f"{asset}/{MAIN_ASSET}")
+                1.0 if asset == MAIN_ASSET else get_ticker_price(client, f"{asset}/{MAIN_ASSET}")
             )
             base_units = quote_amount / price
             expected_free_base = net_investment / price

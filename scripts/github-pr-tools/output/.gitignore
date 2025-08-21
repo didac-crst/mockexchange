@@ -1,0 +1,9 @@
+# Generated PR comment files
+# These are temporary files created by the GitHub PR tools
+# They should not be committed to the repository
+
+*.json
+*.txt
+
+# Keep this file
+!.gitignore

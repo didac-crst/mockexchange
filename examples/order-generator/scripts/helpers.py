@@ -47,9 +47,7 @@ def get_ticker_price(client: Client, tickers: list[str]) -> dict[str, float]:
 
 
 def patch_ticker_price(client: Client, symbol: str, price: float) -> None:
-    client.patch(
-        f"/admin/tickers/{symbol}/price", json={"price": price}
-    ).raise_for_status()
+    client.patch(f"/admin/tickers/{symbol}/price", json={"price": price}).raise_for_status()
 
 
 def place_order(client: Client, payload: dict[str, Any]) -> dict[str, Any]:
@@ -85,9 +83,7 @@ def get_overview_balances(client: Client) -> dict[str, float]:
 # ────────────────── concurrent order submit ────────────────── #
 
 
-def place_orders_parallel(
-    client: Client, payloads: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
+def place_orders_parallel(client: Client, payloads: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Fire POST /orders for every payload concurrently (one thread each).
     Returns the list of order-JSONs in the *same order* as `payloads`.

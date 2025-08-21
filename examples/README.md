@@ -33,7 +33,9 @@ cp .env.example .env
 
 **Makefile commands:**
 ```bash
-make order-generator              # Fresh start with reset
+make order-generator              # Show help
+make order-generator-start-reset  # Fresh start with reset
+make order-generator-start        # Start without reset
 make order-generator-restart      # Continue without reset
 make order-generator-restart-reset # Continue with reset
 make order-generator-logs         # View logs

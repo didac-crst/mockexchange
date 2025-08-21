@@ -83,7 +83,7 @@ class Market:
             ask=float(h.get("ask", price)),
             bid_volume=float(h.get("bidVolume", 0.0)),
             ask_volume=float(h.get("askVolume", 0.0)),
-            info=h,
+            info=str(h),
         )
 
     def last_price(self, symbol: str) -> float:
@@ -118,6 +118,6 @@ class Market:
         }
 
         # Redis won’t store None, so drop them first.
-        clean = {k: v for k, v in fields.items() if v is not None}
+        clean = {k: str(v) for k, v in fields.items() if v is not None}
 
-        self.conn.hset(f"{self.root_key}{TradingPair.symbol}", mapping=clean)
+        self.conn.hset(f"{self.root_key}{TradingPair.symbol}", mapping=clean)  # type: ignore[arg-type]

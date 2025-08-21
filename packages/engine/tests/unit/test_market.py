@@ -137,16 +137,14 @@ class TestMarket(unittest.TestCase):
 
         expected_mapping = {
             "symbol": "BTC/USDT",
-            "price": 50000.0,
-            "timestamp": 1640995200.0,
-            "bid": 49900.0,
-            "ask": 50100.0,
-            "bidVolume": 1.5,
-            "askVolume": 2.0,
+            "price": "50000.0",
+            "timestamp": "1640995200.0",
+            "bid": "49900.0",
+            "ask": "50100.0",
+            "bidVolume": "1.5",
+            "askVolume": "2.0",
         }
-        mock_redis.hset.assert_called_once_with(
-            "tickers:BTC/USDT", mapping=expected_mapping
-        )
+        mock_redis.hset.assert_called_once_with("tickers:BTC/USDT", mapping=expected_mapping)
 
     def test_set_last_price_no_symbol(self):
         """Test setting last price with no symbol raises error."""

@@ -80,10 +80,10 @@ import time
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from pathlib import Path
-from typing import Literal
+from typing import Any
 
 import redis
-from core.constants import ALL_SIDES_STR, ALL_STATUS_STR, ALL_TYPES_STR
+from core._types import OrderSide, OrderState, OrderType  # domain enums
 from core.engine_actors import start_engine  # NEW import
 from core.logging_config import logger
 from dotenv import load_dotenv
@@ -91,13 +91,13 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from pykka import Future
 
-# load environment from your project’s .env
+# load environment from your project's .env
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-
-_ALL_STATUS = Literal[*ALL_STATUS_STR]  # type alias for all order statuses
-_TRADING_SIDES = Literal[*ALL_SIDES_STR]  # type alias for all trading sides
-_ORDER_TYPES = Literal[*ALL_TYPES_STR]  # type alias for all order types
+# Use regular Union types instead of Literal unpacking for better compatibility
+_ALL_STATUS = str  # type alias for all order statuses
+_TRADING_SIDES = str  # type alias for all trading sides
+_ORDER_TYPES = str  # type alias for all order types
 
 CASH_ASSET = os.getenv("CASH_ASSET", "USDT")  # default cash asset
 
@@ -105,8 +105,8 @@ CASH_ASSET = os.getenv("CASH_ASSET", "USDT")  # default cash asset
 # ─────────────────────────── Pydantic models ────────────────────────── #
 class OrderReq(BaseModel):
     symbol: str = "BTC/USDT"
-    side: _TRADING_SIDES
-    type: _ORDER_TYPES = "market"
+    side: OrderSide
+    type: OrderType = OrderType.MARKET
     amount: float
     limit_price: float | None = None
 
@@ -155,7 +155,7 @@ LOCK_TTL = 30  # seconds
 
 
 # auth dependency
-async def verify_key(x_api_key: str = Header(...)):
+async def verify_key(x_api_key: str = Header(...)) -> None:
     if x_api_key != API_KEY:
         raise HTTPException(403, "Invalid API Key")
 
@@ -165,7 +165,15 @@ prod_depends = [] if TEST_ENV else [Depends(verify_key)]
 
 # ───────────────────────────── FastAPI app ──────────────────────────── #
 @asynccontextmanager
-async def lifespan(app):
+async def lifespan(app: FastAPI):  # type: ignore
+    # Run expiration check on startup
+    expire_age = timedelta(seconds=EXPIRE_AFTER_SEC)
+    ENGINE.expire_orders_older_than(age=expire_age).get()
+
+    # Start background tasks
+    logger.info(
+        f"Starting background tasks - TICK_LOOP_SEC: {REFRESH_S}s, PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC}s"
+    )
     tick_task = asyncio.create_task(tick_loop())
     prune_task = asyncio.create_task(prune_and_expire_loop())
     sanity_task = asyncio.create_task(sanity_loop())
@@ -189,7 +197,7 @@ app = FastAPI(
 
 
 # helper to unwrap futures ------------------------------------------------ #
-def _g(x):
+def _g(x: Any) -> Any:
     # return x.get() if hasattr(x, "get") else x
     # Only unwrap actual Pykka futures, leave plain dict/list untouched
     return x.get() if isinstance(x, Future) else x
@@ -197,18 +205,18 @@ def _g(x):
 
 # ─────────────────────────────── endpoints ───────────────────────────── #
 @app.get("/", include_in_schema=False)
-def root():
+def root() -> dict[str, str]:
     return {"service": "mockexchange-api", "version": app.version}
 
 
 # market ----------------------------------------------------------------- #
 @app.get("/tickers", tags=["Market"])
-def all_tickers():
-    return ENGINE.tickers.get()
+def all_tickers() -> list[str]:
+    return ENGINE.tickers.get()  # type: ignore
 
 
 @app.get("/tickers/{symbols:path}", tags=["Market"])
-def ticker(symbols: str = "BTC/USDT"):
+def ticker(symbols: str = "BTC/USDT") -> dict[str, Any]:
     """Return one ticker (str) or many tickers (comma-separated list).
 
     Examples
@@ -230,34 +238,34 @@ def ticker(symbols: str = "BTC/USDT"):
 
 # portfolio -------------------------------------------------------------- #
 @app.get("/balance", tags=["Portfolio"])
-def balance():
-    return _g(ENGINE.fetch_balance())
+def balance() -> dict[str, Any]:
+    return _g(ENGINE.fetch_balance())  # type: ignore
 
 
 @app.get("/balance/list", tags=["Portfolio"])
-def balance_list():
+def balance_list() -> dict[str, Any]:
     asset_owned_list = _g(ENGINE.fetch_balance_list())
     return {"length": len(asset_owned_list), "assets": asset_owned_list}
 
 
 @app.get("/balance/{asset}", tags=["Portfolio"])
-def asset_balance(asset: str):
-    return _g(ENGINE.fetch_balance(asset))
+def asset_balance(asset: str) -> dict[str, Any]:
+    return _g(ENGINE.fetch_balance(asset))  # type: ignore
 
 
 @app.post("/balance/{asset}/deposit", tags=["Portfolio"], dependencies=prod_depends)
-def deposit_asset(req: FundReq, asset: str = CASH_ASSET):
+def deposit_asset(req: FundReq, asset: str = CASH_ASSET) -> dict[str, Any]:
     try:
-        return _g(ENGINE.deposit_asset(asset, req.amount))
+        return _g(ENGINE.deposit_asset(asset, req.amount))  # type: ignore
     except ValueError as e:
         # Turn any ValueError into a 400 Bad Request
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/balance/{asset}/withdrawal", tags=["Portfolio"], dependencies=prod_depends)
-def withdraw_asset(req: FundReq, asset: str = CASH_ASSET):
+def withdraw_asset(req: FundReq, asset: str = CASH_ASSET) -> dict[str, Any]:
     try:
-        return _g(ENGINE.withdrawal_asset(asset, req.amount))
+        return _g(ENGINE.withdrawal_asset(asset, req.amount))  # type: ignore
     except ValueError as e:
         # Turn any ValueError into a 400 Bad Request
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -266,16 +274,15 @@ def withdraw_asset(req: FundReq, asset: str = CASH_ASSET):
 # orders ----------------------------------------------------------------- #
 @app.get("/orders", tags=["Orders"])
 def list_orders(
-    status: _ALL_STATUS | None = Query(None),
+    status: OrderState | None = Query(None),
     symbol: str | None = None,
-    side: _TRADING_SIDES | None = Query(None),
+    side: OrderSide | None = Query(None),
     tail: int | None = None,
-    include_history: bool = Query(
-        False, description="Include order history in response"
-    ),
-):
+    include_history: bool = Query(False, description="Include order history in response"),
+) -> list[dict[str, Any]]:
+    order_book = _g(ENGINE.order_book)
     orders = _g(
-        ENGINE.order_book.get().list(
+        order_book.list(
             status=status,
             symbol=symbol,
             side=side,
@@ -288,14 +295,13 @@ def list_orders(
 
 @app.get("/orders/list", tags=["Orders"])
 def list_orders_simple(
-    status: _ALL_STATUS | None = Query(None),
+    status: OrderState | None = Query(None),
     symbol: str | None = None,
-    side: _TRADING_SIDES | None = Query(None),
+    side: OrderSide | None = Query(None),
     tail: int | None = None,
-):
-    orders = _g(
-        ENGINE.order_book.get().list(status=status, symbol=symbol, side=side, tail=tail)
-    )
+) -> dict[str, Any]:
+    order_book = _g(ENGINE.order_book)
+    orders = _g(order_book.list(status=status, symbol=symbol, side=side, tail=tail))
     ids = [o.id for o in orders]
     return {"length": len(ids), "orders": ids}
 
@@ -303,45 +309,44 @@ def list_orders_simple(
 @app.get("/orders/{oid}", tags=["Orders"])
 def get_order(
     oid: str,
-    include_history: bool = Query(
-        False, description="Include order history in response"
-    ),
-):
+    include_history: bool = Query(False, description="Include order history in response"),
+) -> dict[str, Any]:
     try:
-        o = _g(ENGINE.order_book.get().get(oid, include_history=include_history))
-        return o.to_dict(include_history=include_history)
+        order_book = _g(ENGINE.order_book)
+        o = _g(order_book.get(oid, include_history=include_history))
+        return o.to_dict(include_history=include_history)  # type: ignore
     except ValueError as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @app.post("/orders", tags=["Orders"], dependencies=prod_depends)
-def new_order(req: OrderReq):
+def new_order(req: OrderReq) -> dict[str, Any]:
     """
     Non-blocking for FastAPI: the call runs in the default thread-pool,
     `.get()` blocks only that worker, not the event loop.
     """
     try:
-        return _g(ENGINE.create_order_async(**req.model_dump()))
+        return _g(ENGINE.create_order_async(**req.model_dump()))  # type: ignore
     except ValueError as e:
         return {"error": str(e)}
 
 
 @app.post("/orders/can_execute", tags=["Orders"])
-def dry_run(req: OrderReq):
+def dry_run(req: OrderReq) -> dict[str, Any]:
     return _g(
         ENGINE.can_execute(
             symbol=req.symbol,
-            side=req.side,
+            side=req.side,  # Now properly typed as OrderSide enum
             amount=req.amount,
             price=req.limit_price,
         )
-    )
+    )  # type: ignore
 
 
 @app.post("/orders/{oid}/cancel", tags=["Orders"], dependencies=prod_depends)
-def cancel(oid: str):
+def cancel(oid: str) -> dict[str, Any]:
     try:
-        return _g(ENGINE.cancel_order(oid))
+        return _g(ENGINE.cancel_order(oid))  # type: ignore
     except ValueError as e:
         # 400 = client made a bad request (nothing wrong with the server)
         return {"error": str(e)}
@@ -350,8 +355,8 @@ def cancel(oid: str):
 # overview --------------------------------------------------------------- #
 @app.get("/overview/capital", tags=["Overview"])
 def get_summary_capital(
-    aggregation: bool = Query(True, description="Portfolio aggregated capital")
-):
+    aggregation: bool = Query(True, description="Portfolio aggregated capital"),
+) -> dict[str, Any]:
     """
     Get a summary of all capital related amounts in the portfolio.
     - Current equity in the portfolio (free + used)
@@ -362,34 +367,30 @@ def get_summary_capital(
     sum_capital = _g(ENGINE.get_summary_capital(aggregation=aggregation))
     # If aggregation is True, we return a single dict with all assets aggregated
     # If aggregation is False, we return a dict with each asset's capital separately
-    return sum_capital
+    return sum_capital  # type: ignore
 
 
 @app.get("/overview/assets", tags=["Overview"])
-def get_summary_assets():
+def get_summary_assets() -> dict[str, Any]:
     sum_assets_bal = _g(ENGINE.get_summary_assets())
-    return sum_assets_bal
+    return sum_assets_bal  # type: ignore
 
 
 @app.get("/overview/trades", tags=["Overview"])
 def get_summary_trades(
     assets: str | None = Query(None),
     # assets: str | None = None,
-    side: _TRADING_SIDES | None = Query(None),
-):
+    side: OrderSide | None = Query(None),
+) -> dict[str, Any]:
     # turn "BTC,ETH" → ["BTC", "ETH"]; keep None if nothing supplied
-    assets_list = (
-        [s.strip() for s in assets.split(",") if s.strip()] if assets else None
-    )
+    assets_list = [s.strip() for s in assets.split(",") if s.strip()] if assets else None
     sum_trades = _g(ENGINE.get_trade_stats(assets=assets_list, side=side))
-    return sum_trades
+    return sum_trades  # type: ignore
 
 
 # admin ------------------------------------------------------------------ #
-@app.patch(
-    "/admin/tickers/{ticker:path}/price", tags=["Admin"], dependencies=prod_depends
-)
-def patch_ticker_price(ticker: str, body: ModifyTickerReq):
+@app.patch("/admin/tickers/{ticker:path}/price", tags=["Admin"], dependencies=prod_depends)
+def patch_ticker_price(ticker: str, body: ModifyTickerReq) -> dict[str, Any]:
     data = _g(
         ENGINE.set_ticker(
             symbol=ticker,
@@ -399,12 +400,12 @@ def patch_ticker_price(ticker: str, body: ModifyTickerReq):
         )
     )
     _g(ENGINE.process_price_tick(ticker))
-    return data
+    return data  # type: ignore
 
 
 @app.patch("/admin/balance/{asset}", tags=["Admin"], dependencies=prod_depends)
-def set_balance(asset: str, req: BalanceReq):
-    return _g(ENGINE.set_balance(asset, free=req.free, used=req.used))
+def set_balance(asset: str, req: BalanceReq) -> dict[str, Any]:
+    return _g(ENGINE.set_balance(asset, free=req.free, used=req.used))  # type: ignore
 
 
 # @app.post("/admin/fund", tags=["Admin"], dependencies=prod_depends)
@@ -417,13 +418,13 @@ def set_balance(asset: str, req: BalanceReq):
 
 
 @app.delete("/admin/data", tags=["Admin"], dependencies=prod_depends)
-def purge_all():
+def purge_all() -> dict[str, str]:
     ENGINE.reset().get()
     return {"status": "ok"}
 
 
 @app.get("/admin/health", tags=["Admin"])
-def health():
+def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
@@ -435,24 +436,32 @@ def i_am_leader() -> bool:
     # returns True if lock acquired
     got = _r.set(LOCK_KEY, MY_ID, nx=True, ex=LOCK_TTL)
     if got:
+        logger.debug(f"Acquired leader lock: {MY_ID}")
         return True
     # already held? renew if it's me
-    if _r.get(LOCK_KEY) == MY_ID:
+    current_leader = _r.get(LOCK_KEY)
+    if current_leader == MY_ID:
         _r.expire(LOCK_KEY, LOCK_TTL)
+        logger.debug(f"Renewed leader lock: {MY_ID}")
         return True
+    logger.debug(f"Not leader. Current leader: {current_leader}, My ID: {MY_ID}")
     return False
 
 
-async def tick_loop():
+async def tick_loop() -> None:
     while True:
         logger.debug(f"Tick loop started - REFRESH_S: {REFRESH_S} seconds")
         start_time = time.time()
         try:
             if i_am_leader():
-                for t in ENGINE.tickers.get():
+                tickers = ENGINE.tickers.get()
+                logger.debug(f"Found {len(tickers)} tickers to process")
+                for t in tickers:
                     ENGINE.process_price_tick(t).get()
                 # run every REFRESH_S seconds, so we don't hammer Redis
-                logger.debug(f"Tick loop: {REFRESH_S} seconds")
+                logger.debug(f"Refreshed tickers data - processed {len(tickers)} tickers")
+            else:
+                logger.debug("Not the leader, skipping tick processing")
         except Exception as e:
             logger.exception("Error in tick_loop: %s", e)
             # If an error occurs, we log it and continue the loop
@@ -462,13 +471,11 @@ async def tick_loop():
             await asyncio.sleep(max(1, REFRESH_S - elapsed))
 
 
-async def prune_and_expire_loop():
+async def prune_and_expire_loop() -> None:
     prune_age = timedelta(seconds=STALE_AFTER_SEC)
     expire_age = timedelta(seconds=EXPIRE_AFTER_SEC)
     while True:
-        logger.debug(
-            f"Prune and expire loop started - PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC} seconds"
-        )
+        logger.debug(f"Prune and expire loop started - PRUNE_EVERY_SEC: {PRUNE_EVERY_SEC} seconds")
         try:
             if i_am_leader():
                 ENGINE.prune_orders_older_than(age=prune_age).get()
@@ -481,7 +488,7 @@ async def prune_and_expire_loop():
             await asyncio.sleep(PRUNE_EVERY_SEC)
 
 
-async def sanity_loop():
+async def sanity_loop() -> None:
     while True:
         logger.debug(
             f"Sanity loop started - SANITY_CHECK_EVERY_SEC: {SANITY_CHECK_EVERY_SEC} seconds"

@@ -51,23 +51,23 @@ show_usage() {
 # Function to get the latest version from git tags
 get_latest_version() {
     local silent=${1:-false}
-    
+
     # Fetch latest tags from remote
     if [ "$silent" != "true" ]; then
         print_info "Fetching latest tags from remote..."
     fi
     git fetch --tags --quiet
-    
+
     # Get the latest version tag
     local latest_tag=$(git tag --sort=-version:refname | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | head -1)
-    
+
     if [ -z "$latest_tag" ]; then
         print_error "No version tags found. Please create an initial tag first:"
         echo "  git tag -a v0.1.0 -m 'Initial release'"
         echo "  git push origin v0.1.0"
         exit 1
     fi
-    
+
     # Remove 'v' prefix
     echo "${latest_tag#v}"
 }
@@ -76,10 +76,10 @@ get_latest_version() {
 calculate_new_version() {
     local current_version=$1
     local bump_type=$2
-    
+
     # Parse current version
     IFS='.' read -r major minor patch <<< "$current_version"
-    
+
     case $bump_type in
         patch)
             patch=$((patch + 1))
@@ -99,7 +99,7 @@ calculate_new_version() {
             exit 1
             ;;
     esac
-    
+
     echo "$major.$minor.$patch"
 }
 
@@ -116,20 +116,20 @@ validate_git_status() {
             exit 1
         fi
     fi
-    
+
     # Check if working directory is clean
     if [ -n "$(git status --porcelain)" ]; then
         print_error "Working directory is not clean. Please commit or stash your changes first."
         git status --short
         exit 1
     fi
-    
+
     # Check if main is up to date
     print_info "Checking if main is up to date..."
     git fetch origin main --quiet
     local local_commit=$(git rev-parse HEAD)
     local remote_commit=$(git rev-parse origin/main)
-    
+
     if [ "$local_commit" != "$remote_commit" ]; then
         print_warning "Local main is not up to date with remote main"
         print_info "Local:  $local_commit"
@@ -149,33 +149,33 @@ validate_git_status() {
 create_release_branch() {
     local new_version=$1
     local dry_run=$2
-    
+
     # Debug: Check if new_version is empty
     if [ -z "$new_version" ]; then
         print_error "Error: new_version is empty!"
         print_error "This should not happen. Please check the script."
         exit 1
     fi
-    
+
     local branch_name="release/v$new_version"
-    
+
     print_info "Creating release branch: $branch_name"
-    
+
     if [ "$dry_run" = "true" ]; then
         print_info "[DRY RUN] Would execute:"
         echo "  git checkout -b $branch_name"
         echo "  git push -u origin $branch_name"
         return
     fi
-    
+
     # Create and checkout new branch
     git checkout -b "$branch_name"
     print_success "Created and checked out branch: $branch_name"
-    
+
     # Push to remote and set upstream
     git push -u origin "$branch_name"
     print_success "Pushed branch to remote and set upstream"
-    
+
     print_success "Release branch '$branch_name' is ready!"
     print_info "Next steps:"
     echo "  1. Make any necessary changes on this branch"
@@ -189,7 +189,7 @@ create_release_branch() {
 main() {
     local bump_type=""
     local dry_run=false
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -212,31 +212,31 @@ main() {
                 ;;
         esac
     done
-    
+
     # Validate required argument
     if [ -z "$bump_type" ]; then
         print_error "Bump type is required"
         show_usage
         exit 1
     fi
-    
+
     print_info "MockExchange Release Branch Creator"
     echo "========================================"
     print_info "Bump type: $bump_type"
     print_info "Dry run: $dry_run"
     echo ""
-    
+
     # Validate git status
     validate_git_status
-    
+
     # Get current version
     local current_version=$(get_latest_version true)
     print_info "Current version: v$current_version"
-    
+
     # Calculate new version
     local new_version=$(calculate_new_version "$current_version" "$bump_type")
     print_info "New version: v$new_version"
-    
+
     # Debug: Check if new_version is empty
     if [ -z "$new_version" ]; then
         print_error "Error: Failed to calculate new version!"
@@ -244,9 +244,9 @@ main() {
         print_error "Bump type: $bump_type"
         exit 1
     fi
-    
+
     echo ""
-    
+
     # Confirm action
     if [ "$dry_run" != "true" ]; then
         print_warning "This will create a new release branch: release/v$new_version"
@@ -257,7 +257,7 @@ main() {
             exit 1
         fi
     fi
-    
+
     # Create release branch
     create_release_branch "$new_version" "$dry_run"
 }

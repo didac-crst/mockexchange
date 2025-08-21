@@ -8,7 +8,8 @@ MockX Periscope provides:
 
 - **Portfolio Dashboard** - Real-time balance overview and asset allocation
 - **Order Management** - View and track order status and execution
-- **Trade History** - Complete trading activity and performance metrics
+- **Order Details** - Detailed view of individual orders with complete history
+- **Performance Analytics** - Comprehensive trading activity and performance metrics
 - **Real-time Updates** - Auto-refresh with configurable intervals
 - **Responsive Design** - Works on desktop and mobile devices
 - **Streamlit UI** - Modern, clean interface built with Streamlit
@@ -40,34 +41,73 @@ The dashboard uses environment variables from the root `.env` file. Key variable
 
 | Variable          | Default                 | Description                  |
 | ----------------- | ----------------------- | ---------------------------- |
-| `API_URL`         | `http://localhost:8000` | Engine API URL               |
+| `ENGINE_HOST`     | `engine`                | Engine host for API URL construction |
+| `ENGINE_PORT`     | `8000`                  | Engine port for API URL construction |
+| `PERISCOPE_HOST`  | `localhost`             | Dashboard host for UI URL construction |
+| `PERISCOPE_PORT`  | `8501`                  | Dashboard port for UI URL construction |
 | `API_KEY`         | `dev-key`               | Authentication key           |
 | `REFRESH_SECONDS` | `60`                    | Auto-refresh interval        |
 | `QUOTE_ASSET`     | `USDT`                  | Portfolio valuation currency |
 | `APP_TITLE`       | `MockExchange`          | Dashboard title              |
+| `FRESH_WINDOW_S`  | `300`                   | Fresh window for highlighting (seconds) |
+| `N_VISUAL_DEGRADATIONS` | `60`            | Number of fade-out levels for visual feedback |
+| `SLIDER_MIN`      | `10`                    | Minimum value for order count slider |
+| `SLIDER_MAX`      | `1000`                  | Maximum value for order count slider |
+| `SLIDER_STEP`     | `10`                    | Step size for order count slider |
+| `SLIDER_DEFAULT`  | `50`                    | Default value for order count slider |
+| `LOCAL_TZ`        | `Europe/Berlin`         | Timezone for timestamps |
+| `LOGO_FILE`       | ``                      | Logo file for dashboard (optional) |
 
-**Note**: For Docker deployment, `API_URL` should be `http://engine:8000`. For local development, use `http://localhost:8000`.
+**Note**: URLs are automatically constructed from HOST:PORT variables:
+- `API_URL = http://${ENGINE_HOST}:${ENGINE_PORT}`
+- `UI_URL = http://${PERISCOPE_HOST}:${PERISCOPE_PORT}`
+
+**Deployment Examples:**
+- **Docker**: `ENGINE_HOST=engine`, `PERISCOPE_HOST=localhost`
+- **External Engine**: `ENGINE_HOST=192.168.1.101`, `PERISCOPE_HOST=192.168.1.102`
+- **Local Dev**: `ENGINE_HOST=localhost`, `PERISCOPE_HOST=localhost`
+
+You can still override with `API_URL` and `UI_URL` environment variables if needed.
 
 See the [main README](../../README.md#-environment-configuration) for the complete configuration guide.
 
 ## Features
 
-### **Portfolio Page**
-- **Asset Balances** - Free, used, and total balances for each asset
-- **Portfolio Value** - Total value in quote currency (USDT)
-- **Asset Allocation** - Pie chart showing portfolio distribution
-- **Performance Metrics** - PnL and percentage changes
-
-### **Orders Page**
-- **Order List** - All orders with status, price, and execution details
-- **Filtering** - Filter by status, symbol, side, and time range
-- **Real-time Updates** - Live order status changes
-- **Order Details** - Click to view complete order information
-
 ### **Performance Page**
-- **Trade Statistics** - Aggregated trading metrics
-- **Performance Charts** - Visual representation of trading activity
-- **Asset Performance** - Individual asset performance tracking
+<img src="./docs/img/page_performance.png" alt="Performance Dashboard" width="800">
+
+- **Investment Multiples** - RVPI, DPI, and TVPI ratios for performance measurement
+- **Capital Breakdown** - Waterfall chart showing distribution between net investment, P&L, assets, and cash
+- **Performance Metrics** - Gross/net earnings, fees, and current asset valuations
+- **Advanced Toggle** - Switch between simple and detailed performance views
+- **Real-time Updates** - Auto-refresh with current portfolio performance data
+
+### **Portfolio Page**
+<img src="./docs/img/page_portfolio.png" alt="Portfolio Dashboard" width="800">
+
+- **Asset Overview** - Current holdings with free, used, and total balances per asset
+- **Portfolio Value** - Total equity and market value in quote currency (USDT)
+- **Asset Allocation** - Interactive donut chart with "Other" grouping for small positions
+- **Advanced Breakdown** - Toggle between simple equity view and detailed cash/asset breakdown
+- **Sortable Table** - Human-readable table with formatted numbers and portfolio shares
+
+### **Order Book Page**
+<img src="./docs/img/page_order_book.png" alt="Order Book" width="800">
+
+- **Order Management** - Complete order history with status, price, and execution details
+- **Smart Filtering** - Filter by status, symbol, side, type, and configurable time range
+- **Data Range Control** - Slider to fetch recent orders (10-1000) or entire order book
+- **Visual Feedback** - Color-coded rows highlighting new activity with fade-out effect
+- **Order Details Access** - Click any order to view complete information and execution history
+
+### **Order Details Page**
+<img src="./docs/img/page_order_details.png" alt="Order Details" width="800">
+
+- **Order Summary** - Complete order information including status, type, and timestamps
+- **Execution History** - Step-by-step order history with timestamps and price changes
+- **Trade Breakdown** - Detailed view of all individual trades that fulfilled the order
+- **Order Actions** - Cancel open orders directly from the interface
+- **Navigation** - Contextual navigation buttons to return to main views
 
 ## Architecture
 
@@ -102,15 +142,9 @@ streamlit run app/main.py
 - **Configuration** - Update `app/config.py`
 - **API Integration** - Extend `app/services/api.py`
 
-## Screenshots
-
-![Portfolio Dashboard](./docs/img/portfolio_page.png)
-![Orders Page](./docs/img/orders_page.png)
-
 ## Dependencies
 
 - **Streamlit** - Web application framework
 - **Plotly** - Interactive visualizations
 - **Requests** - HTTP client for API calls
 - **Python-dotenv** - Environment variable management
-
