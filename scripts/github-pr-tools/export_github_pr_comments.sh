@@ -21,7 +21,7 @@ if [ $# -lt 1 ]; then
 fi
 
 PR_NUMBER=$1
-OUTPUT_FILE="$(dirname "$0")/pr_${PR_NUMBER}_comments.json"
+OUTPUT_FILE="$(dirname "$0")/output/pr_${PR_NUMBER}_comments.json"
 
 curl -s \
   -H "Accept: application/vnd.github+json" \

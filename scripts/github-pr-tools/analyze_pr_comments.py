@@ -136,7 +136,9 @@ Focus on actionable, specific recommendations.
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python scripts/analyze_pr_comments.py <comments_json_file>")
-        print("Example: python scripts/analyze_pr_comments.py scripts/pr_123_comments.json")
+        print(
+            "Example: python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_123_comments.json"
+        )
         sys.exit(1)
 
     file_path = sys.argv[1]

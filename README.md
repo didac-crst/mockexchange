@@ -327,6 +327,7 @@ make version          # Show current version and tags
 # 🔗 GitHub PR Tools
 make export-pr-comments PR=123  # Export PR comments to JSON for LLM analysis
 make analyze-pr-comments PR=123 # Analyze comments and generate LLM prompt
+make export-and-analyze-pr PR=123 # Export and analyze in one command
 ```
 make logs-valkey       # Database logs only
 make logs-engine       # Engine logs only
@@ -378,12 +379,14 @@ make logs-engine       # Service-specific logs
 
 #### **🔗 GitHub PR Tools**
 ```bash
-make export-pr-comments PR=123  # Export PR comments to JSON
-make analyze-pr-comments PR=123  # Analyze and generate LLM prompt
+make export-and-analyze-pr PR=123  # One-shot export and analysis
+make export-pr-comments PR=123     # Export PR comments to JSON
+make analyze-pr-comments PR=123    # Analyze and generate LLM prompt
 ```
 - **Export CodeRabbit comments** for AI analysis
-- **Feed to LLMs** for automated PR improvements
-- **JSON format** for easy processing
+- **Organized structure** in `scripts/github-pr-tools/`
+- **Cursor integration** ready for LLM analysis
+- **One-shot workflow** for quick analysis
 - **Requires GitHub token** (set in `scripts/.env`)
 
 **Setup:**
@@ -391,13 +394,12 @@ make analyze-pr-comments PR=123  # Analyze and generate LLM prompt
 # Create scripts/.env with your GitHub token
 echo "GITHUB_TOKEN=your_github_token_here" > scripts/.env
 
-# Export and analyze PR comments
-make export-pr-comments PR=123
-make analyze-pr-comments PR=123
+# One-shot export and analysis (recommended)
+make export-and-analyze-pr PR=123
 
-# Feed to LLM (example)
-cat scripts/pr_123_comments_llm_prompt.txt | your-llm-tool
-# or copy-paste the content into ChatGPT, Claude, etc.
+# Use with Cursor
+# Open scripts/github-pr-tools/output/pr_123_comments_llm_prompt.txt in Cursor
+# Or copy-paste the content into Cursor's chat
 ```
 
 ## 🚀 How we ship

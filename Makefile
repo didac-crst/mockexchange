@@ -192,6 +192,7 @@ examples: ## Show available examples
 	@echo "GitHub PR Tools:"
 	@echo "  make export-pr-comments PR=123    # Export PR comments to JSON"
 	@echo "  make analyze-pr-comments PR=123   # Analyze comments and generate LLM prompt"
+	@echo "  make export-and-analyze-pr PR=123 # Export and analyze in one command"
 	@echo ""
 	@echo "Manual usage:"
 	@echo "  cd examples/order-generator"
@@ -243,9 +244,9 @@ export-pr-comments: ## Export GitHub PR comments to JSON (requires PR=<number>)
 		exit 1; \
 	fi
 	@echo "Exporting PR #$(PR) comments..."
-	@chmod +x scripts/export_github_pr_comments.sh
-	@./scripts/export_github_pr_comments.sh $(PR)
-	@echo "✅ Comments exported to scripts/pr_$(PR)_comments.json"
+	@chmod +x scripts/github-pr-tools/export_github_pr_comments.sh
+	@./scripts/github-pr-tools/export_github_pr_comments.sh $(PR)
+	@echo "✅ Comments exported to scripts/github-pr-tools/output/pr_$(PR)_comments.json"
 	@echo "💡 You can now feed this JSON to an LLM for analysis"
 
 analyze-pr-comments: ## Analyze PR comments and generate LLM prompt (requires PR=<number>)
@@ -254,7 +255,18 @@ analyze-pr-comments: ## Analyze PR comments and generate LLM prompt (requires PR
 		exit 1; \
 	fi
 	@echo "Analyzing PR #$(PR) comments..."
-	@python scripts/analyze_pr_comments.py scripts/pr_$(PR)_comments.json
+	@python scripts/github-pr-tools/analyze_pr_comments.py scripts/github-pr-tools/output/pr_$(PR)_comments.json
+
+export-and-analyze-pr: ## Export and analyze PR comments in one command (requires PR=<number>)
+	@if [ -z "$(PR)" ]; then \
+		echo "Error: PR number required. Usage: make export-and-analyze-pr PR=123"; \
+		exit 1; \
+	fi
+	@echo "🚀 Exporting and analyzing PR #$(PR) comments..."
+	@$(MAKE) export-pr-comments PR=$(PR)
+	@$(MAKE) analyze-pr-comments PR=$(PR)
+	@echo "✅ Complete! Files ready in scripts/github-pr-tools/output/"
+	@echo "💡 Open scripts/github-pr-tools/output/pr_$(PR)_comments_llm_prompt.txt in Cursor"
 
 # Version Info
 version ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
