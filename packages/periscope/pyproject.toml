@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mockexchange-periscope"
-version = "0.1.0"
+version = "0.1.5"
 description = "Streamlit dashboard for mockexchange_api (paper-trading PoC)"
 authors = ["Didac <didac.crst@gmail.com>"]
 readme = "README.md"

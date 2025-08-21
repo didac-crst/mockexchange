@@ -1,6 +1,6 @@
 [tool.poetry]
 name        = "mockexchange"
-version     = "0.1.0"
+version     = "0.1.5"
 description = "Headless exchange emulator backed by Valkey (Redis fork)"
 authors     = ["Didac Cristobal-Canals"]
 homepage    = "https://github.com/didac-crst/mockexchange-api"

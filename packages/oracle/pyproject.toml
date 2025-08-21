@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mockx-oracle"
-version = "0.1.0"
+version = "0.1.5"
 description = "MockX Oracle - Price feed service for MockExchange"
 authors = ["Didac <didac.crst@gmail.com>"]
 readme = "README.md"
