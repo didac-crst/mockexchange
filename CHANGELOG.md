@@ -9,6 +9,17 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+- **Engine Overview Assets**: Fixed 500 error in `/overview/assets` endpoint
+  - Fixed `AttributeError: 'dict' object has no attribute 'free'` in portfolio data access
+  - Updated `_get_summary_assets_balance()` to handle dictionary data from `fetch_balance()`
+  - Added proper dictionary access with `.get()` method for `cash_balance` and `portfolio[a]`
+  - Added type ignore comments for MyPy compatibility
+  - Resolved portfolio page crash when accessing asset overview data
+  - Engine now correctly processes serialized `AssetBalance.to_dict()` data structure
+
+## [v0.1.5] - 2025-08-21
+
 ### 🎯 Major Achievements
 - **Zero MyPy Errors**: Achieved 0 type errors in core business logic through smart filtering
 - **Enhanced Development Workflow**: One-command development cycle with comprehensive testing
