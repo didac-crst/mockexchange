@@ -392,7 +392,7 @@ make analyze-pr-comments PR=123           # Analyze all reviews
 - **Organized structure** in `scripts/github-pr-tools/`
 - **Cursor integration** ready for LLM analysis
 - **One-shot workflow** for quick analysis
-- **Requires GitHub token** (set in `scripts/.env`)
+- **Requires GitHub token** (set in `scripts/github-pr-tools/.env`)
 
 **Setup:**
 ```bash

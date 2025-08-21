@@ -245,9 +245,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
     ts_create_num = pd.to_numeric(df["ts_create"], errors="coerce")
     ts_finish_num = pd.to_numeric(df["ts_finish"], errors="coerce")
 
-    df["Exec. latency"] = (
-        (ts_finish_num - ts_create_num).div(1000).round(2).where(ts_finish_num.notna(), "")
-    )
+    df["Exec. latency"] = (ts_finish_num - ts_create_num).div(1000).where(ts_finish_num.notna())
 
     # Human‑friendly quantity formatting (strip tiny rounding remainders)
     df["Req. Qty"] = df["amount"].map(lambda v: _format_significant_float(value=v))
@@ -283,9 +281,7 @@ def render() -> None:  # noqa: D401 – imperative mood is clearer here
 
     # Normalise naming for the final view --------------------------------------
     df["Order ID"] = df["id"].astype(str)
-    df["Exec. latency"] = df["Exec. latency"].apply(
-        lambda v: f"{v:,.2f} s" if isinstance(v, int | float) else ""
-    )
+    df["Exec. latency"] = df["Exec. latency"].apply(lambda v: f"{v:,.2f} s" if pd.notna(v) else "")
     df["Side"] = df["side"].map(fmt_side_marker)
     df["Type"] = df["type"].str.capitalize()
     df["Status"] = df["status"].str.replace("_", " ").str.capitalize()

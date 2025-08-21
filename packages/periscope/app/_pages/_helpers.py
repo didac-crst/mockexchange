@@ -31,10 +31,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from app.config import settings
+from ..config import settings
 
 # Project ---------------------------------------------------------------------
-from app.services.api import get_assets_overview
+from ..services.api import get_assets_overview
 
 # Get settings once
 config = settings()
@@ -57,10 +57,10 @@ CHART_COLORS = {
 }
 
 # Local lambdas for consistent formatting ---------------------------
-fmt_num = lambda v, warning=False: f"{v:,.0f}" if not warning else f"^{_W} {v:,.0f}"
-fmt_percent = lambda v, warning=False: f"{v:.2%}" if not warning else f"^{_W} {v:.2%}"
+fmt_num = lambda v, warning=False: f"{v:,.0f}" if not warning else f"{_W} {v:,.0f}"
+fmt_percent = lambda v, warning=False: f"{v:.2%}" if not warning else f"{_W} {v:.2%}"
 fmt_cash = lambda v, cash_asset, warning=False: (
-    f"{v:,.2f} {cash_asset}" if not warning else f"^{_W} {v:,.2f} {cash_asset}"
+    f"{v:,.2f} {cash_asset}" if not warning else f"{_W} {v:,.2f} {cash_asset}"
 )
 
 
