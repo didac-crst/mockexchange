@@ -129,7 +129,9 @@ def get_prices(tickers: list[str]) -> dict[str, float]:
         """Find the price field regardless of CCXT vs simplified schema."""
         if "last" in d:  # standard CCXT ticker
             return float(d["last"])
-        if "info" in d and "price" in d["info"]:
+        if "price" in d:  # MockExchange engine format
+            return float(d["price"])
+        if "info" in d and isinstance(d["info"], dict) and "price" in d["info"]:
             return float(d["info"]["price"])
         return None  # unknown format → caller will skip
 
