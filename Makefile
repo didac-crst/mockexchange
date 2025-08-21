@@ -15,6 +15,7 @@ install: ## Install all dependencies
 	cd packages/oracle && poetry install
 
 dev: ## Install development dependencies and run full development cycle
+	$(MAKE) install       # ensure each subpackage env is created
 	poetry install --with dev
 	pre-commit install
 	@echo "Running full development cycle..."

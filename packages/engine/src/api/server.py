@@ -83,6 +83,7 @@ from pathlib import Path
 from typing import Any
 
 import redis
+from core._types import OrderSide, OrderState, OrderType  # domain enums
 from core.engine_actors import start_engine  # NEW import
 from core.logging_config import logger
 from dotenv import load_dotenv
@@ -104,8 +105,8 @@ CASH_ASSET = os.getenv("CASH_ASSET", "USDT")  # default cash asset
 # ─────────────────────────── Pydantic models ────────────────────────── #
 class OrderReq(BaseModel):
     symbol: str = "BTC/USDT"
-    side: _TRADING_SIDES
-    type: _ORDER_TYPES = "market"
+    side: OrderSide
+    type: OrderType = OrderType.MARKET
     amount: float
     limit_price: float | None = None
 
@@ -273,9 +274,9 @@ def withdraw_asset(req: FundReq, asset: str = CASH_ASSET) -> dict[str, Any]:
 # orders ----------------------------------------------------------------- #
 @app.get("/orders", tags=["Orders"])
 def list_orders(
-    status: _ALL_STATUS | None = Query(None),
+    status: OrderState | None = Query(None),
     symbol: str | None = None,
-    side: _TRADING_SIDES | None = Query(None),
+    side: OrderSide | None = Query(None),
     tail: int | None = None,
     include_history: bool = Query(False, description="Include order history in response"),
 ) -> list[dict[str, Any]]:
@@ -294,9 +295,9 @@ def list_orders(
 
 @app.get("/orders/list", tags=["Orders"])
 def list_orders_simple(
-    status: _ALL_STATUS | None = Query(None),
+    status: OrderState | None = Query(None),
     symbol: str | None = None,
-    side: _TRADING_SIDES | None = Query(None),
+    side: OrderSide | None = Query(None),
     tail: int | None = None,
 ) -> dict[str, Any]:
     order_book = _g(ENGINE.order_book)
@@ -315,7 +316,7 @@ def get_order(
         o = _g(order_book.get(oid, include_history=include_history))
         return o.to_dict(include_history=include_history)  # type: ignore
     except ValueError as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @app.post("/orders", tags=["Orders"], dependencies=prod_depends)
@@ -335,7 +336,7 @@ def dry_run(req: OrderReq) -> dict[str, Any]:
     return _g(
         ENGINE.can_execute(
             symbol=req.symbol,
-            side=req.side,
+            side=req.side,  # Now properly typed as OrderSide enum
             amount=req.amount,
             price=req.limit_price,
         )
@@ -379,7 +380,7 @@ def get_summary_assets() -> dict[str, Any]:
 def get_summary_trades(
     assets: str | None = Query(None),
     # assets: str | None = None,
-    side: _TRADING_SIDES | None = Query(None),
+    side: OrderSide | None = Query(None),
 ) -> dict[str, Any]:
     # turn "BTC,ETH" → ["BTC", "ETH"]; keep None if nothing supplied
     assets_list = [s.strip() for s in assets.split(",") if s.strip()] if assets else None

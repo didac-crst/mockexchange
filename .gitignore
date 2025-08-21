@@ -73,3 +73,7 @@ logs/
 node_modules/
 dist/
 build/
+
+# PR comments
+scripts/.env
+scripts/*.json

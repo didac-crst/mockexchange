@@ -49,7 +49,7 @@ The dashboard uses environment variables from the root `.env` file. Key variable
 | `REFRESH_SECONDS` | `60`                    | Auto-refresh interval        |
 | `QUOTE_ASSET`     | `USDT`                  | Portfolio valuation currency |
 | `APP_TITLE`       | `MockExchange`          | Dashboard title              |
-| `FRESH_WINDOW_S`  | `60`                    | Fresh window for highlighting (seconds) |
+| `FRESH_WINDOW_S`  | `300`                   | Fresh window for highlighting (seconds) |
 | `N_VISUAL_DEGRADATIONS` | `60`            | Number of fade-out levels for visual feedback |
 | `SLIDER_MIN`      | `10`                    | Minimum value for order count slider |
 | `SLIDER_MAX`      | `1000`                  | Maximum value for order count slider |

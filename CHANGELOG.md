@@ -62,19 +62,19 @@ Releases are created by pushing a Git tag (vX.Y.Z) or using GitHub's 'Draft a ne
 
 - **Environment Variable Documentation**: Comprehensive documentation for all missing environment variables
   - **Main README.md**: Added complete documentation for all environment variables from `.env.example`
-    * Engine API Configuration: `CASH_ASSET`, `TICK_LOOP_SEC`, `PRUNE_EVERY_MIN`, `STALE_AFTER_H`, `EXPIRE_AFTER_H`, `SANITY_CHECK_EVERY_MIN`, `API_TIMEOUT_SEC`
-    * Engine Order Processing: `MIN_TIME_ANSWER_ORDER_MARKET`, `MAX_TIME_ANSWER_ORDER_MARKET`, `SIGMA_FILL_MARKET_ORDER`
-    * Oracle Discovery: `QUOTES`, `QUOTE`, `DISCOVER_QUOTES`, `DISCOVER_LIMIT`
-    * Periscope UI Configuration: `QUOTE_ASSET`, `FRESH_WINDOW_S`, `N_VISUAL_DEGRADATIONS`, `SLIDER_MIN/MAX/STEP/DEFAULT`, `LOCAL_TZ`, `LOGO_FILE`, `UI_URL`
-    * Global Configuration: `VERSION`, `TEST_ENV`, `DEBUG`
+    - Engine API Configuration: `CASH_ASSET`, `TICK_LOOP_SEC`, `PRUNE_EVERY_MIN`, `STALE_AFTER_H`, `EXPIRE_AFTER_H`, `SANITY_CHECK_EVERY_MIN`, `API_TIMEOUT_SEC`
+    - Engine Order Processing: `MIN_TIME_ANSWER_ORDER_MARKET`, `MAX_TIME_ANSWER_ORDER_MARKET`, `SIGMA_FILL_MARKET_ORDER`
+    - Oracle Discovery: `QUOTES`, `QUOTE`, `DISCOVER_QUOTES`, `DISCOVER_LIMIT`
+    - Periscope UI Configuration: `QUOTE_ASSET`, `FRESH_WINDOW_S`, `N_VISUAL_DEGRADATIONS`, `SLIDER_MIN/MAX/STEP/DEFAULT`, `LOCAL_TZ`, `LOGO_FILE`, `UI_URL`
+    - Global Configuration: `VERSION`, `TEST_ENV`, `DEBUG`
   - **Engine README.md**: Updated configuration table with all missing Engine variables
-    * Added order processing variables for realistic trading simulation
-    * Added API configuration variables for system performance tuning
-    * Added system maintenance variables for data management
+    - Added order processing variables for realistic trading simulation
+    - Added API configuration variables for system performance tuning
+    - Added system maintenance variables for data management
   - **Periscope README.md**: Updated configuration table with all missing UI variables
-    * Added visual feedback configuration for dashboard highlighting
-    * Added slider control configuration for order count management
-    * Added display settings for timezone and logo customization
+    - Added visual feedback configuration for dashboard highlighting
+    - Added slider control configuration for order count management
+    - Added display settings for timezone and logo customization
   - All environment variables now properly documented with descriptions, default values, and usage context
   - Improved user experience with clear understanding of system configuration options
 

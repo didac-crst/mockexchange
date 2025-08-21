@@ -616,10 +616,9 @@ class ExchangeEngineActor(_BaseActor):
         return order.public_payload()
 
     # expose await-able helper
-    def create_order_async(self, **kw: Any) -> pykka.Future:
-        # This should return a Future that can be awaited
-        # For now, we'll use a type ignore since the pykka pattern is complex
-        return self.create_order(**kw)  # type: ignore[no-any-return]
+    def create_order_async(self, **kw: Any) -> dict[str, Any]:
+        # This method is called on an ActorProxy, so Pykka automatically wraps the return in a Future
+        return self.create_order(**kw)
 
     def cancel_order(self, oid: str) -> dict[str, Any]:
         o = self.order_book.get(oid).get()

@@ -101,8 +101,8 @@ class OrderBook:
             side_set = {s.value if isinstance(s, OrderSide) else s for s in side}
         else:  # type: ignore[unreachable]
             side_set = None  # fallback
-        # Only if all statuses are OPEN_STATUS, we can use the indexes
-        use_indexes = all(s in OPEN_STATUS_STR for s in status)
+        # Use indexes only if caller asked exclusively for OPEN statuses and the set is non-empty
+        use_indexes = bool(status) and all(s in OPEN_STATUS_STR for s in status)
         if use_indexes:
             # Use secondary indexes
             if symbol:
@@ -111,16 +111,24 @@ class OrderBook:
                 ids = self.r.smembers(self.OPEN_ALL_KEY)
             if not ids:
                 return []
-            blobs = self.r.hmget(self.HASH_KEY, *ids)  # 1 round-trip
+            blobs = self.r.hmget(
+                self.HASH_KEY, *list(ids)
+            )  # 1 round-trip, convert to list for stable order
             orders = [Order.from_json(b, include_history=include_history) for b in blobs if b]
+            # Even when using indexes, re-filter by status to be robust to stale sets
+            orders = [
+                o
+                for o in orders
+                if (o.status.value if isinstance(o.status, OrderState) else o.status) in status
+            ]
         else:
             # Legacy full scan
             orders = [
                 Order.from_json(blob, include_history=include_history)
                 for _, blob in self.r.hscan_iter(self.HASH_KEY)
             ]
-            # Apply symbol filtering for legacy scan (only when not using indexes)
-            if symbol and not use_indexes:
+            # Apply symbol filtering for legacy scan
+            if symbol:
                 orders = [o for o in orders if o.symbol == symbol]
 
         # Apply side filtering
