@@ -11,7 +11,7 @@ if [ -f "$(dirname "$0")/.env" ]; then
 fi
 
 if [ -z "$GITHUB_TOKEN" ]; then
-  echo "Error: GITHUB_TOKEN not set. Put it in scripts/.env or export it."
+  echo "Error: GITHUB_TOKEN not set. Put it in scripts/github-pr-tools/.env or export it."
   exit 1
 fi
 
