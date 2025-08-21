@@ -19,11 +19,11 @@ reference for new contributors.
 import pandas as pd
 import streamlit as st
 
+from .._pages._colors import _row_style
 from .._pages._helpers import (
     _add_details_column,
     _display_trades_details,
     _format_significant_float,
-    _row_style,
     advanced_filter_toggle,
     convert_to_local_time,
     fmt_side_marker,
