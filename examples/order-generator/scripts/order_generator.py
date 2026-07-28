@@ -78,7 +78,16 @@ def maybe_reset_api(client) -> list[str]:
             print(f"❌ Reset failed: {e}")
     else:
         print("🚀 No reset requested. Continuing as normal.")
-        tickers = _get_existing_tickers(client)
+        balances = client.get("/balance").json()
+        tickers = _tickers_from_balances(balances)
+        if not tickers:
+            tickers = _get_tickers_to_trade(client)
+            if QUOTE not in balances:
+                print("🌱 Empty backend wallet detected. Seeding portfolio once.")
+                reset_and_fund(client, QUOTE, FUNDING_AMOUNT)
+                print("✅ Initialized wallet with funding amount:", FUNDING_AMOUNT)
+            else:
+                print("🌱 Quote-only portfolio detected. Using configured trade universe.")
     print("Trading the following tickers:", ", ".join(tickers))
     return tickers
 
@@ -113,9 +122,11 @@ def _get_tickers_to_trade(client: httpx.Client) -> list[str]:
 
 def _get_existing_tickers(client: httpx.Client) -> list[str]:
     """Return the list of tickers already being traded in the backend."""
-    assets_list = client.get("/balance").json().keys()
-    tickers_list = [f"{asset}/{QUOTE}" for asset in assets_list if asset != QUOTE]
-    return tickers_list
+    return _tickers_from_balances(client.get("/balance").json())
+
+
+def _tickers_from_balances(balances: dict) -> list[str]:
+    return [f"{asset}/{QUOTE}" for asset in balances if asset != QUOTE]
 
 
 def _floor_to_first_sig(x: float) -> float:
